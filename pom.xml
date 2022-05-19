@@ -18,7 +18,8 @@
     </properties>
 
     <modules>
-        <module>core</module>
+        <module>Core</module>
+        <module>WebParent</module>
     </modules>
 
 </project>
