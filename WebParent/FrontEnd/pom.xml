@@ -7,10 +7,11 @@
 		<artifactId>WebParent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>BackEnd</artifactId>
+	<groupId>com.satra</groupId>
+	<artifactId>FrontEnd</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>BackEnd</name>
-	<description>Satra Digital Identity Back-End Module</description>
+	<name>FrontEnd</name>
+	<description>FrontEnd</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>

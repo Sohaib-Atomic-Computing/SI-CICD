@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bb676e2b-b776-4e78-9424-aa8fa5427c77" name="Changes" comment="Initialize satra web parent module&#10;&#10;[DAC-988]">
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+    <list default="true" id="bb676e2b-b776-4e78-9424-aa8fa5427c77" name="Changes" comment="Initialize satra back end module&#10;&#10;[DAC-988]">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/WebParent/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/WebParent/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WebParent/BackEnd/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/WebParent/BackEnd/pom.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,7 +78,7 @@
       <option name="presentableId" value="Default" />
       <updated>1652967148972</updated>
       <workItem from="1652967151967" duration="2250000" />
-      <workItem from="1652969878932" duration="2592000" />
+      <workItem from="1652969878932" duration="3122000" />
     </task>
     <task id="LOCAL-00001" summary="Initialize satra digital identity project&#10;&#10;[DAC-988]">
       <created>1652970533944</created>
@@ -102,7 +101,14 @@
       <option name="project" value="LOCAL" />
       <updated>1652971497569</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Initialize satra back end module&#10;&#10;[DAC-988]">
+      <created>1652972631723</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1652972631723</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -123,7 +129,8 @@
     <MESSAGE value="Initialize satra digital identity project&#10;&#10;[DAC-988]" />
     <MESSAGE value="Initialize satra core module&#10;&#10;[DAC-988]" />
     <MESSAGE value="Initialize satra web parent module&#10;&#10;[DAC-988]" />
-    <option name="LAST_COMMIT_MESSAGE" value="Initialize satra web parent module&#10;&#10;[DAC-988]" />
+    <MESSAGE value="Initialize satra back end module&#10;&#10;[DAC-988]" />
+    <option name="LAST_COMMIT_MESSAGE" value="Initialize satra back end module&#10;&#10;[DAC-988]" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
