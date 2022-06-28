@@ -1,4 +1,4 @@
-package entities;
+package com.iconnect.core.entities;
 
 import lombok.*;
 

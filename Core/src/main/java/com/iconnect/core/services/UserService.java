@@ -1,7 +1,7 @@
-package services;
+package com.iconnect.core.services;
 
+import com.iconnect.core.repositories.UserRepository;
 import org.springframework.stereotype.Service;
-import repositories.UserRepository;
 
 @Service
 public class UserService {
