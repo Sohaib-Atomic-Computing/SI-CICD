@@ -1,3 +1,15 @@
 spring:
   application:
     name: iconnect-core
+  datasource:
+    url: jdbc:postgresql://localhost:5432/iconnect
+    username: iconnect_user
+    password: P@ssw0rd
+    jpa:
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.postgreSQLDialect
+          format_sql: 'true'
+      hibernate:
+        ddl-auto: update
+      show-sql: 'true'
