@@ -39,7 +39,4 @@ public class User {
 
     private Boolean enabled;
 
-    public static void main(String[] args) {
-
-    }
 }
