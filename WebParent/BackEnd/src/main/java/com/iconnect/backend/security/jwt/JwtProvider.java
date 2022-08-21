@@ -17,10 +17,10 @@ public class JwtProvider {
 
   private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
 
-  @Value("${fuller.app.jwtSecret}")
+  @Value("${iconnect.app.jwtSecret}")
   private String jwtSecret;
 
-  @Value("${fuller.app.jwtExpiration}")
+  @Value("${iconnect.app.jwtExpiration}")
   private int jwtExpiration;
 
   public JwtResponse generateJwtToken(Authentication authentication) {

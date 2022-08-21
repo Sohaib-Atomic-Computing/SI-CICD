@@ -52,9 +52,6 @@ public class AuthController {
     @Autowired
     private UsersRepository userRepository;
 
-    @Value("${app.url}")
-    private String appUrl;
-
     @Autowired
     PasswordEncoder encoder;
 

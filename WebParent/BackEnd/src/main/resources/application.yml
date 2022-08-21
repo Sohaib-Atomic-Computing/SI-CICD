@@ -1,20 +1,25 @@
 server:
   port: 9090
-  servlet:
-    context-path: /api
 
 spring:
   application:
     name: iconnectBackEnd
   datasource:
-    url: jdbc:postgresql://localhost:5432/iconnect
-    username: 'iconnect_user'
-    password: 'P@ssw0rd'
+    url: jdbc:postgresql://143.244.173.57:30432/iconnect
+    username: 'iconnect'
+    password: 'Z87@12351vniaApJWu'
   jpa:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: 'true'
+        temp:
+          use_jdbc_metadata_defaults: false
     hibernate:
       ddl-auto: update
-    show-sql: 'true'
+      show-sql: 'true'
+iconnect:
+  app:
+    jwtSecret: Y2whcXUzanZ2dHMzY3IzdA==
+ #24 Hours
+    jwtExpiration: 86400

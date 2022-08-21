@@ -44,7 +44,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
           "/users/activate/**",
           "/users/password/**",
           "/api/v1/auth/password/reset",
-          "/api/v1/auth/password"
+          "/api/v1/auth/password",
+          "/swagger-ui/**",
+          "/"
           //"/api/v1/users/**"
           // other public endpoints of your API may be appended to this array
   };

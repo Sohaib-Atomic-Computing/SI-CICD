@@ -30,7 +30,7 @@ public class TokensController {
   public ResponseEntity<Tokens> addDeviceToken(@RequestBody(required = true) TokensDTO tokensDTO) {
     Tokens deviceToken = tokenService.add(tokensDTO.getDeviceToken());
     URI uri = URI.create("/tokens/" + deviceToken.getId());
-    return ResponseEntity.created(uri).body(deviceToken);
+      return ResponseEntity.created(uri).body(deviceToken);
   }
 
   @PutMapping
