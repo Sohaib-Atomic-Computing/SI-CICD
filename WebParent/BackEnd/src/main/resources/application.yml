@@ -5,9 +5,9 @@ spring:
   application:
     name: iconnectBackEnd
   datasource:
-    url: jdbc:postgresql://143.244.173.57:30432/iconnect
-    username: 'iconnect'
-    password: 'Z87@12351vniaApJWu'
+    url: jdbc:postgresql://connect-test-db.czvuahdk39ku.eu-west-1.rds.amazonaws.com:5432/postgres
+    username: 'dev'
+    password: 'jw8s0F4'
   jpa:
     properties:
       hibernate:
