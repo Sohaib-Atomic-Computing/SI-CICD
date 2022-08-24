@@ -12,21 +12,24 @@ import javax.validation.constraints.Size;
 @Data
 public class RegisterRequest {
 
-    @NotBlank
+    @NotBlank (message = "Email can not be empty")
     @Email
     private String email;
 
-    @NotBlank(message = "Username can not be empty")
-    @Size(min = 2, max = 20)
-    private String username;
+    @NotBlank (message = " Full Name can not be empty")
+    private String fullname;
     
     @NotBlank(message = "Password can not be empty")
     @Size(min = 7, max = 35)
     private String password;
 
+    @NotBlank(message = "Phone Number can not be empty")
+    private String phoneNumber;
+
+    private String dpUrl;
+
     /*@NotNull(message = "Date of Birth cannot be Empty")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dob;*/
-    @NotNull(message = "Gender cannot be Empty")
-    private GenderType gender;
+
 }

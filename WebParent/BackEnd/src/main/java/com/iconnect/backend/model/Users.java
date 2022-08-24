@@ -14,30 +14,23 @@ import javax.validation.constraints.Size;
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = {
-                "email"
-        })})
+                "email","userUniqueId" ,"phoneNumber"
+       })})
 @Data
 public class Users extends BaseEntityAudit {
 
   @NotNull
   @Email
   private String email;
-
   @NotNull
-  @Size(min = 2, max = 20)
-  private String username;
-
-  @NotNull
-  @JsonIgnore
-  private String userUniqueName;
+  private String fullName;
 
   @NotBlank
   @JsonIgnore
   private String password;
 
- /* @NotNull
-  @JsonFormat(pattern = "yyyy-MM-dd")
-  private LocalDate dob;*/
+  @JsonIgnore
+  private String OTPCode;
 
   @JsonIgnore
   private String resetToken;
@@ -45,6 +38,14 @@ public class Users extends BaseEntityAudit {
   @JsonIgnore
   @OneToOne
   private Tokens deviceToken;
+
+  private String dpUrl;
+
+  @NotNull
+  private String phoneNumber;
+
+  @NotNull
+  private String userUniqueId;
 
   private boolean isActive = false;
 

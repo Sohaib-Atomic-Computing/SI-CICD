@@ -62,20 +62,20 @@ public class AuthController {
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsernameOrEmail(), loginRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken(loginRequest.getPhoneNumberOrEmail(), loginRequest.getPasswordOrCode()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        Users user = userRepository.findByEmailOrUsername(loginRequest.getUsernameOrEmail(), loginRequest.getUsernameOrEmail())
+        Users user = userRepository.findByEmailOrPhoneNumber(loginRequest.getPhoneNumberOrEmail(), loginRequest.getPhoneNumberOrEmail())
                 .orElseThrow(()
-                        -> new ForbiddenRequestException("Username or Email Not Active   : " + loginRequest.getUsernameOrEmail()
+                        -> new ForbiddenRequestException("Username or Phone Number Not Found   : " + loginRequest.getPhoneNumberOrEmail()
                 ));
 
         JwtResponse jwt = jwtProvider.generateJwtToken(authentication);
 
         String refreshToken = createRefreshToken(user);
         jwt.setRefreshtoken(refreshToken);
-        logger.log(Level.INFO,"User logged in successfully " +user.getUsername());
+        logger.log(Level.INFO,"User logged in successfully " +user.getUserUniqueId());
         return ResponseEntity.ok(jwt);
     }
 
@@ -90,7 +90,7 @@ public class AuthController {
     public ResponseEntity<Users> save(@RequestBody RegisterRequest user , HttpServletRequest request) throws MessagingException {
         Users newUser = usersService.save(user);
 
-        logger.log(Level.INFO,"The user "+newUser.getUsername()+" has been registered successfully" + " " + newUser.getResetToken());
+        logger.log(Level.INFO,"The user "+newUser.getFullName()+" has been registered successfully" + " " + newUser.getResetToken());
 
         return ResponseEntity.ok(newUser);
 

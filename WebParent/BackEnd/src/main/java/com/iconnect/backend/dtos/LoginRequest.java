@@ -9,11 +9,10 @@ import javax.validation.constraints.NotBlank;
 public class LoginRequest {
 
     @NotBlank
-    private String usernameOrEmail;
-
+    private String phoneNumberOrEmail;
     @NotBlank
-   // @Size(min = 7, max = 35)
-    private String password;
+    private String passwordOrCode;
+
 
    
 }

@@ -13,20 +13,19 @@ import java.util.Optional;
 public interface UsersRepository extends JpaRepository<Users,Long> {
     
    // Optional<Users> findByEmailAndIsActiveOrUsernameAndIsActive(String email , Boolean isActiveEmail, String username, Boolean isActiveUsername);
-
-    Optional<Users> findByUsernameAndIsActive(String username,Boolean isActive);
+    //Optional<Users> findByUsernameAndIsActive(String username,Boolean isActive);
     
-    Optional<Users> findByEmailOrUsername(String email , String username);
+    Optional<Users> findByEmailOrPhoneNumber(String email , String PhoneNumber);
 
     Optional<Users> findByEmail(String email);
     
-    Optional<Users> findByUsername(String username);
+    Optional<Users> findByPhoneNumber(String PhoneNumber);
 
-    Optional<Users> findByUserUniqueName(String userUniqueName);
-    
+    Optional<Users> findByUserUniqueId(String UserUniqueId);
+
     Optional<Users> findByResetToken(String token);
-    
-    Page<Users> findByUsernameIgnoreCaseContains(String username, Pageable pageable );
+
+    Page<Users> findByPhoneNumberIgnoreCaseContains(String phoneNumber, Pageable pageable );
 
    
 }

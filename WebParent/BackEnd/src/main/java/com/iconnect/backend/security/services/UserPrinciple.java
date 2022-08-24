@@ -19,11 +19,15 @@ public class UserPrinciple implements UserDetails {
 
     private String email;
 
-    private String username;
-    
-    private LocalDate dob;
+    private String phoneNumber;
 
-   
+    private String userUniqueId;
+
+    private String dpUrl;
+
+    @JsonIgnore
+    private String OTPCode;
+
     private boolean isActive;
 
     @JsonIgnore
@@ -33,32 +37,35 @@ public class UserPrinciple implements UserDetails {
 
 
     public UserPrinciple(Long id,
-            String email, String password , String username) {
+            String email, String password , String phoneNumber , String userUniqueId, String dpUrl , String OTPCode  ) {
 
         this.id = id;
         this.email = email;
         this.password = password;
-        this.dob = dob;
-        this.username = username;
+        this.phoneNumber = phoneNumber;
+        this.userUniqueId = userUniqueId;
+        this.dpUrl = dpUrl;
+        this.OTPCode = OTPCode;
         //this.authorities = authorities;
         
     }
 
     public static UserPrinciple build(Users user) {
-      
-
         return new UserPrinciple(user.getId(), user.getEmail(),
-               user.getPassword(),user.getUsername());
+               user.getPassword(),user.getPhoneNumber(),user.getUserUniqueId(), user.getDpUrl() , user.getOTPCode());
     }
 
     @Override
     public String getUsername() {
-        return email;
+        return phoneNumber;
     }
 
     @Override
     public String getPassword() {
-        return password;
+        if (OTPCode == null || OTPCode.equals("") )
+        return  password;
+        else
+        return OTPCode;
     }
 
     @Override

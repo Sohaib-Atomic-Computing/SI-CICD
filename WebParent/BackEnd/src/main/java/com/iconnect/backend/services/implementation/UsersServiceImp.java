@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -49,24 +50,23 @@ public class UsersServiceImp implements UsersService {
             throw new BadRequestException("Email Already Exist" );
         }
 
-        user = usersRepository.findByUserUniqueName(registerRequest.getUsername().toLowerCase());
+        user = usersRepository.findByPhoneNumber(registerRequest.getPhoneNumber().toLowerCase());
 
         if (user.isPresent()) {
-            throw new BadRequestException("UserName Already Exist");
+            throw new BadRequestException("Phone Number Already Exist");
         }
 
         Users newUser = new Users();
 
         newUser.setEmail(registerRequest.getEmail().toLowerCase());
-        newUser.setUsername(registerRequest.getUsername());
-        newUser.setUserUniqueName(registerRequest.getUsername().toLowerCase());
-       // newUser.setDob(registerRequest.getDob());
+        newUser.setPhoneNumber(registerRequest.getPhoneNumber().toLowerCase());
+        newUser.setFullName(registerRequest.getFullname().toLowerCase());
+        newUser.setUserUniqueId(UUID.randomUUID().toString().replace("-","").substring(0,8));
+        newUser.setDpUrl(registerRequest.getDpUrl());
         newUser.setResetToken(UUID.randomUUID().toString());
         newUser.setPassword(encoder.encode(registerRequest.getPassword()));
-
+        newUser.setOTPCode(encoder.encode("00000"));
         Users savedUser = usersRepository.save(newUser);
-
-
 
         return savedUser;
     }
@@ -90,7 +90,7 @@ public class UsersServiceImp implements UsersService {
     }
 
     @Override
-    public Page<Users> searchUsers(String username, Pageable pgbl) {
-        return usersRepository.findByUsernameIgnoreCaseContains(username, pgbl);
+    public Page<Users> searchUsers(String phonenumber, Pageable pgbl) {
+        return usersRepository.findByPhoneNumberIgnoreCaseContains(phonenumber, pgbl);
     }
 }
