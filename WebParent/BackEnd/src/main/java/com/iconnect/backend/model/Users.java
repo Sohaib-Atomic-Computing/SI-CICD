@@ -47,6 +47,8 @@ public class Users extends BaseEntityAudit {
   @NotNull
   private String userUniqueId;
 
+  private String QRCode;
+
   private boolean isActive = false;
 
 

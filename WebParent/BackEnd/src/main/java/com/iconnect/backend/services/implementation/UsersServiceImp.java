@@ -1,20 +1,25 @@
 package com.iconnect.backend.services.implementation;
 
+import com.iconnect.backend.Utils.Utils;
+import com.iconnect.backend.dtos.QRCodeDTO;
 import com.iconnect.backend.dtos.RegisterRequest;
 import com.iconnect.backend.exception.BadRequestException;
 import com.iconnect.backend.exception.RecordNotFoundException;
 import com.iconnect.backend.model.Users;
 import com.iconnect.backend.repository.UsersRepository;
 import com.iconnect.backend.services.UsersService;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import com.google.gson.Gson;
 
 @Service
 public class UsersServiceImp implements UsersService {
@@ -66,8 +71,8 @@ public class UsersServiceImp implements UsersService {
         newUser.setResetToken(UUID.randomUUID().toString());
         newUser.setPassword(encoder.encode(registerRequest.getPassword()));
         newUser.setOTPCode(encoder.encode("00000"));
+        newUser.setQRCode(createQRCode(newUser));
         Users savedUser = usersRepository.save(newUser);
-
         return savedUser;
     }
 
@@ -92,5 +97,22 @@ public class UsersServiceImp implements UsersService {
     @Override
     public Page<Users> searchUsers(String phonenumber, Pageable pgbl) {
         return usersRepository.findByPhoneNumberIgnoreCaseContains(phonenumber, pgbl);
+    }
+
+
+    private String createQRCode (Users user)
+    {
+        Gson gson = new Gson();
+
+        QRCodeDTO QRCodeDto = new QRCodeDTO();
+        QRCodeDto.setUniqueID(user.getUserUniqueId());
+        QRCodeDto.setTimestamp(Utils.getCurrentTimeStamp());
+        QRCodeDto.setRandomID(UUID.randomUUID().toString().replace("-","").substring(0,8));
+        String output = gson.toJson(QRCodeDto);
+        try {
+            return Utils.encodeBase64(output) ;
+        } catch (NoSuchAlgorithmException e) {
+           return null;
+        }
     }
 }

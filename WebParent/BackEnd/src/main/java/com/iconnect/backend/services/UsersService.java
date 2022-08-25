@@ -22,5 +22,7 @@ public interface UsersService {
 
     void delete(Long id);
     
-    Page<Users> searchUsers(String username , Pageable pgbl);
+    Page<Users> searchUsers(String phoneNumber , Pageable pgbl);
+
+   // String GetQRCode (string  )
 }

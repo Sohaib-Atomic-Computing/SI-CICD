@@ -10,6 +10,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -114,8 +117,13 @@ public static String generateCommonLangPassword() {
             return false;
         return true;
     }
- 
- 
+
+
+    public static String encodeBase64(final String clearText) throws NoSuchAlgorithmException {
+        return new String(
+                Base64.getEncoder().encode(MessageDigest.getInstance("SHA-256").digest(clearText.getBytes(StandardCharsets.UTF_8))));
+    }
+
   public static Long getUserId() {
          UserPrinciple userDetails = (UserPrinciple) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();

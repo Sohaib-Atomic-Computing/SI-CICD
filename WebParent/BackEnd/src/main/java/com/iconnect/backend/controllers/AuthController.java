@@ -74,8 +74,11 @@ public class AuthController {
         JwtResponse jwt = jwtProvider.generateJwtToken(authentication);
 
         String refreshToken = createRefreshToken(user);
+        user.setOTPCode(null);
+        userRepository.save(user);
         jwt.setRefreshtoken(refreshToken);
-        logger.log(Level.INFO,"User logged in successfully " +user.getUserUniqueId());
+
+        logger.log(Level.INFO,"User logged in successfully " + user.getUserUniqueId());
         return ResponseEntity.ok(jwt);
     }
 
