@@ -3,6 +3,7 @@ package com.iconnect.backend.controllers;
 
 import com.iconnect.backend.Utils.Utils;
 import com.iconnect.backend.dtos.RegisterRequest;
+import com.iconnect.backend.dtos.Response;
 import com.iconnect.backend.model.Users;
 import com.iconnect.backend.services.UsersService;
 import io.swagger.annotations.Api;
@@ -28,9 +29,9 @@ public class UsersController {
     }
 
     @PostMapping
-    public ResponseEntity<Users> saveNewUser(@RequestBody RegisterRequest user) {
+    public ResponseEntity<?> saveNewUser(@RequestBody RegisterRequest user) {
         Users newUser = usersService.save(user);
-        return ResponseEntity.ok(newUser);
+        return ResponseEntity.ok(new Response("Success",true,user));
 
     }
 
@@ -42,9 +43,9 @@ public class UsersController {
     }*/
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public ResponseEntity<Users> findUserById(@PathVariable(name = "id") Long id) {
+    public ResponseEntity<?> findUserById(@PathVariable(name = "id") Long id) {
         Users user = usersService.findById(id);
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(new Response("Success",true,user));
 
     }
 
@@ -54,15 +55,15 @@ public class UsersController {
     }
 
     @GetMapping("/search")
-    public Page<Users> searchForUser(@RequestParam(required = true) String username, Pageable page) {
+    public ResponseEntity<?>  searchForUser(@RequestParam(required = true) String username, Pageable page) {
         Page<Users> users = usersService.searchUsers(username, page);
-        return users;
+        return ResponseEntity.ok(new Response("Success",true,users));
     }
 
     @RequestMapping(value = "/loggedinUser", method = RequestMethod.GET)
-    public ResponseEntity<Users> loggedinUser() {
+    public ResponseEntity<?> loggedinUser() {
         Users user = usersService.findById(Utils.getUserId());
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(new Response("Success",true,user));
 
     }
 

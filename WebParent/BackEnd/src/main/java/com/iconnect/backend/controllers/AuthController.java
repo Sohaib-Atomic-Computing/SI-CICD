@@ -2,6 +2,7 @@ package com.iconnect.backend.controllers;
 
 
 import com.iconnect.backend.dtos.*;
+import com.iconnect.backend.exception.BadRequestException;
 import com.iconnect.backend.exception.ForbiddenRequestException;
 import com.iconnect.backend.exception.RecordNotFoundException;
 import com.iconnect.backend.model.UserRefreshToken;
@@ -74,12 +75,12 @@ public class AuthController {
         JwtResponse jwt = jwtProvider.generateJwtToken(authentication);
 
         String refreshToken = createRefreshToken(user);
-        user.setOTPCode(null);
-        userRepository.save(user);
+      //  user.setOTPCode(null);
+      //  userRepository.save(user);
         jwt.setRefreshtoken(refreshToken);
 
         logger.log(Level.INFO,"User logged in successfully " + user.getUserUniqueId());
-        return ResponseEntity.ok(jwt);
+        return ResponseEntity.ok(new Response("Success",true,jwt));
     }
 
     private String createRefreshToken(Users user) {
@@ -90,12 +91,12 @@ public class AuthController {
     }
 
     @PostMapping(value = "/register")
-    public ResponseEntity<Users> save(@RequestBody RegisterRequest user , HttpServletRequest request) throws MessagingException {
+    public ResponseEntity<?> save(@RequestBody RegisterRequest user , HttpServletRequest request) throws MessagingException {
         Users newUser = usersService.save(user);
 
         logger.log(Level.INFO,"The user "+newUser.getFullName()+" has been registered successfully" + " " + newUser.getResetToken());
 
-        return ResponseEntity.ok(newUser);
+        return ResponseEntity.ok(new Response("Success",true,newUser));
 
     }
 
@@ -107,9 +108,19 @@ public class AuthController {
     }
 
     @PostMapping(value = "/token")
-    public Optional<JwtResponse> refreshAccessToken(@RequestBody RefreshTokenDTO refreshToken) {
-        return userRefreshTokenRepository.findByToken(refreshToken.getRefreshToken())
+    public ResponseEntity<?> refreshAccessToken(@RequestBody RefreshTokenDTO refreshToken) {
+
+
+        Optional<JwtResponse>  jwtResponse = userRefreshTokenRepository.findByToken(refreshToken.getRefreshToken())
                 .map(userRefreshToken -> (jwtProvider.generateJwtToken(userRefreshToken.getUser().getEmail(), refreshToken.getRefreshToken())));
+
+     if (jwtResponse == null)
+     {
+         throw new ForbiddenRequestException("Incorrect Token");
+     }
+     else {
+        return ResponseEntity.ok(new Response("Success",true,jwtResponse));
+     }
 
     }
 
