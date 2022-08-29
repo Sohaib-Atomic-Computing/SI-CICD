@@ -24,5 +24,5 @@ public interface UsersService {
     
     Page<Users> searchUsers(String phoneNumber , Pageable pgbl);
 
-   // String GetQRCode (string  )
+    Boolean generateOTP(String phoneNumber);
 }

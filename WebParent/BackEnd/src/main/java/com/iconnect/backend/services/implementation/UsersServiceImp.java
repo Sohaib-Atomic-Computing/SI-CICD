@@ -4,6 +4,7 @@ import com.iconnect.backend.Utils.Utils;
 import com.iconnect.backend.dtos.QRCodeDTO;
 import com.iconnect.backend.dtos.RegisterRequest;
 import com.iconnect.backend.exception.BadRequestException;
+import com.iconnect.backend.exception.ForbiddenRequestException;
 import com.iconnect.backend.exception.RecordNotFoundException;
 import com.iconnect.backend.model.Users;
 import com.iconnect.backend.repository.UsersRepository;
@@ -97,6 +98,17 @@ public class UsersServiceImp implements UsersService {
     @Override
     public Page<Users> searchUsers(String phonenumber, Pageable pgbl) {
         return usersRepository.findByPhoneNumberIgnoreCaseContains(phonenumber, pgbl);
+    }
+
+    @Override
+    public Boolean generateOTP(String phoneNumber) {
+
+        Users user  = usersRepository.findByPhoneNumber(phoneNumber.toLowerCase()).orElseThrow(()
+                -> new BadRequestException("Phone Number Not Found   : " + phoneNumber));
+            user.setOTPCode("00000");
+            usersRepository.save(user);
+            return true;
+
     }
 
 

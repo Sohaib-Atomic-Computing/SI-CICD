@@ -111,17 +111,24 @@ public class AuthController {
     public ResponseEntity<?> refreshAccessToken(@RequestBody RefreshTokenDTO refreshToken) {
 
 
-        Optional<JwtResponse>  jwtResponse = userRefreshTokenRepository.findByToken(refreshToken.getRefreshToken())
+        Optional<JwtResponse> jwtResponse = userRefreshTokenRepository.findByToken(refreshToken.getRefreshToken())
                 .map(userRefreshToken -> (jwtProvider.generateJwtToken(userRefreshToken.getUser().getEmail(), refreshToken.getRefreshToken())));
 
-     if (jwtResponse == null)
-     {
-         throw new ForbiddenRequestException("Incorrect Token");
-     }
-     else {
-        return ResponseEntity.ok(new Response("Success",true,jwtResponse));
-     }
+        if (jwtResponse == null) {
+            throw new ForbiddenRequestException("Incorrect Token");
+        } else {
+            return ResponseEntity.ok(new Response("Success", true, jwtResponse));
+        }
+    }
+
+        @PostMapping(value = "/generateOTP")
+        public ResponseEntity<?> generateOTP(@RequestBody GenerateOTPDTO  otp)
+        {
+            Boolean isOTPgenerated = usersService.generateOTP(otp.getPhoneNumber());
+            return ResponseEntity.ok(new Response("OTP Generated",true,isOTPgenerated));
+        }
+
 
     }
 
-}
+

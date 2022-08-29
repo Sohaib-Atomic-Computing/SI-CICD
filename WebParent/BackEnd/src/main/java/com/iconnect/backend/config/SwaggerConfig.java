@@ -38,9 +38,9 @@ public class SwaggerConfig {
     }
 
     private ApiInfo apiEndPointsInfo() {
-        return new ApiInfoBuilder().title("Satra Digital Identity")
-                .description("Satra Digital Identity- end services")
-                .contact(new Contact("Satra Digital Identity", "www.satradigital.com", "help@satradigital.com"))
+        return new ApiInfoBuilder().title("IConnect Backend")
+                .description("IConnect Backend- services")
+                .contact(new Contact(" IConnect Backend", "www.iconnect.com", "help@iconnect.com"))
                 .version("1.0.0")
                 .build();
     }
