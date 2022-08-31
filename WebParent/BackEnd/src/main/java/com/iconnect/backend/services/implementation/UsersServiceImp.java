@@ -105,7 +105,7 @@ public class UsersServiceImp implements UsersService {
 
         Users user  = usersRepository.findByPhoneNumber(phoneNumber.toLowerCase()).orElseThrow(()
                 -> new BadRequestException("Phone Number Not Found   : " + phoneNumber));
-            user.setOTPCode("00000");
+            user.setOTPCode(encoder.encode("00000"));
             usersRepository.save(user);
             return true;
 
