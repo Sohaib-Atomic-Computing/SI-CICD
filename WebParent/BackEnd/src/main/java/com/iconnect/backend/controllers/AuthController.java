@@ -121,7 +121,7 @@ public class AuthController {
         }
     }
 
-        @PostMapping(value = "/generateOTP")
+        @PostMapping(value = "/CheckUserAndGenerateOTP")
         public ResponseEntity<?> generateOTP(@RequestBody GenerateOTPDTO  otp)
         {
             Boolean isOTPgenerated = usersService.generateOTP(otp.getPhoneNumber());
