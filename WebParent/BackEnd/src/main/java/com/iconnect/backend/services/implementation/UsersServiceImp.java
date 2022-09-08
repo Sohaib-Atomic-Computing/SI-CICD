@@ -50,13 +50,13 @@ public class UsersServiceImp implements UsersService {
     @Override
     public Users save(RegisterRequest registerRequest) throws RecordNotFoundException {
 
-        Optional<Users> user = usersRepository.findByEmail(registerRequest.getEmail().toLowerCase());
+        Optional<Users> user = usersRepository.findByEmailAndIsActive(registerRequest.getEmail().toLowerCase(),Boolean.TRUE);
 
         if (user.isPresent()) {
             throw new BadRequestException("Email Already Exist" );
         }
 
-        user = usersRepository.findByPhoneNumber(registerRequest.getPhoneNumber().toLowerCase());
+        user = usersRepository.findByPhoneNumberAndIsActive(registerRequest.getPhoneNumber().toLowerCase(),Boolean.TRUE);
 
         if (user.isPresent()) {
             throw new BadRequestException("Phone Number Already Exist");
@@ -64,6 +64,18 @@ public class UsersServiceImp implements UsersService {
 
         Users newUser = new Users();
 
+        user = usersRepository.findByPhoneNumberAndIsActive(registerRequest.getPhoneNumber().toLowerCase(),Boolean.FALSE);
+
+        if (user.isPresent()) {
+            newUser = user.get();
+        }
+        else
+        {
+            user = usersRepository.findByEmailAndIsActive(registerRequest.getPhoneNumber().toLowerCase(),Boolean.FALSE);
+            if (user.isPresent()) {
+                newUser = user.get();
+            }
+        }
         newUser.setEmail(registerRequest.getEmail().toLowerCase());
         newUser.setPhoneNumber(registerRequest.getPhoneNumber().toLowerCase());
         newUser.setFullName(registerRequest.getFullname().toLowerCase());
@@ -103,7 +115,7 @@ public class UsersServiceImp implements UsersService {
     @Override
     public Boolean generateOTP(String phoneNumber) {
 
-        Users user  = usersRepository.findByPhoneNumber(phoneNumber.toLowerCase()).orElseThrow(()
+        Users user  = usersRepository.findByPhoneNumberAndIsActive(phoneNumber.toLowerCase(),Boolean.FALSE).orElseThrow(()
                 -> new BadRequestException("Phone Number Not Found   : " + phoneNumber));
             user.setOTPCode(encoder.encode("00000"));
             usersRepository.save(user);

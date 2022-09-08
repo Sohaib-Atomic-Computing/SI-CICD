@@ -7,6 +7,7 @@ import com.iconnect.backend.exception.ForbiddenRequestException;
 import com.iconnect.backend.exception.RecordNotFoundException;
 import com.iconnect.backend.model.UserRefreshToken;
 import com.iconnect.backend.model.Users;
+import com.iconnect.backend.model.enums.ServiceType;
 import com.iconnect.backend.repository.UserRefreshTokenRepository;
 import com.iconnect.backend.repository.UsersRepository;
 import com.iconnect.backend.security.jwt.JwtProvider;
@@ -62,25 +63,36 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getPhoneNumberOrEmail(), loginRequest.getPasswordOrCode()));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         Users user = userRepository.findByEmailOrPhoneNumber(loginRequest.getPhoneNumberOrEmail(), loginRequest.getPhoneNumberOrEmail())
                 .orElseThrow(()
                         -> new ForbiddenRequestException("Username or Phone Number Not Found   : " + loginRequest.getPhoneNumberOrEmail()
                 ));
+        if ((loginRequest.getServiceType() == ServiceType.LOGIN && user.isActive() == Boolean.TRUE)
+                | (loginRequest.getServiceType() == ServiceType.OTPVERIFY && user.isActive() == Boolean.FALSE)) {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getPhoneNumberOrEmail(), loginRequest.getPasswordOrCode()));
 
-        JwtResponse jwt = jwtProvider.generateJwtToken(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String refreshToken = createRefreshToken(user);
-      //  user.setOTPCode(null);
-      //  userRepository.save(user);
-        jwt.setRefreshtoken(refreshToken);
+            JwtResponse jwt = jwtProvider.generateJwtToken(authentication);
 
-        logger.log(Level.INFO,"User logged in successfully " + user.getUserUniqueId());
-        return ResponseEntity.ok(new Response("Success",true,jwt));
+            String refreshToken = createRefreshToken(user);
+
+            if (loginRequest.getServiceType() == ServiceType.OTPVERIFY) {
+                user.setActive(Boolean.TRUE);
+                user.setPhoneVerified(Boolean.TRUE);
+                userRepository.save(user);
+            }
+            jwt.setRefreshtoken(refreshToken);
+
+            logger.log(Level.INFO, "User logged in successfully " + user.getUserUniqueId());
+            return ResponseEntity.ok(new Response("Success", true, jwt));
+        }
+        else {
+            throw new BadRequestException("Invalid Operation  : " + loginRequest.getPhoneNumberOrEmail());
+        }
+
     }
 
     private String createRefreshToken(Users user) {

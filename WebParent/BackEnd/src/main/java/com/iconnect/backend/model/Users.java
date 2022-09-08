@@ -50,6 +50,9 @@ public class Users extends BaseEntityAudit {
   private String QRCode;
 
   private boolean isActive = false;
-
+  @Column(nullable=false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+  private boolean isPhoneVerified = false;
+  @Column(nullable=false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+  private boolean isEmailVerified = false;
 
 }
