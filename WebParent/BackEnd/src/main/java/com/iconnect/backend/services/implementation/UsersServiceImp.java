@@ -3,6 +3,7 @@ package com.iconnect.backend.services.implementation;
 import com.iconnect.backend.Utils.Utils;
 import com.iconnect.backend.dtos.QRCodeDTO;
 import com.iconnect.backend.dtos.RegisterRequest;
+import com.iconnect.backend.dtos.UpdateProfileRequest;
 import com.iconnect.backend.exception.BadRequestException;
 import com.iconnect.backend.exception.ForbiddenRequestException;
 import com.iconnect.backend.exception.RecordNotFoundException;
@@ -89,18 +90,20 @@ public class UsersServiceImp implements UsersService {
         return savedUser;
     }
 
-    /*@Override
-    public Users update(Long userId, RegisterRequest registerRequest) {
+    @Override
+    public Users update(Long userId, UpdateProfileRequest updateProfileRequest) {
         Users updatedUser = findById(userId);
-        if (registerRequest.getGender() != null) {
-            updatedUser.setGender(registerRequest.getGender().toString());
+        if (updateProfileRequest.getFullname() != null) {
+            updatedUser.setFullName(updateProfileRequest.getFullname().toLowerCase());
         }
-       /* if (registerRequest.getDob() != null) {
-            updatedUser.setDob(registerRequest.getDob());
+        if (updateProfileRequest.getDpUrl() != null) {
+            updatedUser.setDpUrl(updateProfileRequest.getDpUrl().toLowerCase());
         }
-
+        if (updateProfileRequest.getPassword() != null) {
+            updatedUser.setPassword(encoder.encode(updateProfileRequest.getPassword()));
+        }
         return usersRepository.save(updatedUser);
-    }*/
+    }
 
     @Override
     public void delete(Long id) throws RecordNotFoundException {

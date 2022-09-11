@@ -2,6 +2,7 @@ package com.iconnect.backend.services;
 
 
 import com.iconnect.backend.dtos.RegisterRequest;
+import com.iconnect.backend.dtos.UpdateProfileRequest;
 import com.iconnect.backend.model.Users;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +19,7 @@ public interface UsersService {
 
     Users save(RegisterRequest u);
 
-    //Users update(Long userId, RegisterRequest user);
+    Users update(Long userId, UpdateProfileRequest updateProfileRequest);
 
     void delete(Long id);
     

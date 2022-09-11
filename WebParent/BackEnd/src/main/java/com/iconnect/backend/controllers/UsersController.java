@@ -4,6 +4,7 @@ package com.iconnect.backend.controllers;
 import com.iconnect.backend.Utils.Utils;
 import com.iconnect.backend.dtos.RegisterRequest;
 import com.iconnect.backend.dtos.Response;
+import com.iconnect.backend.dtos.UpdateProfileRequest;
 import com.iconnect.backend.model.Users;
 import com.iconnect.backend.services.UsersService;
 import io.swagger.annotations.Api;
@@ -35,12 +36,12 @@ public class UsersController {
 
     }
 
-    /*@RequestMapping(value = "/update/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<Users> updateUser(@PathVariable Long id, @RequestBody RegisterRequest u) {
-        Users user = usersService.update(id, u);
-        return ResponseEntity.ok(user);
+    @RequestMapping(value = "/editProfile", method = RequestMethod.PUT)
+    public ResponseEntity<?> updateUser(@RequestBody UpdateProfileRequest u) {
+        Users user = usersService.update(Utils.getUserId(), u);
+        return ResponseEntity.ok(new Response("Success",true,user));
 
-    }*/
+    }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ResponseEntity<?> findUserById(@PathVariable(name = "id") Long id) {
