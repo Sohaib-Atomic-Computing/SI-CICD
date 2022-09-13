@@ -118,7 +118,7 @@ public class UsersServiceImp implements UsersService {
     @Override
     public Boolean generateOTP(String phoneNumber) {
 
-        Users user  = usersRepository.findByPhoneNumberAndIsActive(phoneNumber.toLowerCase(),Boolean.FALSE).orElseThrow(()
+        Users user  = usersRepository.findByPhoneNumber(phoneNumber.toLowerCase()).orElseThrow(()
                 -> new BadRequestException("Phone Number Not Found   : " + phoneNumber));
             user.setOTPCode(encoder.encode("00000"));
             usersRepository.save(user);
