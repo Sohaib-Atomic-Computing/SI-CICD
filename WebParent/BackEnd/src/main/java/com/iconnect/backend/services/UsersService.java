@@ -2,6 +2,7 @@ package com.iconnect.backend.services;
 
 
 import com.iconnect.backend.dtos.RegisterRequest;
+import com.iconnect.backend.dtos.UpdatePasswordDTO;
 import com.iconnect.backend.dtos.UpdateProfileRequest;
 import com.iconnect.backend.model.Users;
 import org.springframework.data.domain.Page;
@@ -26,4 +27,6 @@ public interface UsersService {
     Page<Users> searchUsers(String phoneNumber , Pageable pgbl);
 
     Boolean generateOTP(String phoneNumber);
+
+    Users updatePassword(Long userId, UpdatePasswordDTO updatePasswordRequest);
 }

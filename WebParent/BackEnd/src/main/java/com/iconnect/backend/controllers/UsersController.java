@@ -4,14 +4,17 @@ package com.iconnect.backend.controllers;
 import com.iconnect.backend.Utils.Utils;
 import com.iconnect.backend.dtos.RegisterRequest;
 import com.iconnect.backend.dtos.Response;
+import com.iconnect.backend.dtos.UpdatePasswordDTO;
 import com.iconnect.backend.dtos.UpdateProfileRequest;
 import com.iconnect.backend.model.Users;
+import com.iconnect.backend.security.services.UserPrinciple;
 import com.iconnect.backend.services.UsersService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin
@@ -63,7 +66,18 @@ public class UsersController {
 
     @RequestMapping(value = "/loggedinUser", method = RequestMethod.GET)
     public ResponseEntity<?> loggedinUser() {
-        Users user = usersService.findById(Utils.getUserId());
+
+        UserPrinciple userDetails = (UserPrinciple) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        //Users user = usersService.findById(Utils.getUserId());
+        return ResponseEntity.ok(new Response("Success",true,userDetails));
+
+    }
+
+
+    @RequestMapping(value = "/updatePassword", method = RequestMethod.PUT)
+    public ResponseEntity<?> updatePassword(@RequestBody UpdatePasswordDTO u) {
+        Users user = usersService.updatePassword(Utils.getUserId(), u);
         return ResponseEntity.ok(new Response("Success",true,user));
 
     }

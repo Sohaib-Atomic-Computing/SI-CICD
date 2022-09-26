@@ -3,6 +3,7 @@ package com.iconnect.backend.services.implementation;
 import com.iconnect.backend.Utils.Utils;
 import com.iconnect.backend.dtos.QRCodeDTO;
 import com.iconnect.backend.dtos.RegisterRequest;
+import com.iconnect.backend.dtos.UpdatePasswordDTO;
 import com.iconnect.backend.dtos.UpdateProfileRequest;
 import com.iconnect.backend.exception.BadRequestException;
 import com.iconnect.backend.exception.ForbiddenRequestException;
@@ -141,5 +142,27 @@ public class UsersServiceImp implements UsersService {
         } catch (NoSuchAlgorithmException e) {
            return null;
         }
+    }
+
+
+
+
+    @Override
+    public Users updatePassword(Long userId, UpdatePasswordDTO updatePasswordRequest) {
+        Users updatedUser = findById(userId);
+        if (updatePasswordRequest.getCurrentpassword() != null) {
+            if (encoder.matches(updatePasswordRequest.getCurrentpassword(), updatedUser.getPassword())) {
+                if (updatePasswordRequest.getNewpassword() != null) {
+                    updatedUser.setPassword(encoder.encode(updatePasswordRequest.getNewpassword()));
+                }
+            }
+            else
+            {
+                throw new BadRequestException("Current Password does not match");
+            }
+        }
+
+
+        return usersRepository.save(updatedUser);
     }
 }
