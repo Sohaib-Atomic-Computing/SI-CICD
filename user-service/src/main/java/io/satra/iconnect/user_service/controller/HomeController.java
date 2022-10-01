@@ -1,4 +1,4 @@
-package com.iconnect.backend.controllers;
+package io.satra.iconnect.user_service.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;

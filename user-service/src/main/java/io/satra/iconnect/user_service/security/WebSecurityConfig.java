@@ -1,8 +1,8 @@
-package com.iconnect.backend.security;
+package io.satra.iconnect.user_service.security;
 
-import com.iconnect.backend.security.jwt.JwtAuthEntryPoint;
-import com.iconnect.backend.security.jwt.JwtAuthTokenFilter;
-import com.iconnect.backend.security.services.UserDetailsServiceImpl;
+import io.satra.iconnect.user_service.security.jwt.JwtAuthEntryPoint;
+import io.satra.iconnect.user_service.security.jwt.JwtAuthTokenFilter;
+import io.satra.iconnect.user_service.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
