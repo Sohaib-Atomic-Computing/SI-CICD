@@ -26,6 +26,9 @@ public class UserPrinciple implements UserDetails {
 
     private String dpUrl;
 
+    private String fullName;
+
+
     @JsonIgnore
     private String OTPCode;
 
@@ -39,7 +42,7 @@ public class UserPrinciple implements UserDetails {
     private String QRCode;
 
     public UserPrinciple(Long id,
-            String email, String password , String phoneNumber , String userUniqueId, String dpUrl , String OTPCode ,String QRCode ) {
+            String email, String FullName, String password , String phoneNumber , String userUniqueId, String dpUrl , String OTPCode ,String QRCode ) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -48,15 +51,17 @@ public class UserPrinciple implements UserDetails {
         this.dpUrl = dpUrl;
         this.OTPCode = OTPCode;
         this.QRCode = QRCode;
+        this.fullName = FullName;
         //this.authorities = authorities;
         
     }
 
     public static UserPrinciple build(Users user) {
-        return new UserPrinciple(user.getId(), user.getEmail(),
+        return new UserPrinciple(user.getId(), user.getEmail(), user.getFullName(),
                user.getPassword(),user.getPhoneNumber(),user.getUserUniqueId(), user.getDpUrl() , user.getOTPCode(), user.getQRCode());
     }
 
+    @JsonIgnore
     @Override
     public String getUsername() {
         return phoneNumber;
