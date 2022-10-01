@@ -1,8 +1,6 @@
 package io.satra.iconnect.user_service.service;
 
 import com.google.gson.Gson;
-import io.satra.iconnect.user_service.Utils.EncodingUtils;
-import io.satra.iconnect.user_service.Utils.TimeUtils;
 import io.satra.iconnect.user_service.dto.QRCodeDTO;
 import io.satra.iconnect.user_service.dto.RegisterRequestDTO;
 import io.satra.iconnect.user_service.dto.UpdatePasswordDTO;
@@ -12,6 +10,8 @@ import io.satra.iconnect.user_service.entity.User;
 import io.satra.iconnect.user_service.exception.generic.BadRequestException;
 import io.satra.iconnect.user_service.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.user_service.repository.UserRepository;
+import io.satra.iconnect.user_service.utils.EncodingUtils;
+import io.satra.iconnect.user_service.utils.TimeUtils;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import java.util.UUID;

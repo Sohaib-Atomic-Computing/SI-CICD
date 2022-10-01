@@ -1,11 +1,11 @@
 package io.satra.iconnect.user_service.service;
 
-import io.satra.iconnect.user_service.Utils.AuthenticationUtils;
 import io.satra.iconnect.user_service.dto.DeviceTokenDTO;
 import io.satra.iconnect.user_service.dto.UserDTO;
 import io.satra.iconnect.user_service.entity.DeviceToken;
 import io.satra.iconnect.user_service.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.user_service.repository.DeviceTokenRepository;
+import io.satra.iconnect.user_service.utils.AuthenticationUtils;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
