@@ -1,17 +1,11 @@
-package com.iconnect.backend.dtos;
-
-import lombok.Data;
+package io.satra.iconnect.user_service.dto;
 
 import javax.validation.constraints.NotBlank;
-
-/**
- * @author kalsumaykhi 20/11/2020
- */
+import lombok.Data;
 
 @Data
 public class RefreshTokenDTO {
 
   @NotBlank
   private String refreshToken;
-
 }

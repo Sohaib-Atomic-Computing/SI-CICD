@@ -1,13 +1,10 @@
-package com.iconnect.backend.dtos;
+package io.satra.iconnect.user_service.dto;
 
+import lombok.Builder;
 import lombok.Data;
-import org.joda.time.DateTime;
-
-import javax.validation.constraints.NotBlank;
-
-
 
 @Data
+@Builder
 public class QRCodeDTO {
 
   private String uniqueID;
@@ -16,5 +13,4 @@ public class QRCodeDTO {
   private String field1;
   private String field2;
   private Object payload;
-
 }
