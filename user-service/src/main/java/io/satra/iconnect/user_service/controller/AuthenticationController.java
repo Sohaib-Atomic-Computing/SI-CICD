@@ -1,6 +1,5 @@
 package io.satra.iconnect.user_service.controller;
 
-
 import io.satra.iconnect.user_service.dto.GenerateOTPDTO;
 import io.satra.iconnect.user_service.dto.RegisterRequestDTO;
 import io.satra.iconnect.user_service.dto.ResponseDTO;
@@ -8,18 +7,13 @@ import io.satra.iconnect.user_service.dto.UserDTO;
 import io.satra.iconnect.user_service.exception.MissingRefreshTokenException;
 import io.satra.iconnect.user_service.exception.UserAlreadyExistsException;
 import io.satra.iconnect.user_service.exception.generic.EntityNotFoundException;
-import io.satra.iconnect.user_service.repository.UserRefreshTokenRepository;
-import io.satra.iconnect.user_service.repository.UserRepository;
 import io.satra.iconnect.user_service.service.UserService;
-import io.satra.iconnect.user_service.utils.JWTUtils;
 import java.net.URI;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,12 +25,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @Slf4j
 public class AuthenticationController {
 
-  private final AuthenticationManager authenticationManager;
-  private final UserRepository userRepository;
-  private final PasswordEncoder encoder;
-  private final UserRefreshTokenRepository userRefreshTokenRepository;
-
-  private final JWTUtils jwtUtils;
   private final UserService userService;
 
   /**

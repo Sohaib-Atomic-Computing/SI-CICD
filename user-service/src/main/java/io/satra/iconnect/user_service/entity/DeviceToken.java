@@ -30,6 +30,7 @@ public class DeviceToken extends BaseEntity {
 
   public DeviceTokenDTO toDTO() {
     return DeviceTokenDTO.builder()
+        .id(id)
         .token(token)
         .build();
   }
