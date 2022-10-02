@@ -1,9 +1,11 @@
 package io.satra.iconnect.user_service.security;
 
-import io.satra.iconnect.user_service.security.jwt.JwtAuthEntryPoint;
 import io.satra.iconnect.user_service.security.jwt.JwtAuthTokenFilter;
+import io.satra.iconnect.user_service.security.jwt.JwtUnauthorizedExceptionHandler;
 import io.satra.iconnect.user_service.service.UserDetailsServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Arrays;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,54 +16,55 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(
-        prePostEnabled = true
+    prePostEnabled = true
 )
+@RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-  @Autowired
-  UserDetailsServiceImpl userDetailsService;
 
-  @Autowired
-  private JwtAuthEntryPoint unauthorizedHandler;
+  private final UserDetailsServiceImpl userDetailsService;
+  private final JwtUnauthorizedExceptionHandler jwtUnauthorizedExceptionHandler;
+  private final JwtAuthTokenFilter jwtAuthTokenFilter;
 
   private static final String[] AUTH_WHITELIST = {
-          // -- swagger ui
-          "/v2/api-docs",
-          "/swagger-resources",
-          "/swagger-resources/**",
-          "/configuration/ui",
-          "/configuration/security",
-          "/swagger-ui.html",
-          "/webjars/**",
-          "/api/v1/auth/**",
-          "/app/**",
-          "/users/activate/**",
-          "/users/password/**",
-          "/api/v1/auth/password/reset",
-          "/api/v1/auth/password",
-          "/swagger-ui/**",
-          "/"
-          //"/api/v1/users/**"
-          // other public endpoints of your API may be appended to this array
+      "/",
+
+      "/swagger-resources",
+      "/swagger-resources/**",
+      "/configuration/ui",
+      "/configuration/security",
+      "/swagger-ui.html",
+      "/webjars/**",
+      "/app/**",
+      "/swagger-ui/**",
+      "/v2/api-docs",
+
+      "/users/activate/**",
+      "/users/password/**",
+
+      "/api/v1/auth/**",
+      "/api/v1/auth/password/reset",
+      "/api/v1/auth/password",
   };
 
-
   @Bean
-  public JwtAuthTokenFilter authenticationJwtTokenFilter() {
-    return new JwtAuthTokenFilter();
+  public BCryptPasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
   }
 
   @Override
   public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
     authenticationManagerBuilder
-            .userDetailsService(userDetailsService)
-            .passwordEncoder(passwordEncoder());
+        .userDetailsService(userDetailsService)
+        .passwordEncoder(passwordEncoder());
   }
 
   @Bean
@@ -71,21 +74,28 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   }
 
   @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
+  CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(List.of("*"));
+    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT"));
+    configuration.setAllowedHeaders(List.of("content-type", "authorization"));
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+
+    return source;
   }
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http.cors().and().csrf().disable().
-            authorizeRequests()
-            .antMatchers(AUTH_WHITELIST).permitAll()
-            .anyRequest().authenticated()
-            .and()
-            .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    http.csrf().disable().cors().and()
+        .authorizeRequests()
+        .antMatchers(AUTH_WHITELIST).permitAll()
+        .anyRequest().authenticated()
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(jwtUnauthorizedExceptionHandler).and()
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
   }
-
 }

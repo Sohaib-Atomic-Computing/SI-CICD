@@ -1,10 +1,18 @@
 package io.satra.iconnect.user_service.security.jwt;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.satra.iconnect.user_service.dto.JwtResponseDTO;
 import io.satra.iconnect.user_service.security.UserPrincipal;
+import io.satra.iconnect.user_service.utils.TimeUtils;
+import java.security.Key;
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.Base64;
+import javax.crypto.spec.SecretKeySpec;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -23,75 +31,67 @@ public class JwtProvider {
   public JwtResponseDTO generateJwtToken(Authentication authentication) {
     UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-    LocalDateTime issueTime = LocalDateTime.now();
-    LocalDateTime expiryTime = LocalDateTime.now().plusSeconds(jwtExpiration);
-
-    //TODO need to verify Expiration
-    String token = Jwts.builder()
-        .setSubject((userPrincipal.getUsername()))
-        .setIssuedAt(issueTime)
-        .setExpiration(expiryTime)
-        .signWith(SignatureAlgorithm.HS512, jwtSecret)
-        .compact();
-
-    JwtResponseDTO jwt = new JwtResponseDTO();
-    jwt.setIssueTime(issueTime);
-    jwt.setExpiryTime(expiryTime);
-    jwt.setAccessToken(token);
-    jwt.setIssueTime(new Date());
-
-    return jwt;
+    return doGenerateTokenResponse(userPrincipal.getUsername(), null);
   }
 
 
-  public JwtResponseDTO generateJwtToken(String username, String refreshtoken) {
-
-    Date issuetime = new Date();
-    Date expirytime = new Date((new Date()).getTime() + jwtExpiration * 1000);
-
-    //TODO need to verify Expiration
-    String token = Jwts.builder()
-        .setSubject((username))
-        .setIssuedAt(issuetime)
-        .setExpiration(expirytime)
-        .signWith(SignatureAlgorithm.HS512, jwtSecret)
-        .compact();
-
-    JwtResponseDTO jwt = new JwtResponseDTO();
-    jwt.setIssueTime(issuetime);
-    jwt.setExpiryTime(expirytime);
-    jwt.setRefreshToken(refreshtoken);
-    jwt.setAccessToken(token);
-    jwt.setIssueTime(new Date());
-
-    return jwt;
+  public JwtResponseDTO generateJwtToken(String username, String refreshToken) {
+    return doGenerateTokenResponse(username, refreshToken);
   }
 
-
-  public boolean validateJwtToken(String authToken) {
+  public boolean validateJwtToken(String token) {
     try {
-      Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
+      getJwtParser().parseClaimsJws(token);
       return true;
-    } catch (SignatureException e) {
-      logger.error("Invalid JWT signature -> Message: {} ", e);
     } catch (MalformedJwtException e) {
-      logger.error("Invalid JWT token -> Message: {}", e);
+      log.error("Invalid JWT token", e);
     } catch (ExpiredJwtException e) {
-      logger.error("Expired JWT token -> Message: {}", e);
+      log.error("Expired JWT token", e);
     } catch (UnsupportedJwtException e) {
-      logger.error("Unsupported JWT token -> Message: {}", e);
+      log.error("Unsupported JWT token", e);
     } catch (IllegalArgumentException e) {
-      logger.error("JWT claims string is empty -> Message: {}", e);
+      log.error("JWT claims string is empty", e);
     }
 
     return false;
   }
 
   public String getUserNameFromJwtToken(String token) {
-    return Jwts.parser()
-        .setSigningKey(jwtSecret)
+    return getJwtParser()
         .parseClaimsJws(token)
-        .getBody().getSubject();
+        .getBody()
+        .getSubject();
   }
 
+  private Key getSecretKey() {
+    return new SecretKeySpec(
+        Base64.getDecoder().decode(jwtSecret),
+        SignatureAlgorithm.HS512.getJcaName()
+    );
+  }
+
+  private JwtParser getJwtParser() {
+    return Jwts.parserBuilder()
+        .setSigningKey(getSecretKey())
+        .build();
+  }
+
+  private JwtResponseDTO doGenerateTokenResponse(String subject, String refreshToken) {
+    LocalDateTime issueTime = LocalDateTime.now();
+    LocalDateTime expiryTime = issueTime.plusSeconds(jwtExpiration);
+
+    String token = Jwts.builder()
+        .setSubject(subject)
+        .setIssuedAt(TimeUtils.convertLocalDateTimeToDate(issueTime))
+        .setExpiration(TimeUtils.convertLocalDateTimeToDate(expiryTime))
+        .signWith(getSecretKey())
+        .compact();
+
+    return JwtResponseDTO.builder()
+        .issueTime(issueTime)
+        .expiryTime(expiryTime)
+        .accessToken(token)
+        .refreshToken(refreshToken)
+        .build();
+  }
 }

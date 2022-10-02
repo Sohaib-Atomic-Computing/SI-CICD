@@ -11,7 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Data
 public class UserPrincipal implements UserDetails {
 
-  private User user;
+  private final User user;
 
   @Override
   public String getUsername() {
