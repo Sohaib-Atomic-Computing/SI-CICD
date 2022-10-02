@@ -1,4 +1,4 @@
-package io.satra.iconnect.user_service.security.jwt;
+package io.satra.iconnect.user_service.security.filter;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class JwtUnauthorizedExceptionHandler implements AuthenticationEntryPoint {
 
-    @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException {
-        log.error("Unauthorized error. Message - {}", e.getMessage());
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error -> Unauthorized");
-    }
+  @Override
+  public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException {
+    log.error("User could not be authenticated!", e);
+    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User could not be authenticated!");
+  }
 }

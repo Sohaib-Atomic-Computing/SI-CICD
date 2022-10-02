@@ -1,7 +1,7 @@
 package io.satra.iconnect.user_service.security;
 
-import io.satra.iconnect.user_service.security.jwt.JwtAuthTokenFilter;
-import io.satra.iconnect.user_service.security.jwt.JwtUnauthorizedExceptionHandler;
+import io.satra.iconnect.user_service.security.filter.CustomAuthenticationFilter;
+import io.satra.iconnect.user_service.security.filter.JwtUnauthorizedExceptionHandler;
 import io.satra.iconnect.user_service.service.UserDetailsServiceImpl;
 import java.util.Arrays;
 import java.util.List;
@@ -32,27 +32,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
   private final UserDetailsServiceImpl userDetailsService;
   private final JwtUnauthorizedExceptionHandler jwtUnauthorizedExceptionHandler;
-  private final JwtAuthTokenFilter jwtAuthTokenFilter;
+  private final CustomAuthenticationFilter customAuthenticationFilter;
 
   private static final String[] AUTH_WHITELIST = {
       "/",
-
-      "/swagger-resources",
-      "/swagger-resources/**",
-      "/configuration/ui",
-      "/configuration/security",
-      "/swagger-ui.html",
-      "/webjars/**",
-      "/app/**",
-      "/swagger-ui/**",
-      "/v2/api-docs",
-
-      "/users/activate/**",
-      "/users/password/**",
-
-      "/api/v1/auth/**",
-      "/api/v1/auth/password/reset",
-      "/api/v1/auth/password",
   };
 
   @Bean
@@ -87,15 +70,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http.csrf().disable().cors().and()
-        .authorizeRequests()
-        .antMatchers(AUTH_WHITELIST).permitAll()
-        .anyRequest().authenticated()
-        .and()
-        .exceptionHandling()
-        .authenticationEntryPoint(jwtUnauthorizedExceptionHandler).and()
-        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    // disable CSRF protection
+    http.csrf().disable();
 
-    http.addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
+    // enable CORS
+    http.cors();
+
+    // configure authentications
+    http.authorizeRequests()
+        .antMatchers(AUTH_WHITELIST).permitAll()
+        .anyRequest().authenticated();
+
+    // configure exception handling
+    http.exceptionHandling().authenticationEntryPoint(jwtUnauthorizedExceptionHandler);
+
+    // add JWT authentication filter
+    http.addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+    // configure session management
+    http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
   }
 }

@@ -1,5 +1,8 @@
 package io.satra.iconnect.user_service.service;
 
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
 import io.satra.iconnect.user_service.dto.QRCodeDTO;
 import io.satra.iconnect.user_service.dto.RegisterRequestDTO;
@@ -7,18 +10,24 @@ import io.satra.iconnect.user_service.dto.UpdatePasswordDTO;
 import io.satra.iconnect.user_service.dto.UpdateProfileRequestDTO;
 import io.satra.iconnect.user_service.dto.UserDTO;
 import io.satra.iconnect.user_service.entity.User;
+import io.satra.iconnect.user_service.exception.MissingRefreshTokenException;
 import io.satra.iconnect.user_service.exception.generic.BadRequestException;
 import io.satra.iconnect.user_service.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.user_service.repository.UserRepository;
+import io.satra.iconnect.user_service.security.UserPrincipal;
 import io.satra.iconnect.user_service.utils.EncodingUtils;
+import io.satra.iconnect.user_service.utils.JWTUtils;
 import io.satra.iconnect.user_service.utils.TimeUtils;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,11 +38,23 @@ public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+  private final JWTUtils jwtUtils;
 
   @Override
   public Page<UserDTO> findAllUsers(Pageable pageable) {
     return userRepository.findAll(pageable).map(User::toDTO);
   }
+
+  @Override
+  public UserDTO getCurrentUser() throws EntityNotFoundException {
+    UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String phoneNumber = userPrincipal.getUser().getPhoneNumber();
+
+    User currentUser = userRepository.findByPhoneNumber(phoneNumber)
+        .orElseThrow(() -> new EntityNotFoundException("No user with phoneNumber %s found".formatted(phoneNumber)));
+    return currentUser.toDTO();
+  }
+
 
   @Override
   public UserDTO findUserById(String id) throws EntityNotFoundException {
@@ -52,6 +73,13 @@ public class UserServiceImpl implements UserService {
   public UserDTO findUserByPhoneNumber(String phoneNumber) throws EntityNotFoundException {
     User user = userRepository.findByPhoneNumberAndIsActive(phoneNumber, Boolean.TRUE)
         .orElseThrow(() -> new EntityNotFoundException("No user with phoneNumber %s found!".formatted(phoneNumber)));
+    return user.toDTO();
+  }
+
+  @Override
+  public UserDTO findUserByEmailOrPhoneNumber(String email, String phoneNumber) throws EntityNotFoundException {
+    User user = userRepository.findByEmailOrPhoneNumber(email, phoneNumber)
+        .orElseThrow(() -> new EntityNotFoundException("No user with email %s or phoneNumber %s found!".formatted(email, phoneNumber)));
     return user.toDTO();
   }
 
@@ -120,6 +148,72 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public UserDTO activateUser(String id) throws EntityNotFoundException {
+    User updatedUser = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No user with given id %s found!".formatted(id)));
+    updatedUser.setIsActive(Boolean.TRUE);
+
+    updatedUser = userRepository.save(updatedUser);
+    log.info("User with id {} activated!", id);
+
+    return updatedUser.toDTO();
+  }
+
+  @Override
+  public UserDTO deactivateUser(String id) throws EntityNotFoundException {
+    User updatedUser = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No user with given id %s found!".formatted(id)));
+    updatedUser.setIsActive(Boolean.FALSE);
+
+    updatedUser = userRepository.save(updatedUser);
+    log.info("User with id {} deactivated!", id);
+
+    return updatedUser.toDTO();
+  }
+
+  @Override
+  public UserDTO verifyMailOfUser(String id) throws EntityNotFoundException {
+    User updatedUser = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No user with given id %s found!".formatted(id)));
+    updatedUser.setIsEmailVerified(Boolean.TRUE);
+
+    updatedUser = userRepository.save(updatedUser);
+    log.info("Email of user with id {} verified!", id);
+
+    return updatedUser.toDTO();
+  }
+
+  @Override
+  public UserDTO refuteMailOfUser(String id) throws EntityNotFoundException {
+    User updatedUser = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No user with given id %s found!".formatted(id)));
+    updatedUser.setIsEmailVerified(Boolean.FALSE);
+
+    updatedUser = userRepository.save(updatedUser);
+    log.info("Email of user with id {} refuted!", id);
+
+    return updatedUser.toDTO();
+  }
+
+  @Override
+  public UserDTO verifyPhoneNumberOfUser(String id) throws EntityNotFoundException {
+    User updatedUser = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No user with given id %s found!".formatted(id)));
+    updatedUser.setIsPhoneVerified(Boolean.TRUE);
+
+    updatedUser = userRepository.save(updatedUser);
+    log.info("PhoneNumber of user with id {} verified!", id);
+
+    return updatedUser.toDTO();
+  }
+
+  @Override
+  public UserDTO refutePhoneNumberOfUser(String id) throws EntityNotFoundException {
+    User updatedUser = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No user with given id %s found!".formatted(id)));
+    updatedUser.setIsPhoneVerified(Boolean.FALSE);
+
+    updatedUser = userRepository.save(updatedUser);
+    log.info("PhoneNumber of user with id {} refuted!", id);
+
+    return updatedUser.toDTO();
+  }
+
+  @Override
   public void deleteUser(String id) throws EntityNotFoundException {
     try {
       userRepository.deleteById(id);
@@ -180,6 +274,26 @@ public class UserServiceImpl implements UserService {
       return EncodingUtils.encodeBase64(output);
     } catch (NoSuchAlgorithmException e) {
       return null;
+    }
+  }
+
+  @Override
+  public Map<String, String> refreshToken(HttpServletRequest request) throws MissingRefreshTokenException {
+    String authorisationHeader = request.getHeader(AUTHORIZATION);
+
+    if (authorisationHeader != null && authorisationHeader.startsWith("Bearer ")) {
+      String refreshToken = authorisationHeader.substring("Bearer ".length());
+      DecodedJWT decodedJWT = jwtUtils.decodeJWT(refreshToken);
+
+      String phoneNumber = decodedJWT.getSubject();
+      User user = userRepository.findByPhoneNumber(phoneNumber)
+          .orElseThrow(() -> new EntityNotFoundException("No user with phoneNumber %s found!".formatted(phoneNumber)));
+
+      String newAccessToken = jwtUtils.createAccessToken(request, user);
+
+      return Map.of("accessToken", newAccessToken, "refreshToken", refreshToken);
+    } else {
+      throw new MissingRefreshTokenException();
     }
   }
 }

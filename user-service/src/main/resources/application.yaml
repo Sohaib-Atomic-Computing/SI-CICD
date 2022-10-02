@@ -27,4 +27,5 @@ eureka:
 iconnect:
   app:
     jwtSecret: Y2whcXUzanZ2dHMzY3IzdA==
-    jwtExpiration: 86400 # 1 day
+    jwtAccessTokenExpiration: 600000 # 1 minute
+    jwtRefreshTokenExpiration: 86400000 # 1 day
