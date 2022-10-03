@@ -1,9 +1,8 @@
 package io.satra.iconnect.user_service.utils;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class TimeUtils {
@@ -12,8 +11,7 @@ public class TimeUtils {
   }
 
   public static String getCurrentDateFormatted() {
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    return simpleDateFormat.format(LocalDate.now());
+    return LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
   }
 
   public static LocalDateTime convertDateToLocalDateTime(Date date) {

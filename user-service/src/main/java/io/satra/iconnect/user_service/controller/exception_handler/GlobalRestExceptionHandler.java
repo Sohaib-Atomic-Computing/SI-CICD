@@ -28,7 +28,7 @@ public class GlobalRestExceptionHandler {
   }
 
   @ExceptionHandler(value = Exception.class)
-  public ResponseEntity<ResponseDTO> databaseConnectionFailsException(Exception exception) {
+  public ResponseEntity<ResponseDTO> handleGenericException(Exception exception) {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createErrorResponseDTO(exception));
   }
 

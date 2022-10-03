@@ -5,7 +5,6 @@ import io.satra.iconnect.user_service.dto.RegisterRequestDTO;
 import io.satra.iconnect.user_service.dto.ResponseDTO;
 import io.satra.iconnect.user_service.dto.UserDTO;
 import io.satra.iconnect.user_service.exception.MissingRefreshTokenException;
-import io.satra.iconnect.user_service.exception.UserAlreadyExistsException;
 import io.satra.iconnect.user_service.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.user_service.service.UserService;
 import java.net.URI;
@@ -47,9 +46,10 @@ public class AuthenticationController {
    * @return newly registered {@link UserDTO}
    */
   @PostMapping("/register")
-  public ResponseEntity<UserDTO> saveUser(@RequestBody RegisterRequestDTO registerRequestDTO) throws UserAlreadyExistsException {
-    URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/users").toUriString());
-    return ResponseEntity.created(uri).body(userService.registerNewUser(registerRequestDTO));
+  public ResponseEntity<UserDTO> saveUser(@RequestBody RegisterRequestDTO registerRequestDTO) {
+    UserDTO registeredUser = userService.registerNewUser(registerRequestDTO);
+    URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/users" + registeredUser.getId()).toUriString());
+    return ResponseEntity.created(uri).body(registeredUser);
   }
 
   /**

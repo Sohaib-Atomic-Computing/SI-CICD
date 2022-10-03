@@ -22,7 +22,7 @@ public class RegisterRequestDTO {
   private GenderType genderType;
 
   @NotBlank(message = "Firstname cannot be empty")
-  private String fristName;
+  private String firstName;
 
   @NotBlank(message = "Lastname cannot be empty")
   private String lastName;

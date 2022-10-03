@@ -1,9 +1,11 @@
 package io.satra.iconnect.user_service.security;
 
 import io.satra.iconnect.user_service.security.filter.CustomAuthenticationFilter;
+import io.satra.iconnect.user_service.security.filter.CustomAuthorizationFilter;
 import io.satra.iconnect.user_service.security.filter.JwtUnauthorizedExceptionHandler;
 import io.satra.iconnect.user_service.service.UserDetailsServiceImpl;
 import io.satra.iconnect.user_service.service.UserService;
+import io.satra.iconnect.user_service.utils.JWTUtils;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -27,13 +29,21 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-  private final UserService userService;
   private final UserDetailsServiceImpl userDetailsService;
-  private final JwtUnauthorizedExceptionHandler jwtUnauthorizedExceptionHandler;
   private final PasswordEncoder passwordEncoder;
+
+  private final UserService userService;
+  private final JwtUnauthorizedExceptionHandler jwtUnauthorizedExceptionHandler;
+  private final JWTUtils jwtUtils;
 
   private static final String[] AUTH_WHITELIST = {
       "/",
+      "/api/v1/auth/login/**",
+      "/api/v1/auth/register/**"
+  };
+
+  private static final String[] AUTH_AUTHENTICATED_LIST = {
+      "/api/v1/auth/userinfo"
   };
 
   @Override
@@ -51,10 +61,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Bean
   public CustomAuthenticationFilter customAuthenticationFilter() throws Exception {
-    CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(userService);
+    CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(userService, jwtUtils);
     customAuthenticationFilter.setAuthenticationManager(authenticationManagerBean());
+    customAuthenticationFilter.setFilterProcessesUrl("/api/v1/auth/login");
 
     return customAuthenticationFilter;
+  }
+
+  @Bean
+  public CustomAuthorizationFilter customAuthorizationFilter() throws Exception {
+    return new CustomAuthorizationFilter(jwtUtils);
   }
 
   @Bean
@@ -80,13 +96,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     // configure authentications
     http.authorizeRequests()
         .antMatchers(AUTH_WHITELIST).permitAll()
-        .anyRequest().authenticated();
+        .antMatchers(AUTH_AUTHENTICATED_LIST).authenticated()
+        .anyRequest().denyAll();
 
     // configure exception handling
     http.exceptionHandling().authenticationEntryPoint(jwtUnauthorizedExceptionHandler);
 
-    // add JWT authentication filter
-    http.addFilterBefore(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+    // add JWT authentication and authorization filter
+    http.addFilter(customAuthenticationFilter());
+    http.addFilterBefore(customAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
 
     // configure session management
     http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

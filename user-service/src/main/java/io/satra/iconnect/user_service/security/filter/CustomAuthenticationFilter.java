@@ -25,6 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
   private final UserService userService;
+  private final JWTUtils jwtUtils;
 
   /**
    * This method parses the authentication HTTP request
@@ -67,6 +68,11 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
       Boolean isOTPLogin = loginRequestDTO.getServiceType() == ServiceType.OTP_VERIFY && userDTO.getIsActive() == Boolean.FALSE;
 
       if (isNormalLogin || isOTPLogin) {
+        if (isOTPLogin) {
+          userService.activateUser(userDTO.getId());
+          userService.verifyPhoneNumberOfUser(userDTO.getId());
+        }
+
         UsernamePasswordAuthenticationToken authenticationToken =
             new UsernamePasswordAuthenticationToken(
                 loginRequestDTO.getPhoneNumberOrEmail(),
@@ -85,17 +91,13 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
   @Override
   protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication)
       throws IOException {
-    LoginRequestDTO loginRequestDTO = parseAuthenticationRequest(request);
-    UserDTO userDTO = userService.findUserByEmailOrPhoneNumber(loginRequestDTO.getPhoneNumberOrEmail(), loginRequestDTO.getPhoneNumberOrEmail());
 
-    if (loginRequestDTO.getServiceType() == ServiceType.OTP_VERIFY) {
-      userService.activateUser(userDTO.getId());
-      userService.verifyPhoneNumberOfUser(userDTO.getId());
-    }
+    String accessToken = jwtUtils.createAccessToken(request, authentication);
+    String refreshToken = jwtUtils.createRefreshToken(request, authentication);
 
-    JWTUtils.addTokensToResponse(
-        JWTUtils.createAccessToken(request, authentication),
-        JWTUtils.createRefreshToken(request, authentication),
+    jwtUtils.addTokensToResponse(
+        accessToken,
+        refreshToken,
         response
     );
   }

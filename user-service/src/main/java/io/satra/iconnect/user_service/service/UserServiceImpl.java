@@ -14,7 +14,6 @@ import io.satra.iconnect.user_service.exception.MissingRefreshTokenException;
 import io.satra.iconnect.user_service.exception.generic.BadRequestException;
 import io.satra.iconnect.user_service.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.user_service.repository.UserRepository;
-import io.satra.iconnect.user_service.security.UserPrincipal;
 import io.satra.iconnect.user_service.utils.EncodingUtils;
 import io.satra.iconnect.user_service.utils.JWTUtils;
 import io.satra.iconnect.user_service.utils.TimeUtils;
@@ -38,6 +37,7 @@ public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+  private final JWTUtils jwtUtils;
 
   @Override
   public Page<UserDTO> findAllUsers(Pageable pageable) {
@@ -46,11 +46,10 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserDTO getCurrentUser() throws EntityNotFoundException {
-    UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String phoneNumber = userPrincipal.getUser().getPhoneNumber();
+    String emailOrPhoneNumber = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-    User currentUser = userRepository.findByPhoneNumber(phoneNumber)
-        .orElseThrow(() -> new EntityNotFoundException("No user with phoneNumber %s found".formatted(phoneNumber)));
+    User currentUser = userRepository.findByEmailOrPhoneNumber(emailOrPhoneNumber, emailOrPhoneNumber)
+        .orElseThrow(() -> new EntityNotFoundException("No user with email or phoneNumber %s found".formatted(emailOrPhoneNumber)));
     return currentUser.toDTO();
   }
 
@@ -105,7 +104,7 @@ public class UserServiceImpl implements UserService {
         .email(registerRequest.getEmail())
         .phoneNumber(registerRequest.getPhoneNumber())
         .genderType(registerRequest.getGenderType())
-        .firstName(registerRequest.getFristName())
+        .firstName(registerRequest.getFirstName())
         .lastName(registerRequest.getLastName())
         .password(passwordEncoder.encode(registerRequest.getPassword()))
         .dpUrl(registerRequest.getDpUrl())
@@ -282,13 +281,13 @@ public class UserServiceImpl implements UserService {
 
     if (authorisationHeader != null && authorisationHeader.startsWith("Bearer ")) {
       String refreshToken = authorisationHeader.substring("Bearer ".length());
-      DecodedJWT decodedJWT = JWTUtils.decodeJWT(refreshToken);
+      DecodedJWT decodedJWT = jwtUtils.decodeJWT(refreshToken);
 
       String phoneNumber = decodedJWT.getSubject();
       User user = userRepository.findByPhoneNumber(phoneNumber)
           .orElseThrow(() -> new EntityNotFoundException("No user with phoneNumber %s found!".formatted(phoneNumber)));
 
-      String newAccessToken = JWTUtils.createAccessToken(request, user);
+      String newAccessToken = jwtUtils.createAccessToken(request, user);
 
       return Map.of("accessToken", newAccessToken, "refreshToken", refreshToken);
     } else {
