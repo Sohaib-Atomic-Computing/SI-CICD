@@ -38,7 +38,6 @@ public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
-  private final JWTUtils jwtUtils;
 
   @Override
   public Page<UserDTO> findAllUsers(Pageable pageable) {
@@ -283,13 +282,13 @@ public class UserServiceImpl implements UserService {
 
     if (authorisationHeader != null && authorisationHeader.startsWith("Bearer ")) {
       String refreshToken = authorisationHeader.substring("Bearer ".length());
-      DecodedJWT decodedJWT = jwtUtils.decodeJWT(refreshToken);
+      DecodedJWT decodedJWT = JWTUtils.decodeJWT(refreshToken);
 
       String phoneNumber = decodedJWT.getSubject();
       User user = userRepository.findByPhoneNumber(phoneNumber)
           .orElseThrow(() -> new EntityNotFoundException("No user with phoneNumber %s found!".formatted(phoneNumber)));
 
-      String newAccessToken = jwtUtils.createAccessToken(request, user);
+      String newAccessToken = JWTUtils.createAccessToken(request, user);
 
       return Map.of("accessToken", newAccessToken, "refreshToken", refreshToken);
     } else {

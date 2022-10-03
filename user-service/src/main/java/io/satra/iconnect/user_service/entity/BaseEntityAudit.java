@@ -5,29 +5,26 @@
  */
 package io.satra.iconnect.user_service.entity;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
-
 @MappedSuperclass
 @Getter
 @Setter
-@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public abstract class BaseEntityAudit extends BaseEntity {
 
-  @Temporal(TemporalType.TIME)
   @CreatedDate
-  protected ZonedDateTime createdAt;
+  protected LocalDateTime createdAt;
 
-  @Temporal(TemporalType.TIME)
   @LastModifiedDate
-  protected ZonedDateTime lastModifiedAt;
+  protected LocalDateTime lastModifiedAt;
 }
 

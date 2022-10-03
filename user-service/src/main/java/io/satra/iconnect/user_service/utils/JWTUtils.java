@@ -15,23 +15,19 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
 
-@Slf4j
-@Component
 public class JWTUtils {
 
   @Value("${iconnect.app.jwtSecret}")
-  private String secret;
+  private static String secret;
 
   @Value("${iconnect.app.jwtAccessTokenExpiration}")
-  private Long accessTokenExpiration;
+  private static Long accessTokenExpiration;
 
-  @Value("${iconnect.app.jwtSecret}")
-  private Long refreshTokenExpiration;
+  @Value("${iconnect.app.jwtRefreshTokenExpiration}")
+  private static Long refreshTokenExpiration;
 
   /**
    * This method adds the access token and the refresh token to the HTTP response body
@@ -41,7 +37,7 @@ public class JWTUtils {
    * @param response     the HTTP response
    * @throws IOException if tokens cannot be added to HTTP response body
    */
-  public void addTokensToResponse(String accessToken, String refreshToken, HttpServletResponse response) throws IOException {
+  public static void addTokensToResponse(String accessToken, String refreshToken, HttpServletResponse response) throws IOException {
     Map<String, String> tokens = new HashMap<>();
     tokens.put("accessToken", accessToken);
     tokens.put("refreshToken", refreshToken);
@@ -57,7 +53,7 @@ public class JWTUtils {
    * @param authentication the authentication
    * @return the access token
    */
-  public String createAccessToken(HttpServletRequest request, Authentication authentication) {
+  public static String createAccessToken(HttpServletRequest request, Authentication authentication) {
     UserPrincipal user = (UserPrincipal) authentication.getPrincipal();
     Algorithm algorithm = Algorithm.HMAC256(secret);
 
@@ -72,7 +68,7 @@ public class JWTUtils {
    * @param user    the user
    * @return the access token
    */
-  public String createAccessToken(HttpServletRequest request, io.satra.iconnect.user_service.entity.User user) {
+  public static String createAccessToken(HttpServletRequest request, io.satra.iconnect.user_service.entity.User user) {
     Algorithm algorithm = Algorithm.HMAC256(secret);
 
     return createToken(request, user, new Date(System.currentTimeMillis() + accessTokenExpiration))
@@ -86,21 +82,21 @@ public class JWTUtils {
    * @param authentication the authentication
    * @return the refresh token
    */
-  public String createRefreshToken(HttpServletRequest request, Authentication authentication) {
+  public static String createRefreshToken(HttpServletRequest request, Authentication authentication) {
     UserPrincipal user = (UserPrincipal) authentication.getPrincipal();
     Algorithm algorithm = Algorithm.HMAC256(secret);
 
     return createToken(request, user, new Date(System.currentTimeMillis() + refreshTokenExpiration)).sign(algorithm);
   }
 
-  private JWTCreator.Builder createToken(HttpServletRequest request, UserPrincipal userPrincipal, Date expirationDate) {
+  private static JWTCreator.Builder createToken(HttpServletRequest request, UserPrincipal userPrincipal, Date expirationDate) {
     return JWT.create()
         .withSubject(userPrincipal.getUser().getPhoneNumber())
         .withExpiresAt(expirationDate)
         .withIssuer(request.getRequestURL().toString());
   }
 
-  private JWTCreator.Builder createToken(
+  private static JWTCreator.Builder createToken(
       HttpServletRequest request, io.satra.iconnect.user_service.entity.User user, Date expirationDate) {
     return JWT.create()
         .withSubject(user.getPhoneNumber())
@@ -114,7 +110,7 @@ public class JWTUtils {
    * @param token to token to be decoded
    * @return the decoded token
    */
-  public DecodedJWT decodeJWT(String token) {
+  public static DecodedJWT decodeJWT(String token) {
     Algorithm algorithm = Algorithm.HMAC256(secret);
     JWTVerifier verifier = JWT.require(algorithm).build();
 

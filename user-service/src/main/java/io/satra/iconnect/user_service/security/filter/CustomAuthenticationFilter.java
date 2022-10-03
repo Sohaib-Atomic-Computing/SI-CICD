@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,8 +24,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-  private final JWTUtils jwtUtils;
-  private final AuthenticationManager authenticationManager;
   private final UserService userService;
 
   /**
@@ -70,15 +67,13 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
       Boolean isOTPLogin = loginRequestDTO.getServiceType() == ServiceType.OTP_VERIFY && userDTO.getIsActive() == Boolean.FALSE;
 
       if (isNormalLogin || isOTPLogin) {
-        Authentication authentication = authenticationManager.authenticate(
+        UsernamePasswordAuthenticationToken authenticationToken =
             new UsernamePasswordAuthenticationToken(
                 loginRequestDTO.getPhoneNumberOrEmail(),
-                loginRequestDTO.getPasswordOrCode())
-        );
+                loginRequestDTO.getPasswordOrCode());
 
         log.info("User with id {} logged in successfully", userDTO.getId());
-
-        return super.getAuthenticationManager().authenticate(authentication);
+        return super.getAuthenticationManager().authenticate(authenticationToken);
       }
     } catch (Exception e) {
       throw new InternalAuthenticationServiceException("Failed to authenticate user", e);
@@ -98,9 +93,9 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
       userService.verifyPhoneNumberOfUser(userDTO.getId());
     }
 
-    jwtUtils.addTokensToResponse(
-        jwtUtils.createAccessToken(request, authentication),
-        jwtUtils.createRefreshToken(request, authentication),
+    JWTUtils.addTokensToResponse(
+        JWTUtils.createAccessToken(request, authentication),
+        JWTUtils.createRefreshToken(request, authentication),
         response
     );
   }

@@ -4,14 +4,16 @@ import io.satra.iconnect.user_service.entity.User;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Data
+@Builder
 public class UserPrincipal implements UserDetails {
 
-  private final User user;
+  private final transient User user;
 
   @Override
   public String getUsername() {

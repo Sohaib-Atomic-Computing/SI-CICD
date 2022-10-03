@@ -3,6 +3,7 @@ package io.satra.iconnect.user_service.security;
 import io.satra.iconnect.user_service.security.filter.CustomAuthenticationFilter;
 import io.satra.iconnect.user_service.security.filter.JwtUnauthorizedExceptionHandler;
 import io.satra.iconnect.user_service.service.UserDetailsServiceImpl;
+import io.satra.iconnect.user_service.service.UserService;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -10,12 +11,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -24,36 +24,37 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(
-    prePostEnabled = true
-)
 @RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+  private final UserService userService;
   private final UserDetailsServiceImpl userDetailsService;
   private final JwtUnauthorizedExceptionHandler jwtUnauthorizedExceptionHandler;
-  private final CustomAuthenticationFilter customAuthenticationFilter;
+  private final PasswordEncoder passwordEncoder;
 
   private static final String[] AUTH_WHITELIST = {
       "/",
   };
 
-  @Bean
-  public BCryptPasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
-
   @Override
   public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
     authenticationManagerBuilder
         .userDetailsService(userDetailsService)
-        .passwordEncoder(passwordEncoder());
+        .passwordEncoder(passwordEncoder);
   }
 
   @Bean
   @Override
   public AuthenticationManager authenticationManagerBean() throws Exception {
     return super.authenticationManagerBean();
+  }
+
+  @Bean
+  public CustomAuthenticationFilter customAuthenticationFilter() throws Exception {
+    CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(userService);
+    customAuthenticationFilter.setAuthenticationManager(authenticationManagerBean());
+
+    return customAuthenticationFilter;
   }
 
   @Bean
@@ -85,7 +86,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     http.exceptionHandling().authenticationEntryPoint(jwtUnauthorizedExceptionHandler);
 
     // add JWT authentication filter
-    http.addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
     // configure session management
     http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

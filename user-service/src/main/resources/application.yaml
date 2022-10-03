@@ -26,6 +26,6 @@ eureka:
 
 iconnect:
   app:
-    jwtSecret: Y2whcXUzanZ2dHMzY3IzdA==
-    jwtAccessTokenExpiration: 600000 # 1 minute
-    jwtRefreshTokenExpiration: 86400000 # 1 day
+    jwtSecret: ${JWT_SECRET}
+    jwtAccessTokenExpiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
+    jwtRefreshTokenExpiration: ${JWT_REFRESH_TOKEN_EXPIRATION}

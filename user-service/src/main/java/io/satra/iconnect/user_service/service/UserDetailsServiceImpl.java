@@ -4,29 +4,25 @@ package io.satra.iconnect.user_service.service;
 import io.satra.iconnect.user_service.entity.User;
 import io.satra.iconnect.user_service.repository.UserRepository;
 import io.satra.iconnect.user_service.security.UserPrincipal;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-  @Autowired
-  UserRepository userRepository;
+  private final UserRepository userRepository;
 
-    @Override
-    @Transactional
-    public UserDetails loadUserByUsername(String username)
-            throws UsernameNotFoundException {
+  @Override
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-      User user = userRepository.findByEmailOrPhoneNumber(username, username)
-          .orElseThrow(() ->
-              new UsernameNotFoundException("PhoneNumber or Email Not Found with : " + username)
-          );
+    User user = userRepository.findByEmailOrPhoneNumber(username, username).orElseThrow(() ->
+        new UsernameNotFoundException("No user for phoneNumber or email %s found!".formatted(username))
+    );
 
-      return UserPrincipal.build(user);
-    }
+    return UserPrincipal.builder().user(user).build();
+  }
 }

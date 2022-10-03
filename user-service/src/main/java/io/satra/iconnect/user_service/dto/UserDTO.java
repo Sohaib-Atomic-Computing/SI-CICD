@@ -2,7 +2,7 @@ package io.satra.iconnect.user_service.dto;
 
 import io.satra.iconnect.user_service.entity.User;
 import io.satra.iconnect.user_service.entity.enums.GenderType;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,8 +11,8 @@ import lombok.Data;
 public class UserDTO {
 
   private String id;
-  private ZonedDateTime createdAt;
-  private ZonedDateTime lastModifiedAt;
+  private LocalDateTime createdAt;
+  private LocalDateTime lastModifiedAt;
   private String email;
   private String phoneNumber;
   private GenderType genderType;
