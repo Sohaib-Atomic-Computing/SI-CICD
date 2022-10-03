@@ -1,15 +1,12 @@
 package io.satra.iconnect.user_service.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.satra.iconnect.user_service.dto.UserDTO;
 import io.satra.iconnect.user_service.entity.enums.GenderType;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -24,20 +21,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(uniqueConstraints = {
-    @UniqueConstraint(columnNames = {
-        "id",
-        "email",
-        "phoneNumber"
-    })
-}
-)
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "app_user")
 public class User extends BaseEntityAudit {
 
   @NotNull
@@ -57,18 +47,11 @@ public class User extends BaseEntityAudit {
   private String lastName;
 
   @NotBlank
-  @JsonIgnore
   private String password;
 
-  @JsonIgnore
   private String otpCode;
 
-  @JsonIgnore
   private String resetToken;
-
-  @JsonIgnore
-  @OneToOne
-  private DeviceToken deviceToken;
 
   private String dpUrl;
 
