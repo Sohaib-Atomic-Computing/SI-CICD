@@ -59,29 +59,37 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+
+    LoginRequestDTO loginRequestDTO = parseAuthenticationRequest(request);
+    UserDTO userDTO = userService.findUserByEmailOrPhoneNumber(loginRequestDTO.getPhoneNumberOrEmail(), loginRequestDTO.getPhoneNumberOrEmail());
+
+    boolean isNormalLogin = loginRequestDTO.getServiceType() == ServiceType.LOGIN && userDTO.getIsActive() == Boolean.TRUE;
+    boolean isOTPLogin = loginRequestDTO.getServiceType() == ServiceType.OTP_VERIFY && userDTO.getIsActive() == Boolean.FALSE;
+
     try {
-      LoginRequestDTO loginRequestDTO = parseAuthenticationRequest(request);
-
-      UserDTO userDTO = userService.findUserByEmailOrPhoneNumber(loginRequestDTO.getPhoneNumberOrEmail(), loginRequestDTO.getPhoneNumberOrEmail());
-
-      Boolean isNormalLogin = loginRequestDTO.getServiceType() == ServiceType.LOGIN && userDTO.getIsActive() == Boolean.TRUE;
-      Boolean isOTPLogin = loginRequestDTO.getServiceType() == ServiceType.OTP_VERIFY && userDTO.getIsActive() == Boolean.FALSE;
-
       if (isNormalLogin || isOTPLogin) {
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+            loginRequestDTO.getPhoneNumberOrEmail(),
+            loginRequestDTO.getPasswordOrCode()
+        );
+
+        log.info("Login attempt for user with id {}", userDTO.getId());
+
         if (isOTPLogin) {
           userService.activateUser(userDTO.getId());
+        }
+
+        Authentication authentication = super.getAuthenticationManager().authenticate(authenticationToken);
+
+        if (isOTPLogin) {
+          userService.deleteOTPFromUser(userDTO.getId());
           userService.verifyPhoneNumberOfUser(userDTO.getId());
         }
 
-        UsernamePasswordAuthenticationToken authenticationToken =
-            new UsernamePasswordAuthenticationToken(
-                loginRequestDTO.getPhoneNumberOrEmail(),
-                loginRequestDTO.getPasswordOrCode());
-
-        log.info("User with id {} logged in successfully", userDTO.getId());
-        return super.getAuthenticationManager().authenticate(authenticationToken);
+        return authentication;
       }
     } catch (Exception e) {
+      userService.deactivateUser(userDTO.getId());
       throw new InternalAuthenticationServiceException("Failed to authenticate user", e);
     }
 

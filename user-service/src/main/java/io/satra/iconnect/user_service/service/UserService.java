@@ -171,6 +171,15 @@ public interface UserService {
   Boolean generateOTPByPhoneNumber(String phoneNumber) throws EntityNotFoundException;
 
   /**
+   * Delete OTP from given user
+   *
+   * @param id the id of the user the OTP should be deleted from
+   * @return the updated {@link UserDTO}
+   * @throws EntityNotFoundException if no user with given id is found
+   */
+  UserDTO deleteOTPFromUser(String id) throws EntityNotFoundException;
+
+  /**
    * Updates the password of a user
    *
    * @param id                    the id of the user to be updated

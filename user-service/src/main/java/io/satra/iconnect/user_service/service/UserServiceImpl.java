@@ -238,6 +238,17 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public UserDTO deleteOTPFromUser(String id) throws EntityNotFoundException {
+    User updatedUser = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No user with id %s found!".formatted(id)));
+    updatedUser.setOtpCode(null);
+
+    updatedUser = userRepository.save(updatedUser);
+    log.info("Deleted OTP token from user with id {}", id);
+
+    return updatedUser.toDTO();
+  }
+
+  @Override
   public UserDTO updatePassword(String id, UpdatePasswordDTO updatePasswordRequest) throws EntityNotFoundException, BadRequestException {
     User updatedUser = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No user with id %s found!".formatted(id)));
 
