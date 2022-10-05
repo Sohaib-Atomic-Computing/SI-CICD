@@ -6,8 +6,6 @@ import io.satra.iconnect.user_service.security.filter.JwtUnauthorizedExceptionHa
 import io.satra.iconnect.user_service.service.UserDetailsServiceImpl;
 import io.satra.iconnect.user_service.service.UserService;
 import io.satra.iconnect.user_service.utils.JWTUtils;
-import java.util.Arrays;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +21,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+import java.util.List;
+
 
 @Configuration
 @EnableWebSecurity
@@ -37,9 +38,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   private final JWTUtils jwtUtils;
 
   private static final String[] AUTH_WHITELIST = {
-      "/",
-      "/api/v1/auth/login/**",
-      "/api/v1/auth/register/**"
+          "/",
+          "/favicon.ico/**",
+
+          "/swagger-ui.html/**",
+          "/swagger-ui/**",
+          "/v3/api-docs/**",
+          "/sw.js/**",
+
+          "/api/v1/auth/login/**",
+          "/api/v1/auth/register/**"
   };
 
   private static final String[] AUTH_AUTHENTICATED_LIST = {
