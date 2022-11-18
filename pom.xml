@@ -13,7 +13,7 @@
   <modules>
     <module>user-service</module>
     <module>eureka-server</module>
-      <module>vendor-service</module>
+    <module>vendor-service</module>
   </modules>
 
   <properties>

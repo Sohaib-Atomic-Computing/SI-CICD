@@ -57,9 +57,9 @@ public class User extends BaseEntityAudit {
 
   private String qrCode;
 
-  @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+  @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
   @Builder.Default
-  private Boolean isActive = Boolean.FALSE;
+  private Boolean isActive = Boolean.TRUE;
   @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
   @Builder.Default
   private Boolean isPhoneVerified = Boolean.FALSE;

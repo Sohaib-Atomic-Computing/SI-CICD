@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Configuration;
         description = "User Service API to register new users, delete existing users, obtain user data and update user data"
     ),
     servers = @Server(
-        url = "http://localhost:8080/users/",
+        url = "http://localhost:8081/users/",
         description = "Development"
     )
 )

@@ -2,30 +2,33 @@ package io.satra.iconnect.user_service.service;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
-import io.satra.iconnect.user_service.dto.QRCodeDTO;
-import io.satra.iconnect.user_service.dto.RegisterRequestDTO;
-import io.satra.iconnect.user_service.dto.UpdatePasswordDTO;
-import io.satra.iconnect.user_service.dto.UpdateProfileRequestDTO;
-import io.satra.iconnect.user_service.dto.UserDTO;
+import io.satra.iconnect.user_service.dto.*;
+import io.satra.iconnect.user_service.dto.response.JwtResponseDTO;
 import io.satra.iconnect.user_service.entity.User;
+import io.satra.iconnect.user_service.entity.enums.ServiceType;
 import io.satra.iconnect.user_service.exception.MissingRefreshTokenException;
 import io.satra.iconnect.user_service.exception.generic.BadRequestException;
 import io.satra.iconnect.user_service.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.user_service.repository.UserRepository;
+import io.satra.iconnect.user_service.security.UserPrincipal;
 import io.satra.iconnect.user_service.utils.EncodingUtils;
-import io.satra.iconnect.user_service.utils.JWTUtils;
+import io.satra.iconnect.user_service.security.JWTUtils;
 import io.satra.iconnect.user_service.utils.TimeUtils;
 import java.security.NoSuchAlgorithmException;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,6 +41,7 @@ public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final JWTUtils jwtUtils;
+  private final AuthenticationManager authenticationManager;
 
   @Override
   public Page<UserDTO> findAllUsers(Pageable pageable) {
@@ -52,7 +56,6 @@ public class UserServiceImpl implements UserService {
         .orElseThrow(() -> new EntityNotFoundException("No user with email or phoneNumber %s found".formatted(emailOrPhoneNumber)));
     return currentUser.toDTO();
   }
-
 
   @Override
   public UserDTO findUserById(String id) throws EntityNotFoundException {
@@ -83,14 +86,17 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public UserDTO registerNewUser(RegisterRequestDTO registerRequest) throws BadRequestException {
+    log.info("User email: {}", registerRequest.getEmail().toLowerCase());
     // check if user with same email already exists
     Optional<User> userEmailOptional = userRepository.findByEmail(registerRequest.getEmail().toLowerCase());
+
     userEmailOptional.ifPresent(
         user -> {
           throw new BadRequestException("User with email %s already exists!".formatted(registerRequest.getEmail()));
         }
     );
 
+    log.info("User email: {}", registerRequest.getPhoneNumber().toLowerCase());
     // check if user with same phoneNumber already exists
     Optional<User> userPhoneNumberOptional = userRepository.findByPhoneNumber(registerRequest.getPhoneNumber().toLowerCase());
     userPhoneNumberOptional.ifPresent(
@@ -109,7 +115,6 @@ public class UserServiceImpl implements UserService {
         .password(passwordEncoder.encode(registerRequest.getPassword()))
         .dpUrl(registerRequest.getDpUrl())
         .resetToken(UUID.randomUUID().toString())
-        .otpCode(passwordEncoder.encode("00000"))
         .build();
 
     // create QR code from user information
@@ -120,6 +125,36 @@ public class UserServiceImpl implements UserService {
     log.info("New User registered: {}", registeredUser);
 
     return registeredUser.toDTO();
+  }
+
+  @Override
+  public JwtResponseDTO loginUser(LoginRequestDTO loginRequestDTO) throws BadRequestException{
+
+    try{
+      log.info("User email: {}", loginRequestDTO.getEmailOrPhoneNumber());
+      log.info("User password: {}", loginRequestDTO.getPasswordOrCode());
+
+      Authentication authentication = authenticationManager.authenticate(
+              new UsernamePasswordAuthenticationToken(loginRequestDTO.getEmailOrPhoneNumber(), loginRequestDTO.getPasswordOrCode()));
+
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+      String jwt = jwtUtils.generateJwtToken(authentication);
+
+      UserPrincipal userDetails = (UserPrincipal) authentication.getPrincipal();
+      List<String> roles = new ArrayList<>();
+      for (GrantedAuthority item : userDetails.getAuthorities()) {
+        String authority = item.getAuthority();
+        roles.add(authority);
+      }
+
+      return JwtResponseDTO.builder()
+              .token(jwt)
+              .type("Bearer")
+              .user(userDetails.getUser().toDTO())
+              .build();
+    } catch (Exception e) {
+      throw new BadRequestException("Invalid email or password");
+    }
   }
 
   @Override
@@ -286,23 +321,4 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-  @Override
-  public Map<String, String> refreshToken(HttpServletRequest request) throws MissingRefreshTokenException {
-    String authorisationHeader = request.getHeader(AUTHORIZATION);
-
-    if (authorisationHeader != null && authorisationHeader.startsWith("Bearer ")) {
-      String refreshToken = authorisationHeader.substring("Bearer ".length());
-      DecodedJWT decodedJWT = jwtUtils.decodeJWT(refreshToken);
-
-      String phoneNumber = decodedJWT.getSubject();
-      User user = userRepository.findByPhoneNumber(phoneNumber)
-          .orElseThrow(() -> new EntityNotFoundException("No user with phoneNumber %s found!".formatted(phoneNumber)));
-
-      String newAccessToken = jwtUtils.createAccessToken(request, user);
-
-      return Map.of("accessToken", newAccessToken, "refreshToken", refreshToken);
-    } else {
-      throw new MissingRefreshTokenException();
-    }
-  }
 }

@@ -1,10 +1,8 @@
 package io.satra.iconnect.user_service.service;
 
 
-import io.satra.iconnect.user_service.dto.RegisterRequestDTO;
-import io.satra.iconnect.user_service.dto.UpdatePasswordDTO;
-import io.satra.iconnect.user_service.dto.UpdateProfileRequestDTO;
-import io.satra.iconnect.user_service.dto.UserDTO;
+import io.satra.iconnect.user_service.dto.*;
+import io.satra.iconnect.user_service.dto.response.JwtResponseDTO;
 import io.satra.iconnect.user_service.exception.MissingRefreshTokenException;
 import io.satra.iconnect.user_service.exception.generic.BadRequestException;
 import io.satra.iconnect.user_service.exception.generic.EntityNotFoundException;
@@ -59,7 +57,7 @@ public interface UserService {
    * @return a {@link UserDTO}
    * @throws EntityNotFoundException if no user with given phoneNumber is found
    */
-  UserDTO findUserByPhoneNumber(String phoneNumber) throws EntityNotFoundException;
+  UserDTO findUserByPhoneNumber(String phoneNumber) throws BadRequestException;
 
   /**
    * Get a user by given email or phoneNumber
@@ -79,6 +77,15 @@ public interface UserService {
    * @throws BadRequestException if user with same email or phoneNumber already exists
    */
   UserDTO registerNewUser(RegisterRequestDTO registerRequestDTO) throws BadRequestException;
+
+  /**
+   * Log in a new user
+   *
+   * @param loginRequestDTO the information for the user to be logged in
+   * @return the newly registered {@link JwtResponseDTO}
+   * @throws BadRequestException if the user is not found or the password is incorrect
+   */
+    JwtResponseDTO loginUser(LoginRequestDTO loginRequestDTO) throws BadRequestException;
 
   /**
    * Update an existing user
@@ -190,13 +197,4 @@ public interface UserService {
    */
   UserDTO updatePassword(String id, UpdatePasswordDTO updatePasswordRequest) throws EntityNotFoundException, BadRequestException;
 
-  /**
-   * Refreshes the access token by utilizing the refresh token
-   *
-   * @param request the HTTP request including the authentication information
-   * @return the newly created accessToken
-   * @throws MissingRefreshTokenException if no refreshToken is present in the request
-   * @throws EntityNotFoundException      if now user with phoneNumber from token is found
-   */
-  Map<String, String> refreshToken(HttpServletRequest request) throws MissingRefreshTokenException, EntityNotFoundException;
 }

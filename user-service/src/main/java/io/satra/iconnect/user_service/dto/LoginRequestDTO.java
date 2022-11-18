@@ -10,7 +10,7 @@ import lombok.Data;
 public class LoginRequestDTO {
 
   @NotBlank(message = "Phone Number or Email cannot be blank")
-  private String phoneNumberOrEmail;
+  private String emailOrPhoneNumber;
   @NotBlank(message = "Password or Code cannot be blank")
   private String passwordOrCode;
   @NotNull(message = "Service Type cannot be empty")
