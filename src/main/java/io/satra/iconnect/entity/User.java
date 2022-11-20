@@ -1,5 +1,6 @@
 package io.satra.iconnect.entity;
 
+import io.satra.iconnect.dto.UserDTO;
 import io.satra.iconnect.entity.base.BaseEntityAudit;
 import io.satra.iconnect.entity.enums.UserRole;
 import lombok.*;
@@ -56,5 +57,20 @@ public class User extends BaseEntityAudit {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    public UserDTO toDTO() {
+        return UserDTO.builder()
+                .id(id)
+                .firstName(firstName)
+                .lastName(lastName)
+                .email(email)
+                .mobile(mobile)
+                .isActive(isActive)
+                .role(role)
+                .qrCode(qrCode)
+                .createdAt(createdAt)
+                .lastModifiedAt(lastModifiedAt)
+                .build();
     }
 }
