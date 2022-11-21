@@ -8,8 +8,14 @@ import io.satra.iconnect.entity.User;
 import io.satra.iconnect.entity.enums.UserRole;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.repository.UserRepository;
+import io.satra.iconnect.security.JWTUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,6 +24,9 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JWTUtils jwtUtils;
+    private final AuthenticationManager authenticationManager;
 
     /**
      * Login a user
@@ -28,25 +37,16 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public JwtResponseDTO loginUser(LoginRequestDTO loginRequestDTO) throws BadRequestException {
-       log.info("Logging in user with email: {}", loginRequestDTO.getEmailOrMobile());
+       log.info("Logging in user with email: {}, and password: {}", loginRequestDTO.getEmailOrMobile(), loginRequestDTO.getPassword());
          User user = userRepository.findByEmailOrMobile(loginRequestDTO.getEmailOrMobile(), loginRequestDTO.getEmailOrMobile())
                 .orElseThrow(() -> new BadRequestException("User does not exist"));
-        if (!user.getPassword().equals(loginRequestDTO.getPassword())) {
-            throw new BadRequestException("Invalid email or password");
-        }
 
-        // TODO: Generate JWT token
+        // Generate JWT token
+        String jwt = generateJWTToken(loginRequestDTO.getEmailOrMobile(), loginRequestDTO.getPassword());
 
         return JwtResponseDTO.builder()
-                .user(UserDTO.builder()
-                        .id(user.getId())
-                        .firstName(user.getFirstName())
-                        .lastName(user.getLastName())
-                        .email(user.getEmail())
-                        .mobile(user.getMobile())
-                        .role(user.getRole())
-                        .build())
-                .token("token")
+                .user(user.toDTO())
+                .token(jwt)
                 .type("Bearer")
                 .build();
     }
@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
      * @throws BadRequestException if the user already exists
      */
     @Override
-    public UserDTO register(RegisterRequestDTO registerRequestDTO) throws BadRequestException {
+    public JwtResponseDTO register(RegisterRequestDTO registerRequestDTO) throws BadRequestException {
         log.info("Registering user with email: {} and mobile: {}", registerRequestDTO.getEmail(), registerRequestDTO.getMobile());
         // check if the user already exists
         if (userRepository.findByEmailOrMobile(registerRequestDTO.getEmail(), registerRequestDTO.getMobile()).isPresent()) {
@@ -71,15 +71,29 @@ public class UserServiceImpl implements UserService {
                 .email(registerRequestDTO.getEmail())
                 .mobile(registerRequestDTO.getMobile())
                 .role(UserRole.USER)
-                // TODO: encrypt the password
-                .password(registerRequestDTO.getPassword())
+                .password(passwordEncoder.encode(registerRequestDTO.getPassword()))
                 .build();
 
         // TODO: generate QR code
         // save the new user to the database
         registeredUser = userRepository.save(registeredUser);
 
-        return registeredUser.toDTO();
+        // Generate JWT token
+        String jwt = generateJWTToken(registerRequestDTO.getEmail(), registerRequestDTO.getPassword());
+
+        return JwtResponseDTO.builder()
+                .user(registeredUser.toDTO())
+                .token(jwt)
+                .type("Bearer")
+                .build();
+    }
+
+    private String generateJWTToken(String emailOrMobile, String password) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(emailOrMobile, password));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return jwtUtils.generateJwtToken(authentication);
     }
 
 }

@@ -24,8 +24,8 @@ public interface UserService {
      * Register a new user
      *
      * @param registerRequestDTO the user information to register
-     * @return the registered user {@link UserDTO}
+     * @return the registered user {@link JwtResponseDTO}
      * @throws BadRequestException if the user already exists
      */
-    UserDTO register(RegisterRequestDTO registerRequestDTO) throws BadRequestException;
+    JwtResponseDTO register(RegisterRequestDTO registerRequestDTO) throws BadRequestException;
 }
