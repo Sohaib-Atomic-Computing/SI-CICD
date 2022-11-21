@@ -1,7 +1,9 @@
 package io.satra.iconnect.service;
 
 import io.satra.iconnect.dto.UserDTO;
+import io.satra.iconnect.dto.request.LoginRequestDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
+import io.satra.iconnect.dto.response.JwtResponseDTO;
 import io.satra.iconnect.entity.User;
 import io.satra.iconnect.entity.enums.UserRole;
 import io.satra.iconnect.exception.generic.BadRequestException;
@@ -16,6 +18,38 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+
+    /**
+     * Login a user
+     *
+     * @param loginRequestDTO the user email & password
+     * @return the logged-in user with the jwt token {@link JwtResponseDTO}
+     * @throws BadRequestException if the user does not exist or the password is incorrect
+     */
+    @Override
+    public JwtResponseDTO loginUser(LoginRequestDTO loginRequestDTO) throws BadRequestException {
+       log.info("Logging in user with email: {}", loginRequestDTO.getEmailOrMobile());
+         User user = userRepository.findByEmailOrMobile(loginRequestDTO.getEmailOrMobile(), loginRequestDTO.getEmailOrMobile())
+                .orElseThrow(() -> new BadRequestException("User does not exist"));
+        if (!user.getPassword().equals(loginRequestDTO.getPassword())) {
+            throw new BadRequestException("Invalid email or password");
+        }
+
+        // TODO: Generate JWT token
+
+        return JwtResponseDTO.builder()
+                .user(UserDTO.builder()
+                        .id(user.getId())
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .email(user.getEmail())
+                        .mobile(user.getMobile())
+                        .role(user.getRole())
+                        .build())
+                .token("token")
+                .type("Bearer")
+                .build();
+    }
 
     /**
      * Register a new user
