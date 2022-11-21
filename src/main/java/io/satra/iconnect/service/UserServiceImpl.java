@@ -5,6 +5,7 @@ import io.satra.iconnect.dto.QRCodeDTO;
 import io.satra.iconnect.dto.UserDTO;
 import io.satra.iconnect.dto.request.LoginRequestDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
+import io.satra.iconnect.dto.request.UpdateProfileRequestDTO;
 import io.satra.iconnect.dto.response.JwtResponseDTO;
 import io.satra.iconnect.entity.User;
 import io.satra.iconnect.entity.enums.UserRole;
@@ -17,6 +18,8 @@ import io.satra.iconnect.utils.EncodingUtils;
 import io.satra.iconnect.utils.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,7 +34,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTUtils jwtUtils;
@@ -113,6 +115,150 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found!"));
 
         return currentUser.toDTO();
+    }
+
+    /**
+     * This method is used to find a user by id
+     *
+     * @param id the id of the user to be obtained
+     * @return the user with the given id {@link UserDTO}
+     * @throws EntityNotFoundException if the user does not exist
+     */
+    @Override
+    public UserDTO findUserById(String id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No user with id %s found".formatted(id)));
+        return user.toDTO();
+    }
+
+    /**
+     * This method is used to add a new admin user
+     *
+     * @param registerRequestDTO the user information to register
+     * @return the registered user {@link UserDTO}
+     * @throws BadRequestException if the user already exists
+     */
+    @Override
+    public UserDTO addAdminUser(RegisterRequestDTO registerRequestDTO) throws BadRequestException {
+        log.info("Registering admin with email: {} and mobile: {}", registerRequestDTO.getEmail(), registerRequestDTO.getMobile());
+        // check if the user already exists
+        if (userRepository.findByEmailOrMobile(registerRequestDTO.getEmail(), registerRequestDTO.getMobile()).isPresent()) {
+            throw new BadRequestException("User with email %s or mobile %s already exists!".formatted(registerRequestDTO.getEmail(), registerRequestDTO.getMobile()));
+        }
+        User registeredUser = User.builder()
+                .firstName(registerRequestDTO.getFirstName())
+                .lastName(registerRequestDTO.getLastName())
+                .email(registerRequestDTO.getEmail())
+                .mobile(registerRequestDTO.getMobile())
+                .role(UserRole.ROLE_ADMIN)
+                .password(passwordEncoder.encode(registerRequestDTO.getPassword()))
+                .build();
+
+        // save the new user to the database
+        registeredUser = userRepository.save(registeredUser);
+
+        return registeredUser.toDTO();
+    }
+
+    /**
+     * This method is used to update the user information.
+     * The user can only update his/her first name and last name.
+     * The admin can update the first name, last name, email, mobile, isActive and role of the user.
+     *
+     * @param id                       the id of the user to be updated
+     * @param updateProfileRequestDTO the user information to update
+     * @return the updated user {@link UserDTO}
+     * @throws EntityNotFoundException
+     */
+    @Override
+    public UserDTO updateUser(String id, UpdateProfileRequestDTO updateProfileRequestDTO) throws EntityNotFoundException {
+        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        User updatedUser = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("No user with given id %s found!".formatted(id)));
+
+        if (updateProfileRequestDTO.getFirstName() != null) {
+            updatedUser.setFirstName(updateProfileRequestDTO.getFirstName());
+        }
+        if (updateProfileRequestDTO.getLastName() != null) {
+            updatedUser.setLastName(updateProfileRequestDTO.getLastName());
+        }
+
+        // only admin can update the role, email, isActive and mobile
+        if (userPrincipal.getUser().getRole() == UserRole.ROLE_ADMIN) {
+            if (updateProfileRequestDTO.getRole() != null) {
+                updatedUser.setRole(updateProfileRequestDTO.getRole());
+            }
+
+            if (updateProfileRequestDTO.getEmail() != null) {
+                updatedUser.setEmail(updateProfileRequestDTO.getEmail());
+            }
+
+            if (updateProfileRequestDTO.getMobile() != null) {
+                updatedUser.setMobile(updateProfileRequestDTO.getMobile());
+            }
+
+            if (updateProfileRequestDTO.getIsActive() != null) {
+                updatedUser.setIsActive(updateProfileRequestDTO.getIsActive());
+            }
+        }
+
+        // update the user
+        updatedUser = userRepository.save(updatedUser);
+
+        return updatedUser.toDTO();
+    }
+
+    /**
+     * This method is used to delete a user
+     *
+     * @param id the id of the user to be deleted
+     * @throws EntityNotFoundException if the user does not exist
+     */
+    @Override
+    public void deleteUser(String id) throws EntityNotFoundException {
+        try {
+            userRepository.deleteById(id);
+        } catch (IllegalArgumentException e) {
+            throw new EntityNotFoundException("No user with id %s found".formatted(id));
+        }
+    }
+
+    /**
+     * This method is used to find all users with pagination
+     *
+     * @param pageable used for pagination
+     * @return the list of users as a {@link Page} of {@link UserDTO}
+     */
+    @Override
+    public Page<UserDTO> findAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable).map(User::toDTO);
+    }
+
+    /**
+     * This method checks if the main user admin is exists or not.
+     * If not, it creates a new admin user with the given email and password
+     *
+     * @param email the email of the admin user
+     *              if null, the default email will be used
+     * @param password the password of the admin user
+     *                 if null, the default password will be used
+     * @throws Exception if the admin user is not created
+     */
+    @Override
+    public void checkAndCreateAdminUser(String email, String password) throws Exception {
+        if (userRepository.findByRole(UserRole.ROLE_ADMIN).isEmpty()) {
+            log.info("No admin user found. Creating a new admin user with email: {} and password: {}", email, password);
+            User adminUser = User.builder()
+                    .firstName("Admin")
+                    .lastName("User")
+                    .email(email)
+                    .mobile("0771234567")
+                    .role(UserRole.ROLE_ADMIN)
+                    .password(passwordEncoder.encode(password))
+                    .build();
+
+            userRepository.save(adminUser);
+        }
     }
 
     /**

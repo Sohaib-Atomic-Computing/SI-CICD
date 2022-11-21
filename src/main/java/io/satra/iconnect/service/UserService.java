@@ -3,10 +3,13 @@ package io.satra.iconnect.service;
 import io.satra.iconnect.dto.UserDTO;
 import io.satra.iconnect.dto.request.LoginRequestDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
+import io.satra.iconnect.dto.request.UpdateProfileRequestDTO;
 import io.satra.iconnect.dto.response.JwtResponseDTO;
 import io.satra.iconnect.entity.User;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -37,4 +40,61 @@ public interface UserService {
      * @throws EntityNotFoundException if no user is authenticated
      */
     UserDTO getCurrentUser() throws EntityNotFoundException;
+
+    /**
+     * Get a user by given id
+     *
+     * @param id the id of the user to be obtained
+     * @return a {@link UserDTO}
+     * @throws EntityNotFoundException if no user with given id is found
+     */
+    UserDTO findUserById(String id);
+
+    /**
+     * This method is used to add a new admin user
+     *
+     * @param registerRequestDTO the user information to register
+     * @return the registered user {@link UserDTO}
+     * @throws BadRequestException
+     */
+    UserDTO addAdminUser(RegisterRequestDTO registerRequestDTO) throws BadRequestException;
+
+    /**
+     * This method is used to update a user
+     *
+     * @param id                       the id of the user to be updated
+     * @param updateProfileRequestDTO the user information to update
+     * @return the updated user {@link UserDTO}
+     * @throws EntityNotFoundException if no user with given id is found
+     */
+    UserDTO updateUser(String id, UpdateProfileRequestDTO updateProfileRequestDTO) throws EntityNotFoundException;
+
+    /**
+     * Delete an user
+     *
+     * @param id the id of the user to be deleted
+     * @throws EntityNotFoundException if no user with given id is found
+     */
+    void deleteUser(String id) throws EntityNotFoundException;
+
+    /**
+     * This method is used to get all users
+     *
+     * @param pageable used for pagination
+     * @return a {@link Page} of {@link UserDTO}
+     */
+    Page<UserDTO> findAllUsers(Pageable pageable);
+
+    /**
+     * This method checks if the main user admin is exists or not.
+     * If not, it creates a new admin user with the given email and password
+     *
+     * @param email the email of the admin user
+     *              if null, the default email will be used
+     * @param password the password of the admin user
+     *                 if null, the default password will be used
+     * @throws Exception if the admin user is not created
+     */
+    void checkAndCreateAdminUser(String email, String password) throws Exception;
+
 }
