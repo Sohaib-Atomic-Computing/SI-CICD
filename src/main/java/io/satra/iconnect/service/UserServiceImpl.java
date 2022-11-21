@@ -1,5 +1,7 @@
 package io.satra.iconnect.service;
 
+import com.google.gson.Gson;
+import io.satra.iconnect.dto.QRCodeDTO;
 import io.satra.iconnect.dto.UserDTO;
 import io.satra.iconnect.dto.request.LoginRequestDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
@@ -9,6 +11,8 @@ import io.satra.iconnect.entity.enums.UserRole;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.repository.UserRepository;
 import io.satra.iconnect.security.JWTUtils;
+import io.satra.iconnect.utils.EncodingUtils;
+import io.satra.iconnect.utils.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +21,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -74,7 +81,9 @@ public class UserServiceImpl implements UserService {
                 .password(passwordEncoder.encode(registerRequestDTO.getPassword()))
                 .build();
 
-        // TODO: generate QR code
+        // generate QR code
+        registeredUser.setQrCode(generateQRCode(registeredUser));
+
         // save the new user to the database
         registeredUser = userRepository.save(registeredUser);
 
@@ -88,12 +97,44 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    /**
+     * Generate a JWT token for the user
+     *
+     * @param emailOrMobile the user email or mobile number
+     * @param password the user password
+     * @return the generated JWT token
+     */
     private String generateJWTToken(String emailOrMobile, String password) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(emailOrMobile, password));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         return jwtUtils.generateJwtToken(authentication);
+    }
+
+    /**
+     * Generate a QR code for the user
+     *
+     * @param user the user to generate the QR code for
+     * @return the QR code {@link QRCodeDTO}
+     * @throws NoSuchAlgorithmException if the algorithm is not found
+     */
+    private String generateQRCode(User user) {
+        Gson gson = new Gson();
+
+        QRCodeDTO qrCodeDTO = QRCodeDTO.builder()
+                .uniqueID(user.getId())
+                .timestamp(TimeUtils.getCurrentDateFormatted())
+                .randomID(UUID.randomUUID().toString().replace("-", "").substring(0, 8))
+                .build();
+
+        String output = gson.toJson(qrCodeDTO);
+
+        try {
+            return EncodingUtils.encodeBase64(output);
+        } catch (NoSuchAlgorithmException e) {
+            return null;
+        }
     }
 
 }
