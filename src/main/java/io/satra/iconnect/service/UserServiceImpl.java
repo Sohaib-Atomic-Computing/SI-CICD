@@ -9,8 +9,10 @@ import io.satra.iconnect.dto.response.JwtResponseDTO;
 import io.satra.iconnect.entity.User;
 import io.satra.iconnect.entity.enums.UserRole;
 import io.satra.iconnect.exception.generic.BadRequestException;
+import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.repository.UserRepository;
 import io.satra.iconnect.security.JWTUtils;
+import io.satra.iconnect.security.UserPrincipal;
 import io.satra.iconnect.utils.EncodingUtils;
 import io.satra.iconnect.utils.TimeUtils;
 import lombok.RequiredArgsConstructor;
@@ -77,7 +79,7 @@ public class UserServiceImpl implements UserService {
                 .lastName(registerRequestDTO.getLastName())
                 .email(registerRequestDTO.getEmail())
                 .mobile(registerRequestDTO.getMobile())
-                .role(UserRole.USER)
+                .role(UserRole.ROLE_USER)
                 .password(passwordEncoder.encode(registerRequestDTO.getPassword()))
                 .build();
 
@@ -95,6 +97,22 @@ public class UserServiceImpl implements UserService {
                 .token(jwt)
                 .type("Bearer")
                 .build();
+    }
+
+    /**
+     * This method is used to get the current authenticated user
+     *
+     * @return the current authenticated user
+     * @throws EntityNotFoundException if no user is authenticated
+     */
+    @Override
+    public UserDTO getCurrentUser() throws EntityNotFoundException {
+        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        User currentUser = userRepository.findByEmail(userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found!"));
+
+        return currentUser.toDTO();
     }
 
     /**

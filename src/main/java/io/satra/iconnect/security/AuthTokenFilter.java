@@ -3,6 +3,7 @@ package io.satra.iconnect.security;
 import io.satra.iconnect.service.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,9 +18,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Slf4j
-@RequiredArgsConstructor
 public class AuthTokenFilter extends OncePerRequestFilter {
+    @Autowired
     private JWTUtils jwtUtils;
+    @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
     @Override
@@ -38,6 +40,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                                 null,
                                 userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                // log user authorities
+                log.info("User authorities: {}", userDetails.getAuthorities());
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }

@@ -6,6 +6,7 @@ import io.satra.iconnect.dto.request.RegisterRequestDTO;
 import io.satra.iconnect.dto.response.JwtResponseDTO;
 import io.satra.iconnect.entity.User;
 import io.satra.iconnect.exception.generic.BadRequestException;
+import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,4 +29,12 @@ public interface UserService {
      * @throws BadRequestException if the user already exists
      */
     JwtResponseDTO register(RegisterRequestDTO registerRequestDTO) throws BadRequestException;
+
+    /**
+     * This method is used to get the current authenticated user
+     *
+     * @return the current authenticated user
+     * @throws EntityNotFoundException if no user is authenticated
+     */
+    UserDTO getCurrentUser() throws EntityNotFoundException;
 }
