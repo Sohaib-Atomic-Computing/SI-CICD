@@ -1,6 +1,6 @@
 package io.satra.iconnect.security;
 
-import io.satra.iconnect.service.UserDetailsServiceImpl;
+import io.satra.iconnect.service.user.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

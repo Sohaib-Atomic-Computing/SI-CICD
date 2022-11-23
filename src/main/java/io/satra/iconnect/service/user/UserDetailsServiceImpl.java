@@ -1,4 +1,4 @@
-package io.satra.iconnect.service;
+package io.satra.iconnect.service.user;
 
 import io.satra.iconnect.entity.User;
 import io.satra.iconnect.repository.UserRepository;

@@ -1,4 +1,4 @@
-package io.satra.iconnect.service;
+package io.satra.iconnect.service.user;
 
 import com.google.gson.Gson;
 import io.satra.iconnect.dto.QRCodeDTO;
@@ -28,6 +28,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -86,7 +88,11 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         // generate QR code
-        registeredUser.setQrCode(generateQRCode(registeredUser));
+        try {
+            registeredUser.setQrCode(generateQRCode(registeredUser));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
 
         // save the new user to the database
         registeredUser = userRepository.save(registeredUser);
@@ -167,7 +173,7 @@ public class UserServiceImpl implements UserService {
      * @param id                       the id of the user to be updated
      * @param updateProfileRequestDTO the user information to update
      * @return the updated user {@link UserDTO}
-     * @throws EntityNotFoundException
+     * @throws EntityNotFoundException if the user does not exist
      */
     @Override
     public UserDTO updateUser(String id, UpdateProfileRequestDTO updateProfileRequestDTO) throws EntityNotFoundException {
@@ -262,6 +268,29 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * This method is used to get the users entities by given ids
+     *
+     * @param ids the ids of the users to be obtained
+     * @return a {@link Set} of {@link User}
+     */
+    @Override
+    public List<User> findUsersByIds(Set<String> ids) {
+        return userRepository.findAllById(ids);
+    }
+
+    /**
+     * This method is used to get the user entity by given id
+     * @param id the id of the user to be obtained
+     * @return a {@link User}
+     * @throws EntityNotFoundException if no user with given id is found
+     */
+    @Override
+    public User findUserEntityById(String id) throws EntityNotFoundException {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("No user with given id %s found!".formatted(id)));
+    }
+
+    /**
      * Generate a JWT token for the user
      *
      * @param emailOrMobile the user email or mobile number
@@ -283,7 +312,7 @@ public class UserServiceImpl implements UserService {
      * @return the QR code {@link QRCodeDTO}
      * @throws NoSuchAlgorithmException if the algorithm is not found
      */
-    private String generateQRCode(User user) {
+    private String generateQRCode(User user) throws NoSuchAlgorithmException {
         Gson gson = new Gson();
 
         QRCodeDTO qrCodeDTO = QRCodeDTO.builder()
@@ -300,5 +329,4 @@ public class UserServiceImpl implements UserService {
             return null;
         }
     }
-
 }

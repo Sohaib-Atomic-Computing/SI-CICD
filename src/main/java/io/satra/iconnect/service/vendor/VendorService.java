@@ -1,7 +1,8 @@
-package io.satra.iconnect.service;
+package io.satra.iconnect.service.vendor;
 
 import io.satra.iconnect.dto.VendorDTO;
 import io.satra.iconnect.dto.request.VendorRequestDTO;
+import io.satra.iconnect.entity.Vendor;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import org.springframework.data.domain.Page;
@@ -47,10 +48,19 @@ public interface VendorService {
     VendorDTO findVendorById(String id) throws EntityNotFoundException;
 
     /**
+     * This method is used to get vendor entity by given id
+     *
+     * @param id the id of the vendor to be obtained
+     * @return the vendor entity {@link Vendor}
+     * @throws EntityNotFoundException
+     */
+    Vendor findVendorEntityById(String id) throws EntityNotFoundException;
+
+    /**
      * This method is used to get all vendors
      *
-     * @param pageable the pagination information
+     * @param page the pagination information
      * @return the list of vendors {@link VendorDTO}
      */
-    Page<VendorDTO> findAllVendors(Pageable pageable);
+    Page<VendorDTO> findAllVendors(Pageable page);
 }

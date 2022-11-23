@@ -4,7 +4,7 @@ import io.satra.iconnect.dto.UserDTO;
 import io.satra.iconnect.dto.request.LoginRequestDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
 import io.satra.iconnect.dto.response.JwtResponseDTO;
-import io.satra.iconnect.service.UserService;
+import io.satra.iconnect.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

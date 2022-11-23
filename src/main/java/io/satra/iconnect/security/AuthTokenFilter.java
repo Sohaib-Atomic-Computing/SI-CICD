@@ -1,6 +1,6 @@
 package io.satra.iconnect.security;
 
-import io.satra.iconnect.service.UserDetailsServiceImpl;
+import io.satra.iconnect.service.user.UserDetailsServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

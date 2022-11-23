@@ -1,4 +1,4 @@
-package io.satra.iconnect.service;
+package io.satra.iconnect.service.vendor;
 
 import io.satra.iconnect.dto.VendorDTO;
 import io.satra.iconnect.dto.request.VendorRequestDTO;
@@ -115,13 +115,25 @@ public class VendorServiceImpl implements VendorService {
     }
 
     /**
+     * This method is used to get vendor entity by given id
+     *
+     * @param id the id of the vendor to be obtained
+     * @return the vendor entity {@link Vendor}
+     * @throws EntityNotFoundException
+     */
+    @Override
+    public Vendor findVendorEntityById(String id) throws EntityNotFoundException {
+        return vendorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No vendor with given id %s found!".formatted(id)));
+    }
+
+    /**
      * This method is used to get all vendors
      *
-     * @param pageable the pagination information
+     * @param page the pagination information
      * @return the list of vendors {@link VendorDTO}
      */
     @Override
-    public Page<VendorDTO> findAllVendors(Pageable pageable) {
-        return vendorRepository.findAll(pageable).map(Vendor::toDTO);
+    public Page<VendorDTO> findAllVendors(Pageable page) {
+        return vendorRepository.findAll(page).map(Vendor::toDTO);
     }
 }

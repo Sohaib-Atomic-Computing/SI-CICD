@@ -25,4 +25,9 @@ public class TimeUtils {
                 .from(localDateTime.atZone(ZoneId.systemDefault())
                         .toInstant());
     }
+
+    public static LocalDateTime convertStringToLocalDateTime(String date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return LocalDateTime.parse(date, formatter);
+    }
 }

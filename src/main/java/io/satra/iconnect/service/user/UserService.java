@@ -1,4 +1,4 @@
-package io.satra.iconnect.service;
+package io.satra.iconnect.service.user;
 
 import io.satra.iconnect.dto.UserDTO;
 import io.satra.iconnect.dto.request.LoginRequestDTO;
@@ -11,6 +11,9 @@ import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Set;
 
 @Service
 public interface UserService {
@@ -97,4 +100,19 @@ public interface UserService {
      */
     void checkAndCreateAdminUser(String email, String password) throws Exception;
 
+    /**
+     * This method is used to get the users entities by given ids
+     *
+     * @param ids the ids of the users to be obtained
+     * @return a {@link Set} of {@link User}
+     */
+    List<User> findUsersByIds(Set<String> ids);
+
+    /**
+     * This method is used to get the user entity by given id
+     * @param id the id of the user to be obtained
+     * @return a {@link User}
+     * @throws EntityNotFoundException if no user with given id is found
+     */
+    User findUserEntityById(String id) throws EntityNotFoundException;
 }
