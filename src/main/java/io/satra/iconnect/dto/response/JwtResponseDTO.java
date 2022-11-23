@@ -9,5 +9,6 @@ import lombok.Data;
 public class JwtResponseDTO {
     private UserDTO user;
     private String token;
+    @Builder.Default
     private String type = "Bearer";
 }

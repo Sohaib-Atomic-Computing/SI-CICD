@@ -3,4 +3,5 @@ package io.satra.iconnect.entity.enums;
 public enum UserRole {
     ROLE_USER,
     ROLE_ADMIN,
+    USER,
 }
