@@ -1,6 +1,7 @@
 package io.satra.iconnect.controllers;
 
 import io.satra.iconnect.dto.PromotionDTO;
+import io.satra.iconnect.dto.ScannerMessageDTO;
 import io.satra.iconnect.dto.request.PromotionRequestDTO;
 import io.satra.iconnect.dto.request.ScanDTO;
 import io.satra.iconnect.dto.response.ResponseDTO;
@@ -134,17 +135,23 @@ public class PromotionController {
      * @return the promotion associated with the scanned QR code
      * @throws EntityNotFoundException if no promotion is found with the given QR code
      */
-    @PostMapping(value = "/qr")
+    @PostMapping(value = "/scanner/validate")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> getPromotionByQRCode(@Valid @RequestBody ScanDTO scanDTO) throws EntityNotFoundException {
-        promotionService.getPromotionByQRCode(scanDTO);
-        return ResponseEntity.ok(
-                ResponseDTO.builder()
-                        .message("To be implemented")
-                        .success(true)
-                        .build()
-        );
+        return ResponseEntity.ok(promotionService.promotionScannerValidator(scanDTO));
     }
 
+    /**
+     * This endpoint takes userId and return the encrypted string that contain json object of the user id.
+     *
+     * @param scannerMessageDTO the user id information {@link ScannerMessageDTO}
+     * @return the encrypted string that contain json object of the user id
+     * @throws BadRequestException if the user id is invalid
+     */
+    @PostMapping(value = "/scanner/encrypt")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> encryptQRCode(@Valid @RequestBody ScannerMessageDTO scannerMessageDTO) throws BadRequestException {
+        return ResponseEntity.ok(promotionService.encrypt(scannerMessageDTO));
+    }
 
 }

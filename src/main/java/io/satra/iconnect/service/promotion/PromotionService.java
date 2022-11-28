@@ -1,6 +1,7 @@
 package io.satra.iconnect.service.promotion;
 
 import io.satra.iconnect.dto.PromotionDTO;
+import io.satra.iconnect.dto.ScannerMessageDTO;
 import io.satra.iconnect.dto.request.PromotionRequestDTO;
 import io.satra.iconnect.dto.request.ScanDTO;
 import io.satra.iconnect.exception.generic.BadRequestException;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -64,7 +66,7 @@ public interface PromotionService {
      * @param scanDTO the scan information
      * @throws EntityNotFoundException if the promotion does not exist
      */
-    void getPromotionByQRCode(ScanDTO scanDTO) throws EntityNotFoundException;
+    List<PromotionDTO> promotionScannerValidator(ScanDTO scanDTO) throws EntityNotFoundException;
 
     /**
      * This method is used to get all vendor promotions
@@ -75,8 +77,12 @@ public interface PromotionService {
      */
     List<PromotionDTO> getVendorPromotions(String vendorId) throws EntityNotFoundException;
 
-
-
-
-
+    /**
+     * This method is used encrypt the user id using AES
+     *
+     * @param scannerMessageDTO the user id information {@link ScannerMessageDTO}
+     * @return the encrypted user id
+     * @throws BadRequestException if the user id is not valid
+     */
+    HashMap<String, Object> encrypt(ScannerMessageDTO scannerMessageDTO) throws BadRequestException;
 }

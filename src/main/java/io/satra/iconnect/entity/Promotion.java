@@ -81,4 +81,16 @@ public class Promotion extends BaseEntityAudit {
                 .lastModifiedBy(lastModifiedBy != null ? lastModifiedBy.getFirstName() + ' ' + lastModifiedBy.getLastName() : null)
                 .build();
     }
+
+    public PromotionDTO toScannerResponseDTO() {
+        return PromotionDTO.builder()
+                .id(id)
+                .name(name)
+                .description(description)
+                .isActive(isActive)
+                .startDate(startDate)
+                .endDate(endDate)
+                .vendor(vendor != null ? vendor.toDTO() : null)
+                .build();
+    }
 }
