@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -175,12 +176,29 @@ public class PromotionServiceImpl implements PromotionService {
     /**
      * This method is used to get all promotions
      *
+     * @param name the name of the promotion to be obtained
+     * @param isActive the status of the promotion to be obtained
+     * @param startDateFrom the start date from of the promotion to be obtained
+     * @param startDateTo the start date to of the promotion to be obtained
+     * @param endDateFrom the end date from of the promotion to be obtained
+     * @param endDateTo the end date to of the promotion to be obtained
      * @param page the pagination information
      * @return the list of promotions {@link PromotionDTO}
      */
     @Override
-    public Page<PromotionDTO> getAllPromotions(Pageable page) {
-        return promotionRepository.findAll(page).map(Promotion::toDTO);
+    public Page<PromotionDTO> getAllPromotions(String name, Boolean isActive, String startDateFrom, String startDateTo,
+                                               String endDateFrom, String endDateTo, Pageable page) {
+        // prepare the filter specification
+        Specification<Promotion> specification = PromotionSpecifications.filterPromotions(
+                name,
+                isActive,
+                startDateFrom,
+                startDateTo,
+                endDateFrom,
+                endDateTo
+        );
+        return promotionRepository.findAll(specification, page)
+                .map(Promotion::toDTO);
     }
 
     /**

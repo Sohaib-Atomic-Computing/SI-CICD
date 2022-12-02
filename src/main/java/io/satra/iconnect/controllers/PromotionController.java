@@ -106,13 +106,27 @@ public class PromotionController {
     /**
      * This endpoint returns all promotions.
      *
+     * @param name the name of the promotion to be retrieved
+     * @param isActive the active status of the promotion to be retrieved
+     * @param startDateFrom the start date from of the promotion to be retrieved
+     * @param startDateTo the start date to of the promotion to be retrieved
+     * @param endDateFrom the end date from of the promotion to be retrieved
+     * @param endDateTo the end date to of the promotion to be retrieved
      * @param page the current page of the promotion to be obtained
      * @return a {@link Page} of {@link PromotionDTO}
      */
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> getAllPromotions(Pageable page) {
-        return ResponseEntity.ok(promotionService.getAllPromotions(page));
+    public ResponseEntity<?> getAllPromotions(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false) String startDateFrom,
+            @RequestParam(required = false) String startDateTo,
+            @RequestParam(required = false) String endDateFrom,
+            @RequestParam(required = false) String endDateTo,
+            Pageable page) {
+        return ResponseEntity.ok(promotionService.getAllPromotions(name, isActive, startDateFrom, startDateTo, endDateFrom,
+                endDateTo, page));
     }
 
     /**

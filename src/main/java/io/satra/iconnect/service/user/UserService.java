@@ -83,10 +83,14 @@ public interface UserService {
     /**
      * This method is used to get all users
      *
+     * @param email the user email to be searched
+     * @param mobile  the user mobile to be searched
+     * @param firstName the user first name to be searched
+     * @param lastName the user last name to be searched
      * @param pageable used for pagination
      * @return a {@link Page} of {@link UserDTO}
      */
-    Page<UserDTO> findAllUsers(Pageable pageable);
+    Page<UserDTO> findAllUsers(String email, String mobile, String firstName, String lastName, Pageable pageable);
 
     /**
      * This method checks if the main user admin is exists or not.

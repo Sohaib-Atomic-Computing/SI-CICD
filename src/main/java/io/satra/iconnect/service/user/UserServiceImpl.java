@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -232,12 +233,18 @@ public class UserServiceImpl implements UserService {
     /**
      * This method is used to find all users with pagination
      *
+     * @param email the user email to be searched
+     * @param mobile  the user mobile to be searched
+     * @param firstName the user first name to be searched
+     * @param lastName the user last name to be searched
      * @param pageable used for pagination
      * @return the list of users as a {@link Page} of {@link UserDTO}
      */
     @Override
-    public Page<UserDTO> findAllUsers(Pageable pageable) {
-        return userRepository.findAll(pageable).map(User::toDTO);
+    public Page<UserDTO> findAllUsers(String email, String mobile, String firstName, String lastName, Pageable pageable) {
+        // prepare the filter specification
+        Specification<User> specification = UserSpecifications.filterUsers(email, mobile, firstName, lastName);
+        return userRepository.findAll(specification, pageable).map(User::toDTO);
     }
 
     /**

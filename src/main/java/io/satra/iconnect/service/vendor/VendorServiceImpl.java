@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -129,11 +130,14 @@ public class VendorServiceImpl implements VendorService {
     /**
      * This method is used to get all vendors
      *
+     * @param name the name of the vendor to be searched
      * @param page the pagination information
      * @return the list of vendors {@link VendorDTO}
      */
     @Override
-    public Page<VendorDTO> findAllVendors(Pageable page) {
-        return vendorRepository.findAll(page).map(Vendor::toDTO);
+    public Page<VendorDTO> findAllVendors(String name, Pageable page) {
+        // prepare the filter specification
+        Specification<Vendor> specification = VendorSpecifications.filterVendors(name);
+        return vendorRepository.findAll(specification, page).map(Vendor::toDTO);
     }
 }

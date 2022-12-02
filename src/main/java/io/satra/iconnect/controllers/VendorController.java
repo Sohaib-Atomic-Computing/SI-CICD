@@ -103,12 +103,15 @@ public class VendorController {
     /**
      * This endpoint returns all vendors.
      *
+     * @param name the name of the vendors to be obtained
      * @param page the current page of the vendors to be obtained
      * @return a {@link Page} of {@link VendorDTO}
      */
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Page<VendorDTO>> getAllVendors(Pageable page) {
-        return ResponseEntity.ok(vendorService.findAllVendors(page));
+    public ResponseEntity<Page<VendorDTO>> getAllVendors(
+            @RequestParam(required = false) String name,
+            Pageable page) {
+        return ResponseEntity.ok(vendorService.findAllVendors(name, page));
     }
 }

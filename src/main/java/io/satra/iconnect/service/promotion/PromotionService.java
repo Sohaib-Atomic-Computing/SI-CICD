@@ -55,10 +55,17 @@ public interface PromotionService {
     /**
      * This method is used to get all promotions
      *
+     * @param name the name of the promotion to be obtained
+     * @param isActive the active status of the promotion to be obtained
+     * @param startDateFrom the start date from of the promotion to be obtained
+     * @param startDateTo the start date to of the promotion to be obtained
+     * @param endDateFrom the end date from of the promotion to be obtained
+     * @param endDateTo the end date to of the promotion to be obtained
      * @param page the pagination information
      * @return the list of promotions {@link PromotionDTO}
      */
-    Page<PromotionDTO> getAllPromotions(Pageable page);
+    Page<PromotionDTO> getAllPromotions(String name, Boolean isActive, String startDateFrom, String startDateTo,
+                                        String endDateFrom, String endDateTo, Pageable page);
 
     /**
      * This method is used to scan a promotion

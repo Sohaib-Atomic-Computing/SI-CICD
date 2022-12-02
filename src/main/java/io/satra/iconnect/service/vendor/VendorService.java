@@ -59,8 +59,9 @@ public interface VendorService {
     /**
      * This method is used to get all vendors
      *
+     * @param name the name of the vendor to be searched
      * @param page the pagination information
      * @return the list of vendors {@link VendorDTO}
      */
-    Page<VendorDTO> findAllVendors(Pageable page);
+    Page<VendorDTO> findAllVendors(String name, Pageable page);
 }

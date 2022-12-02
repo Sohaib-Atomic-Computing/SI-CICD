@@ -113,12 +113,21 @@ public class UserController {
     /**
      * This endpoint obtains all existing users with pagination
      *
+     * @param email the email of the user to be obtained
+     * @param mobile the mobile of the user to be obtained
+     * @param firstName the first name of the user to be obtained
+     * @param lastName the last name of the user to be obtained
      * @param page the current page of user to be obtained
      * @return a {@link Page} of {@link UserDTO}
      */
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Page<UserDTO>> getAllUsers(Pageable page) {
-        return ResponseEntity.ok(userService.findAllUsers(page));
+    public ResponseEntity<Page<UserDTO>> getAllUsers(
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String mobile,
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            Pageable page) {
+        return ResponseEntity.ok(userService.findAllUsers(email, mobile, firstName, lastName,  page));
     }
 }
