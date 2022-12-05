@@ -4,6 +4,7 @@ import io.satra.iconnect.entity.User;
 import io.satra.iconnect.entity.enums.UserRole;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +13,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
+@Slf4j
 public class UserPrincipal implements UserDetails {
 
     private final transient User user;
@@ -42,7 +44,13 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        if (user.getOtpCode() == null || user.getOtpCode().isEmpty()) {
+            log.info("User password: {}", user.getPassword());
+            return user.getPassword();
+        }
+
+        log.info("User OTP: {}", user.getOtpCode());
+        return user.getOtpCode();
     }
 
     @Override

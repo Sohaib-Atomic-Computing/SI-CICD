@@ -1,9 +1,12 @@
 package io.satra.iconnect.controllers;
 
 import io.satra.iconnect.dto.UserDTO;
+import io.satra.iconnect.dto.request.GenerateOTPDTO;
 import io.satra.iconnect.dto.request.LoginRequestDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
 import io.satra.iconnect.dto.response.JwtResponseDTO;
+import io.satra.iconnect.dto.response.ResponseDTO;
+import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,5 +50,17 @@ public class AuthController {
         JwtResponseDTO registeredUser = userService.register(registerRequestDTO);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/users/" + registeredUser.getUser().getId()).toUriString());
         return ResponseEntity.created(uri).body(registeredUser);
+    }
+
+    /**
+     * This endpoint is used to send an OTP to the user's.
+     *
+     * @param generateOTPDTO the user mobile number to send OTP
+     * @return {@link ResponseDTO} with the status of the request
+     * @throws EntityNotFoundException if no user is authenticated
+     */
+    @PostMapping("/otp/generate")
+    public ResponseEntity<?> sendOTP(@RequestBody GenerateOTPDTO generateOTPDTO) throws EntityNotFoundException{
+        return ResponseEntity.ok(userService.sendOTP(generateOTPDTO));
     }
 }

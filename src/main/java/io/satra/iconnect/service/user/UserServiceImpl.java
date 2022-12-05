@@ -3,10 +3,12 @@ package io.satra.iconnect.service.user;
 import com.google.gson.Gson;
 import io.satra.iconnect.dto.QRCodeDTO;
 import io.satra.iconnect.dto.UserDTO;
+import io.satra.iconnect.dto.request.GenerateOTPDTO;
 import io.satra.iconnect.dto.request.LoginRequestDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
 import io.satra.iconnect.dto.request.UpdateProfileRequestDTO;
 import io.satra.iconnect.dto.response.JwtResponseDTO;
+import io.satra.iconnect.dto.response.ResponseDTO;
 import io.satra.iconnect.entity.User;
 import io.satra.iconnect.entity.enums.UserRole;
 import io.satra.iconnect.exception.generic.BadRequestException;
@@ -18,6 +20,7 @@ import io.satra.iconnect.utils.EncodingUtils;
 import io.satra.iconnect.utils.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -29,9 +32,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +43,8 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JWTUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
+    @Value("${iconnect.app.env}")
+    private String env;
 
     /**
      * Login a user
@@ -57,6 +61,20 @@ public class UserServiceImpl implements UserService {
 
         // Generate JWT token
         String jwt = generateJWTToken(loginRequestDTO.getEmailOrMobile(), loginRequestDTO.getPassword());
+
+        // check if the user has OTP
+        if (user.getOtpCode() != null && !user.getOtpCode().isEmpty()) {
+            log.info("User has OTP: {}", user.getOtpCode());
+
+            // check if the otp is expired
+            if (user.getOtpExpireAt().isBefore(LocalDateTime.now())) {
+                throw new BadRequestException("OTP is expired!");
+            }
+
+            // reset the OTP
+            user.setOtpCode(null);
+            userRepository.save(user);
+        }
 
         return JwtResponseDTO.builder()
                 .user(user.toDTO())
@@ -118,7 +136,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO getCurrentUser() throws EntityNotFoundException {
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        User currentUser = userRepository.findByEmail(userPrincipal.getUsername())
+        User currentUser = userRepository.findByEmailOrMobile(userPrincipal.getUsername(), userPrincipal.getUsername())
                 .orElseThrow(() -> new EntityNotFoundException("User not found!"));
 
         return currentUser.toDTO();
@@ -295,6 +313,49 @@ public class UserServiceImpl implements UserService {
     public User findUserEntityById(String id) throws EntityNotFoundException {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("No user with given id %s found!".formatted(id)));
+    }
+
+    /**
+     * This method is used to send OTP to the user
+     *
+     * @param generateOTPDTO the user mobile number to send the OTP
+     * @return {@link ResponseDTO} with the status of the operation
+     * @throws EntityNotFoundException if the user does not exist
+     */
+    @Override
+    public ResponseDTO sendOTP(GenerateOTPDTO generateOTPDTO) throws EntityNotFoundException{
+        // get the user by mobile number
+        User user = userRepository.findByMobile(generateOTPDTO.getMobile())
+                .orElseThrow(() -> new EntityNotFoundException("No user with given mobile number %s found!".formatted(generateOTPDTO.getMobile())));
+
+        // generate a random 5 digit number
+        Random rand = new Random();
+        Calendar c = Calendar.getInstance();
+        c.setTime(new Date());
+        c.add(Calendar.MINUTE, 5);
+
+        String otp = String.format("%05d", rand.nextInt(100000));
+
+        if (env.equals("dev")) {
+            user.setOtpCode(passwordEncoder.encode("00000"));
+        } else {
+            user.setOtpCode(passwordEncoder.encode(otp));
+        }
+
+        // TODO: send the OTP to the user
+
+        // set the expiry time
+        user.setOtpExpireAt(TimeUtils.convertDateToLocalDateTime(c.getTime()));
+        // set the otp created time
+        user.setOtpCreatedAt(LocalDateTime.now());
+
+        // save the user
+        userRepository.save(user);
+
+        return ResponseDTO.builder()
+                .message("Verification OTP has been sent to your mobile number.")
+                .success(true)
+                .build();
     }
 
     /**

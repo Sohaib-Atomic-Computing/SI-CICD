@@ -1,10 +1,12 @@
 package io.satra.iconnect.service.user;
 
 import io.satra.iconnect.dto.UserDTO;
+import io.satra.iconnect.dto.request.GenerateOTPDTO;
 import io.satra.iconnect.dto.request.LoginRequestDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
 import io.satra.iconnect.dto.request.UpdateProfileRequestDTO;
 import io.satra.iconnect.dto.response.JwtResponseDTO;
+import io.satra.iconnect.dto.response.ResponseDTO;
 import io.satra.iconnect.entity.User;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
@@ -119,4 +121,14 @@ public interface UserService {
      * @throws EntityNotFoundException if no user with given id is found
      */
     User findUserEntityById(String id) throws EntityNotFoundException;
+
+    /**
+     * This method is used to send OTP to the user
+     *
+     * @param generateOTPDTO the user mobile number to send OTP
+     * @return {@link ResponseDTO} with the status of the operation
+     * @throws EntityNotFoundException if no user is authenticated
+     */
+    ResponseDTO sendOTP(GenerateOTPDTO generateOTPDTO) throws EntityNotFoundException;
+
 }

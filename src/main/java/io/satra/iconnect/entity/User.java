@@ -12,6 +12,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -45,6 +46,10 @@ public class User extends BaseEntityAudit {
     @Enumerated(EnumType.STRING)
     private UserRole role;
     private String qrCode;
+    private String otpCode;
+    private LocalDateTime otpExpireAt;
+    private LocalDateTime otpCreatedAt;
+
 
     @Override
     public boolean equals(Object o) {
