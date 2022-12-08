@@ -1,6 +1,7 @@
 package io.satra.iconnect.service.user;
 
 import io.satra.iconnect.dto.UserDTO;
+import io.satra.iconnect.dto.VendorDTO;
 import io.satra.iconnect.dto.request.GenerateOTPDTO;
 import io.satra.iconnect.dto.request.LoginRequestDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
@@ -100,7 +101,7 @@ public interface UserService {
      * @param email the user email to be searched
      * @param mobile the user mobile to be searched
      * @return true if the user exists, false otherwise
-     * @throws EntityNotFoundException
+     * @throws BadRequestException if the email or mobile is not provided
      */
     Boolean userExists(String email, String mobile) throws EntityNotFoundException;
 
@@ -140,5 +141,13 @@ public interface UserService {
      * @throws EntityNotFoundException if no user is authenticated
      */
     ResponseDTO sendOTP(GenerateOTPDTO generateOTPDTO) throws EntityNotFoundException;
+
+    /**
+     * This method is used to return the users vendors
+     *
+     * @return list of vendors that user has promotions for
+     * @throws EntityNotFoundException if no user is authenticated
+     */
+    List<VendorDTO> getVendors() throws EntityNotFoundException;
 
 }

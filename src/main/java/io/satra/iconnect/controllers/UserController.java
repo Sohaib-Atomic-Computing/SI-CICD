@@ -1,6 +1,7 @@
 package io.satra.iconnect.controllers;
 
 import io.satra.iconnect.dto.UserDTO;
+import io.satra.iconnect.dto.VendorDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
 import io.satra.iconnect.dto.request.UpdateProfileRequestDTO;
 import io.satra.iconnect.dto.response.ResponseDTO;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -130,6 +132,23 @@ public class UserController {
             @RequestParam(required = false) String lastName,
             Pageable page) {
         return ResponseEntity.ok(userService.findAllUsers(email, mobile, firstName, lastName,  page));
+    }
+
+    /**
+     * This endpoint is used to obtain the user vendors
+     *
+     * @return a list of vendors {@link VendorDTO}
+     * @throws EntityNotFoundException if no user is authenticated
+     */
+    @GetMapping("/vendors")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<?> getVendors() throws EntityNotFoundException {
+        List<VendorDTO> vendors = userService.getVendors();
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .message("User has promotions in the following vendors")
+                .success(true)
+                .data(vendors)
+                .build());
     }
 
     /**

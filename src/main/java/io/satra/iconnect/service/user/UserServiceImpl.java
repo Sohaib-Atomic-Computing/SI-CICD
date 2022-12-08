@@ -3,12 +3,14 @@ package io.satra.iconnect.service.user;
 import com.google.gson.Gson;
 import io.satra.iconnect.dto.QRCodeDTO;
 import io.satra.iconnect.dto.UserDTO;
+import io.satra.iconnect.dto.VendorDTO;
 import io.satra.iconnect.dto.request.GenerateOTPDTO;
 import io.satra.iconnect.dto.request.LoginRequestDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
 import io.satra.iconnect.dto.request.UpdateProfileRequestDTO;
 import io.satra.iconnect.dto.response.JwtResponseDTO;
 import io.satra.iconnect.dto.response.ResponseDTO;
+import io.satra.iconnect.entity.Promotion;
 import io.satra.iconnect.entity.User;
 import io.satra.iconnect.entity.enums.UserRole;
 import io.satra.iconnect.exception.generic.BadRequestException;
@@ -34,6 +36,7 @@ import org.springframework.stereotype.Service;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +59,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public JwtResponseDTO loginUser(LoginRequestDTO loginRequestDTO) throws BadRequestException {
        log.info("Logging in user with email: {}, and password: {}", loginRequestDTO.getEmailOrMobile(), loginRequestDTO.getPassword());
-         User user = userRepository.findByEmailOrMobile(loginRequestDTO.getEmailOrMobile(), loginRequestDTO.getEmailOrMobile())
+         User user = userRepository.findFirstByEmailOrMobile(loginRequestDTO.getEmailOrMobile(), loginRequestDTO.getEmailOrMobile())
                 .orElseThrow(() -> new BadRequestException("User does not exist"));
 
         // Generate JWT token
@@ -94,7 +97,7 @@ public class UserServiceImpl implements UserService {
     public JwtResponseDTO register(RegisterRequestDTO registerRequestDTO) throws BadRequestException {
         log.info("Registering user with email: {} and mobile: {}", registerRequestDTO.getEmail(), registerRequestDTO.getMobile());
         // check if the user already exists
-        if (userRepository.findByEmailOrMobile(registerRequestDTO.getEmail(), registerRequestDTO.getMobile()).isPresent()) {
+        if (userRepository.findFirstByEmailOrMobile(registerRequestDTO.getEmail(), registerRequestDTO.getMobile()).isPresent()) {
             throw new BadRequestException("User with email %s or mobile %s already exists!".formatted(registerRequestDTO.getEmail(), registerRequestDTO.getMobile()));
         }
         User registeredUser = User.builder()
@@ -136,7 +139,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO getCurrentUser() throws EntityNotFoundException {
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        User currentUser = userRepository.findByEmailOrMobile(userPrincipal.getUsername(), userPrincipal.getUsername())
+        User currentUser = userRepository.findFirstByEmailOrMobile(userPrincipal.getUsername(), userPrincipal.getUsername())
                 .orElseThrow(() -> new EntityNotFoundException("User not found!"));
 
         return currentUser.toDTO();
@@ -166,7 +169,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO addAdminUser(RegisterRequestDTO registerRequestDTO) throws BadRequestException {
         log.info("Registering admin with email: {} and mobile: {}", registerRequestDTO.getEmail(), registerRequestDTO.getMobile());
         // check if the user already exists
-        if (userRepository.findByEmailOrMobile(registerRequestDTO.getEmail(), registerRequestDTO.getMobile()).isPresent()) {
+        if (userRepository.findFirstByEmailOrMobile(registerRequestDTO.getEmail(), registerRequestDTO.getMobile()).isPresent()) {
             throw new BadRequestException("User with email %s or mobile %s already exists!".formatted(registerRequestDTO.getEmail(), registerRequestDTO.getMobile()));
         }
         User registeredUser = User.builder()
@@ -271,11 +274,11 @@ public class UserServiceImpl implements UserService {
      * @param email the user email to be searched
      * @param mobile the user mobile to be searched
      * @return true if the user exists, false otherwise
-     * @throws EntityNotFoundException
+     * @throws BadRequestException if the email or mobile is not provided
      */
     @Override
     public Boolean userExists(String email, String mobile) throws EntityNotFoundException {
-        return userRepository.findByEmailOrMobile(email, mobile).isPresent();
+        return userRepository.findFirstByEmailOrMobile(email, mobile).isPresent();
     }
 
     /**
@@ -409,5 +412,28 @@ public class UserServiceImpl implements UserService {
         } catch (NoSuchAlgorithmException e) {
             return null;
         }
+    }
+
+    /**
+     * This method is used to return the users vendors
+     *
+     * @return list of vendors that user has promotions for
+     * @throws EntityNotFoundException if no user is authenticated
+     */
+    @Override
+    public List<VendorDTO> getVendors() throws EntityNotFoundException {
+        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        User user = userRepository.findById(userPrincipal.getUser().getId())
+                .orElseThrow(() -> new EntityNotFoundException("No user with given id %s found!".formatted(userPrincipal.getUser().getId())));
+
+        return user.getPromotions().stream()
+                .map(Promotion::getVendor)
+                .distinct()
+                .map(vendor -> VendorDTO.builder()
+                        .id(vendor.getId())
+                        .name(vendor.getName())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

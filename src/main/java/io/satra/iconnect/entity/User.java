@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -49,7 +50,12 @@ public class User extends BaseEntityAudit {
     private String otpCode;
     private LocalDateTime otpExpireAt;
     private LocalDateTime otpCreatedAt;
-
+    @ManyToMany
+    @JoinTable(
+            name = "promotion_user",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "promotion_id"))
+    private Set<Promotion> promotions;
 
     @Override
     public boolean equals(Object o) {
