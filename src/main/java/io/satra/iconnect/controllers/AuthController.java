@@ -9,6 +9,7 @@ import io.satra.iconnect.dto.response.ResponseDTO;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.service.user.UserService;
+import io.satra.iconnect.service.validator.ValidatorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,7 @@ import java.net.URI;
 public class AuthController {
 
     private final UserService userService;
+    private final ValidatorService validatorService;
 
     /**
      * This endpoint logs in a user to the application.
@@ -63,5 +65,17 @@ public class AuthController {
     @PostMapping("/otp/generate")
     public ResponseEntity<?> sendOTP(@RequestBody GenerateOTPDTO generateOTPDTO) throws EntityNotFoundException{
         return ResponseEntity.ok(userService.sendOTP(generateOTPDTO));
+    }
+
+    /**
+     * This endpoint takes the validator key and returns the associated vendor.
+     *
+     * @param validatorKey the validator key
+     * @return the validator with the associated vendor
+     * @throws EntityNotFoundException if no validator is found
+     */
+    @GetMapping("/validator/{validatorKey}")
+    public ResponseEntity<?> getValidator(@PathVariable String validatorKey) throws EntityNotFoundException {
+        return ResponseEntity.ok(validatorService.getValidatorByKey(validatorKey));
     }
 }
