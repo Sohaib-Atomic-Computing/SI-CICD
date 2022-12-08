@@ -266,6 +266,19 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * This method is used check if the user exists by given email or mobile
+     *
+     * @param email the user email to be searched
+     * @param mobile the user mobile to be searched
+     * @return true if the user exists, false otherwise
+     * @throws EntityNotFoundException
+     */
+    @Override
+    public Boolean userExists(String email, String mobile) throws EntityNotFoundException {
+        return userRepository.findByEmailOrMobile(email, mobile).isPresent();
+    }
+
+    /**
      * This method checks if the main user admin is exists or not.
      * If not, it creates a new admin user with the given email and password
      *

@@ -4,6 +4,7 @@ import io.satra.iconnect.dto.UserDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
 import io.satra.iconnect.dto.request.UpdateProfileRequestDTO;
 import io.satra.iconnect.dto.response.ResponseDTO;
+import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.service.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -129,5 +130,26 @@ public class UserController {
             @RequestParam(required = false) String lastName,
             Pageable page) {
         return ResponseEntity.ok(userService.findAllUsers(email, mobile, firstName, lastName,  page));
+    }
+
+    /**
+     * This endpoint check if the given email or mobile is already registered
+     *
+     * @param email the email of the user to be obtained
+     * @param mobile the mobile of the user to be obtained
+     * @return success message if the user exists {@link ResponseDTO} and failure message if the user does not exist
+     * @throws EntityNotFoundException if no user with given email or mobile is found
+     */
+    @GetMapping("/check")
+    public ResponseEntity<?> userExists(@RequestParam(required = false) String email, @RequestParam(required = false) String mobile)
+            throws EntityNotFoundException {
+        if (email == null && mobile == null) {
+            throw new BadRequestException("Email or mobile is required");
+        }
+        boolean exists = userService.userExists(email, mobile);
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .message(exists ? "User exists" : "User does not exist")
+                .success(exists)
+                .build());
     }
 }
