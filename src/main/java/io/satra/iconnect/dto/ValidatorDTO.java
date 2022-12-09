@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class ValidatorDTO {
     private String id;
     private String name;
-    private String key;
+    private String validatorKey;
     private VendorDTO vendor;
     private LocalDateTime createdAt;
     private String createdBy;

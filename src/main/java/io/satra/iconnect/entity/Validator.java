@@ -13,7 +13,6 @@ import javax.validation.constraints.NotNull;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -22,7 +21,7 @@ public class Validator extends BaseEntityAudit {
     @NotNull
     private String name;
     @NotNull
-    private String key;
+    private String validatorKey;
     @JsonIgnore
     @JoinColumn(name = "createdBy", referencedColumnName = "id")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -53,7 +52,7 @@ public class Validator extends BaseEntityAudit {
         return ValidatorDTO.builder()
                 .id(id)
                 .name(name)
-                .key(key)
+                .validatorKey(validatorKey)
                 .vendor(vendor != null ? vendor.toDTO() : null)
                 .createdAt(createdAt)
                 .createdBy(createdBy != null ? createdBy.getFirstName() + ' ' + createdBy.getLastName() : null)

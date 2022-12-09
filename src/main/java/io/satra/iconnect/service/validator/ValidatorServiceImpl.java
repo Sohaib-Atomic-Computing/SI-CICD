@@ -44,7 +44,7 @@ public class ValidatorServiceImpl implements ValidatorService {
         // create validator entity
         Validator validator = Validator.builder()
                 .name(validatorRequestDTO.getName())
-                .key(key)
+                .validatorKey(key)
                 .vendor(vendor)
                 .createdBy(userPrincipal.getUser())
                 .lastModifiedBy(userPrincipal.getUser())
@@ -104,7 +104,7 @@ public class ValidatorServiceImpl implements ValidatorService {
 
     @Override
     public ValidatorDTO getValidatorByKey(String key) throws EntityNotFoundException {
-        return validatorRepository.findByKey(key).orElseThrow(() -> new EntityNotFoundException("Validator not found")).toDTO();
+        return validatorRepository.findByValidatorKey(key).orElseThrow(() -> new EntityNotFoundException("Validator not found")).toDTO();
     }
 
     private String generateKey() {
