@@ -10,6 +10,7 @@ import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.service.user.UserService;
 import io.satra.iconnect.service.validator.ValidatorService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,7 @@ public class AuthController {
      * @return the logged-in user with a JWT token {@link JwtResponseDTO}
      */
     @PostMapping("/login")
+    @Operation(summary = "Login a user to the application. Can login with email and password or mobile number and OTP code")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO loginRequestDTO) {
         return ResponseEntity.ok(userService.loginUser(loginRequestDTO));
     }
@@ -48,6 +50,7 @@ public class AuthController {
      * @return the registered user {@link UserDTO}
      */
     @PostMapping("/register")
+    @Operation(summary = "Register a new user to the application")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequestDTO registerRequestDTO) throws BadRequestException {
         log.info("Registering user with email: {} and mobile: {}", registerRequestDTO.getEmail(), registerRequestDTO.getMobile());
         JwtResponseDTO registeredUser = userService.register(registerRequestDTO);
@@ -63,6 +66,7 @@ public class AuthController {
      * @throws EntityNotFoundException if no user is authenticated
      */
     @PostMapping("/otp/generate")
+    @Operation(summary = "Generate and send an OTP to the user's mobile number")
     public ResponseEntity<?> sendOTP(@RequestBody GenerateOTPDTO generateOTPDTO) throws EntityNotFoundException{
         return ResponseEntity.ok(userService.sendOTP(generateOTPDTO));
     }
@@ -75,6 +79,7 @@ public class AuthController {
      * @throws EntityNotFoundException if no validator is found
      */
     @GetMapping("/validator/{validatorKey}")
+    @Operation(summary = "Authenticate a vendor with the validator key")
     public ResponseEntity<?> getValidator(@PathVariable String validatorKey) throws EntityNotFoundException {
         return ResponseEntity.ok(validatorService.getValidatorByKey(validatorKey));
     }
