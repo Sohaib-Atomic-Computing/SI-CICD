@@ -67,6 +67,9 @@ public class ValidatorServiceImpl implements ValidatorService {
 
         // get the user data from the request
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userPrincipal.getUser() == null) {
+            throw new EntityNotFoundException("User not found");
+        }
 
         // generate license key
         String key = KeyGenerator.nextKey();
@@ -102,6 +105,9 @@ public class ValidatorServiceImpl implements ValidatorService {
 
         // get the user data from the request
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userPrincipal.getUser() == null) {
+            throw new EntityNotFoundException("User not found");
+        }
 
         validator.setName(validatorRequestDTO.getName());
         validator.setLastModifiedBy(userPrincipal.getUser());
@@ -124,6 +130,16 @@ public class ValidatorServiceImpl implements ValidatorService {
     @Override
     public ValidatorDTO getValidator(String id) throws EntityNotFoundException {
         return validatorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Validator not found")).toDTO();
+    }
+
+    @Override
+    public Validator getValidatorEntityById(String id) throws EntityNotFoundException {
+        return validatorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Validator not found"));
+    }
+
+    @Override
+    public Validator getValidatorEntityByName(String name) throws EntityNotFoundException {
+        return validatorRepository.findFirstByName(name).orElseThrow(() -> new EntityNotFoundException("Validator not found"));
     }
 
     @Override

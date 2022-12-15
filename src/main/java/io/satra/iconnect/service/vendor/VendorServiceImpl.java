@@ -43,6 +43,9 @@ public class VendorServiceImpl implements VendorService {
 
         // get the user data from the request
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userPrincipal.getUser() == null) {
+            throw new EntityNotFoundException("User not found");
+        }
 
         // create the vendor entity
         Vendor vendor = Vendor.builder()
@@ -72,6 +75,9 @@ public class VendorServiceImpl implements VendorService {
 
         // get the user data from the request
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userPrincipal.getUser() == null) {
+            throw new EntityNotFoundException("User not found");
+        }
 
         // update the vendor entity
         if (vendorRequestDTO.getName() != null && !vendorRequestDTO.getName().isEmpty()) {

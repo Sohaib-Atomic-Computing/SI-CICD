@@ -12,12 +12,14 @@ import io.satra.iconnect.dto.response.JwtResponseDTO;
 import io.satra.iconnect.dto.response.ResponseDTO;
 import io.satra.iconnect.entity.Promotion;
 import io.satra.iconnect.entity.User;
+import io.satra.iconnect.entity.Validator;
 import io.satra.iconnect.entity.enums.UserRole;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.repository.UserRepository;
 import io.satra.iconnect.security.JWTUtils;
 import io.satra.iconnect.security.UserPrincipal;
+import io.satra.iconnect.service.validator.ValidatorService;
 import io.satra.iconnect.utils.EncodingUtils;
 import io.satra.iconnect.utils.TimeUtils;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +45,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final ValidatorService validatorService;
     private final PasswordEncoder passwordEncoder;
     private final JWTUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
@@ -136,13 +139,22 @@ public class UserServiceImpl implements UserService {
      * @throws EntityNotFoundException if no user is authenticated
      */
     @Override
-    public UserDTO getCurrentUser() throws EntityNotFoundException {
+    public Object getCurrentUser() throws EntityNotFoundException {
+        User currentUser = null;
+        Validator currentValidator = null;
+
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userPrincipal.getUser() != null) {
+            currentUser = userRepository.findFirstByEmailOrMobile(userPrincipal.getUsername(), userPrincipal.getUsername())
+                    .orElseThrow(() -> new EntityNotFoundException("User not found!"));
+            return currentUser.toDTO();
+        } else if (userPrincipal.getValidator() != null) {
+            return validatorService.getValidatorEntityByName(userPrincipal.getUsername());
+        } else {
+            throw new EntityNotFoundException("User not found");
+        }
 
-        User currentUser = userRepository.findFirstByEmailOrMobile(userPrincipal.getUsername(), userPrincipal.getUsername())
-                .orElseThrow(() -> new EntityNotFoundException("User not found!"));
 
-        return currentUser.toDTO();
     }
 
     /**
@@ -200,6 +212,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO updateUser(String id, UpdateProfileRequestDTO updateProfileRequestDTO) throws EntityNotFoundException {
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userPrincipal.getUser() == null) {
+            throw new EntityNotFoundException("User not found");
+        }
 
         User updatedUser = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("No user with given id %s found!".formatted(id)));
@@ -423,6 +438,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<VendorDTO> getVendors() throws EntityNotFoundException {
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userPrincipal.getUser() == null) {
+            throw new EntityNotFoundException("User not found");
+        }
 
         User user = userRepository.findById(userPrincipal.getUser().getId())
                 .orElseThrow(() -> new EntityNotFoundException("No user with given id %s found!".formatted(userPrincipal.getUser().getId())));

@@ -36,8 +36,8 @@ public class UserController {
      * @throws EntityNotFoundException if no user is authenticated
      */
     @GetMapping("/userinfo")
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserDTO> getUserInfo() throws EntityNotFoundException {
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN') or hasRole('ROLE_VALIDATOR')")
+    public ResponseEntity<?> getUserInfo() throws EntityNotFoundException {
         log.info("Getting user info");
         return ResponseEntity.ok(userService.getCurrentUser());
     }
