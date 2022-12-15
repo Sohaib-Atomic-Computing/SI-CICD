@@ -4,6 +4,7 @@ import io.satra.iconnect.dto.UserDTO;
 import io.satra.iconnect.dto.request.GenerateOTPDTO;
 import io.satra.iconnect.dto.request.LoginRequestDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
+import io.satra.iconnect.dto.request.ValidatorLoginRequestDTO;
 import io.satra.iconnect.dto.response.JwtResponseDTO;
 import io.satra.iconnect.dto.response.ResponseDTO;
 import io.satra.iconnect.exception.generic.BadRequestException;
@@ -70,12 +71,12 @@ public class AuthController {
     /**
      * This endpoint takes the validator key and returns the associated vendor.
      *
-     * @param validatorKey the validator key
+     * @param validatorLoginRequestDTO the validator object that contains the key and customer id
      * @return the validator with the associated vendor
      * @throws EntityNotFoundException if no validator is found
      */
-    @GetMapping("/validator/{validatorKey}")
-    public ResponseEntity<?> getValidator(@PathVariable String validatorKey) throws EntityNotFoundException {
-        return ResponseEntity.ok(validatorService.getValidatorByKey(validatorKey));
+    @PostMapping("/login/validator")
+    public ResponseEntity<?> loginValidator(@Valid @RequestBody ValidatorLoginRequestDTO validatorLoginRequestDTO) throws EntityNotFoundException {
+        return ResponseEntity.ok(validatorService.loginValidator(validatorLoginRequestDTO));
     }
 }

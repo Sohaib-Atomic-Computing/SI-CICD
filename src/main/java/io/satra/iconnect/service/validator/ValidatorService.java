@@ -1,7 +1,9 @@
 package io.satra.iconnect.service.validator;
 
 import io.satra.iconnect.dto.ValidatorDTO;
+import io.satra.iconnect.dto.request.ValidatorLoginRequestDTO;
 import io.satra.iconnect.dto.request.ValidatorRequestDTO;
+import io.satra.iconnect.dto.response.JwtResponseDTO;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,15 @@ import java.util.List;
 
 @Service
 public interface ValidatorService {
+
+    /**
+     * This method login the vendor using the vendor validator.
+     *
+     * @param validatorLoginRequestDTO the validator information to log in the vendor
+     * @return {@link JwtResponseDTO} with the logged in validator
+     * @throws BadRequestException if the validator is not found
+     */
+    JwtResponseDTO loginValidator(ValidatorLoginRequestDTO validatorLoginRequestDTO) throws BadRequestException;
 
     /**
      * This method is used to add a new validator

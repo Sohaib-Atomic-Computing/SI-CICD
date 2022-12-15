@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface ValidatorRepository extends JpaRepository<Validator, String> {
 
     Optional<Validator> findByName(String name);
+    Optional<Validator> findFirstByName(String name);
     Optional<Validator> findByValidatorKey(String validatorKey);
     Optional<Validator> findByVendorAndName(Vendor vendor, String name);
     List<Validator> findAllByVendor(Vendor vendor);

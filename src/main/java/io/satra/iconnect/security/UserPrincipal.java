@@ -1,6 +1,7 @@
 package io.satra.iconnect.security;
 
 import io.satra.iconnect.entity.User;
+import io.satra.iconnect.entity.Validator;
 import io.satra.iconnect.entity.enums.UserRole;
 import lombok.Builder;
 import lombok.Data;
@@ -16,11 +17,17 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserPrincipal implements UserDetails {
 
-    private final transient User user;
+    private transient User user;
+    private transient Validator validator;
     private Collection<? extends GrantedAuthority> authorities;
 
     public UserPrincipal(User user, Collection<? extends GrantedAuthority> authorities) {
         this.user = user;
+        this.authorities = authorities;
+    }
+
+    public UserPrincipal(Validator validator, Collection<? extends GrantedAuthority> authorities) {
+        this.validator = validator;
         this.authorities = authorities;
     }
 
@@ -37,20 +44,41 @@ public class UserPrincipal implements UserDetails {
                 authorities);
     }
 
+    public static UserPrincipal build(Validator validator) {
+        List<UserRole> roles = new ArrayList<>();
+        roles.add(UserRole.ROLE_VALIDATOR);
+
+        List<GrantedAuthority> authorities = roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.toString()))
+                .collect(Collectors.toList());
+
+        return new UserPrincipal(
+                validator,
+                authorities);
+    }
+
     @Override
     public String getUsername() {
-        return user.getEmail();
+        if (user != null) {
+            return user.getEmail();
+        } else {
+            return validator.getName();
+        }
     }
 
     @Override
     public String getPassword() {
-        if (user.getOtpCode() == null || user.getOtpCode().isEmpty()) {
-            log.info("User password: {}", user.getPassword());
-            return user.getPassword();
-        }
+        if (user != null) {
+            if (user.getOtpCode() == null || user.getOtpCode().isEmpty()) {
+                log.info("User password: {}", user.getPassword());
+                return user.getPassword();
+            }
 
-        log.info("User OTP: {}", user.getOtpCode());
-        return user.getOtpCode();
+            log.info("User OTP: {}", user.getOtpCode());
+            return user.getOtpCode();
+        } else {
+            return validator.getEncodedKey();
+        }
     }
 
     @Override
@@ -70,7 +98,11 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.getIsActive();
+        if (user != null) {
+            return user.getIsActive();
+        } else {
+            return validator.getIsActive();
+        }
     }
 
     @Override
@@ -82,11 +114,19 @@ public class UserPrincipal implements UserDetails {
             return false;
         }
         UserPrincipal that = (UserPrincipal) o;
-        return Objects.equals(user, that.user);
+        if (user != null) {
+            return Objects.equals(user, that.user);
+        } else {
+            return Objects.equals(validator, that.validator);
+        }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(user);
+        if (user != null) {
+            return Objects.hash(user);
+        } else {
+            return Objects.hash(validator);
+        }
     }
 }

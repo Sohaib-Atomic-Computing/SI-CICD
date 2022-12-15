@@ -150,6 +150,7 @@ public class PromotionController {
      * @throws EntityNotFoundException if no promotion is found with the given QR code
      */
     @PostMapping(value = "/scanner/validate")
+    @PreAuthorize("hasRole('ROLE_VALIDATOR')")
     public ResponseEntity<?> getPromotionByQRCode(@Valid @RequestBody ScanDTO scanDTO) throws EntityNotFoundException {
         return ResponseEntity.ok(promotionService.promotionScannerValidator(scanDTO));
     }

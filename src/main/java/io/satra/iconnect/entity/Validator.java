@@ -22,6 +22,11 @@ public class Validator extends BaseEntityAudit {
     private String name;
     @NotNull
     private String validatorKey;
+    @NotNull
+    private String encodedKey;
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    @Builder.Default
+    private Boolean isActive = Boolean.TRUE;
     @JsonIgnore
     @JoinColumn(name = "createdBy", referencedColumnName = "id")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
