@@ -38,11 +38,11 @@ public class ValidatorServiceImpl implements ValidatorService {
     @Override
     public JwtResponseDTO loginValidator(ValidatorLoginRequestDTO validatorLoginRequestDTO) throws BadRequestException {
 
-        Validator validator = validatorRepository.findFirstByName(validatorLoginRequestDTO.getCustomerId())
+        Validator validator = validatorRepository.findFirstByName(validatorLoginRequestDTO.getUserId())
                 .orElseThrow(() -> new BadRequestException("Validator does not exist"));
 
         // Generate JWT token
-        String jwt = generateJWTToken(validatorLoginRequestDTO.getCustomerId(), validatorLoginRequestDTO.getValidatorKey());
+        String jwt = generateJWTToken(validatorLoginRequestDTO.getUserId(), validatorLoginRequestDTO.getValidatorKey());
 
         return JwtResponseDTO.builder()
                 .validator(validator.toDTO())
