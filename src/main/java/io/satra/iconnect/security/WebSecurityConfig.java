@@ -33,12 +33,10 @@ public class WebSecurityConfig {
     private static final String[] AUTH_WHITELIST = {
             "/",
             "/favicon.ico/**",
-
             "/swagger-ui.html/**",
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/sw.js/**",
-
             "/api/auth/**"
     };
     private static final String[] AUTH_AUTHENTICATED_LIST = {

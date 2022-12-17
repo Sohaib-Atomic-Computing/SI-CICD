@@ -8,6 +8,7 @@ import io.satra.iconnect.dto.response.ResponseDTO;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.service.promotion.PromotionService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,6 +38,7 @@ public class PromotionController {
      */
     @PostMapping(value = "/")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Create a new promotion")
     public ResponseEntity<?> createPromotion(@Valid @RequestBody PromotionRequestDTO promotionRequestDTO) throws BadRequestException {
         PromotionDTO promotionDTO = promotionService.createPromotion(promotionRequestDTO);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/promotions/" + promotionDTO.getId()).toUriString());
@@ -59,6 +61,7 @@ public class PromotionController {
      */
     @PutMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Update a promotion")
     public ResponseEntity<?> updatePromotion(@PathVariable String id, @Valid @RequestBody PromotionRequestDTO promotionRequestDTO)
             throws EntityNotFoundException {
         PromotionDTO promotionDTO = promotionService.updatePromotion(id, promotionRequestDTO);
@@ -80,6 +83,7 @@ public class PromotionController {
      */
     @DeleteMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Delete a promotion")
     public ResponseEntity<?> deletePromotion(@PathVariable String id) throws EntityNotFoundException {
         promotionService.deletePromotion(id);
         return ResponseEntity.ok(
@@ -99,6 +103,7 @@ public class PromotionController {
      */
     @GetMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Get a promotion by id")
     public ResponseEntity<?> getPromotion(@PathVariable String id) throws EntityNotFoundException {
         return ResponseEntity.ok(promotionService.getPromotion(id));
     }
@@ -117,6 +122,7 @@ public class PromotionController {
      */
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Get all promotions with pagination and filters")
     public ResponseEntity<?> getAllPromotions(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Boolean isActive,
@@ -138,6 +144,7 @@ public class PromotionController {
      */
     @GetMapping(value = "/vendor/{vendorId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Get all promotions for a vendor")
     public ResponseEntity<?> getPromotionsByVendor(@PathVariable String vendorId) throws EntityNotFoundException {
         return ResponseEntity.ok(promotionService.getVendorPromotions(vendorId));
     }
@@ -150,6 +157,7 @@ public class PromotionController {
      * @throws EntityNotFoundException if no promotion is found with the given QR code
      */
     @PostMapping(value = "/scanner/validate")
+    @Operation(summary = "Validate a QR code and get the promotion associated with it")
     public ResponseEntity<?> getPromotionByQRCode(@Valid @RequestBody ScanDTO scanDTO) throws EntityNotFoundException {
         return ResponseEntity.ok(promotionService.promotionScannerValidator(scanDTO));
     }
@@ -163,6 +171,7 @@ public class PromotionController {
      */
     @PostMapping(value = "/scanner/encrypt")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Encrypt the user id and return the encrypted string")
     public ResponseEntity<?> encryptQRCode(@Valid @RequestBody ScannerMessageDTO scannerMessageDTO) throws BadRequestException {
         return ResponseEntity.ok(promotionService.encrypt(scannerMessageDTO));
     }

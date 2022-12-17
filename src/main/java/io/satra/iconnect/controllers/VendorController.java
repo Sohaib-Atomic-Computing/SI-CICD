@@ -5,6 +5,7 @@ import io.satra.iconnect.dto.request.VendorRequestDTO;
 import io.satra.iconnect.dto.response.ResponseDTO;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.service.vendor.VendorService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,6 +34,7 @@ public class VendorController {
      */
     @PostMapping(value = "/")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Create a new vendor")
     public ResponseEntity<?> createVendor(@Valid @RequestBody VendorRequestDTO vendorRequestDTO) {
         VendorDTO vendorDTO = vendorService.createVendor(vendorRequestDTO);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/vendors/" + vendorDTO.getId()).toUriString());
@@ -55,6 +57,7 @@ public class VendorController {
      */
     @PutMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Update a vendor")
     public ResponseEntity<?> updateVendor(@PathVariable String id, @Valid @RequestBody VendorRequestDTO vendorRequestDTO)
             throws EntityNotFoundException {
         VendorDTO vendorDTO = vendorService.updateVendor(id, vendorRequestDTO);
@@ -76,6 +79,7 @@ public class VendorController {
      */
     @DeleteMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Delete a vendor")
     public ResponseEntity<?> deleteVendor(@PathVariable String id)
             throws EntityNotFoundException {
         vendorService.deleteVendor(id);
@@ -96,6 +100,7 @@ public class VendorController {
      */
     @GetMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Get a vendor by id")
     public ResponseEntity<?> getVendor(@PathVariable String id) throws EntityNotFoundException {
         return ResponseEntity.ok(vendorService.findVendorById(id));
     }
@@ -109,6 +114,7 @@ public class VendorController {
      */
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Get all vendors with pagination and filters")
     public ResponseEntity<Page<VendorDTO>> getAllVendors(
             @RequestParam(required = false) String name,
             Pageable page) {

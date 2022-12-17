@@ -6,6 +6,7 @@ import io.satra.iconnect.dto.response.ResponseDTO;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.service.validator.ValidatorService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,7 @@ public class ValidatorController {
      */
     @PostMapping(value = "/")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Create a new validator")
     public ResponseEntity<?> createValidator(@Valid @RequestBody ValidatorRequestDTO validatorRequestDTO) throws BadRequestException {
         log.info("Creating validator");
         ValidatorDTO validatorDTO = validatorService.createValidator(validatorRequestDTO);
@@ -56,6 +58,7 @@ public class ValidatorController {
      */
     @PutMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Update a validator by id")
     public ResponseEntity<?> updateValidator(@PathVariable String id, @Valid @RequestBody ValidatorRequestDTO validatorRequestDTO)
             throws EntityNotFoundException {
         log.info("Updating validator with id: {}", id);
@@ -78,6 +81,7 @@ public class ValidatorController {
      */
     @DeleteMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Delete a validator by id")
     public ResponseEntity<?> deleteValidator(@PathVariable String id) throws EntityNotFoundException {
         log.info("Deleting validator with id: {}", id);
         validatorService.deleteValidator(id);
@@ -98,6 +102,7 @@ public class ValidatorController {
      */
     @GetMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Get a validator by id")
     public ResponseEntity<?> getValidator(@PathVariable String id) throws EntityNotFoundException {
         log.info("Getting validator with id: {}", id);
         ValidatorDTO validatorDTO = validatorService.getValidator(id);
@@ -119,6 +124,7 @@ public class ValidatorController {
      */
     @GetMapping(value = "/vendor/{vendorId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Get all vendor validators by vendor id")
     public ResponseEntity<?> getValidatorsByVendor(@PathVariable String vendorId) throws EntityNotFoundException {
         log.info("Getting validators by vendor id: {}", vendorId);
         return ResponseEntity.ok(validatorService.getValidatorsByVendorId(vendorId));

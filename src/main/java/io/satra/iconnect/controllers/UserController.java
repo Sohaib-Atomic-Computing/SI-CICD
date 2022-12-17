@@ -8,6 +8,7 @@ import io.satra.iconnect.dto.response.ResponseDTO;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.service.user.UserService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,6 +38,7 @@ public class UserController {
      */
     @GetMapping("/userinfo")
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Get the current authenticated user information")
     public ResponseEntity<UserDTO> getUserInfo() throws EntityNotFoundException {
         log.info("Getting user info");
         return ResponseEntity.ok(userService.getCurrentUser());
@@ -50,6 +52,7 @@ public class UserController {
      */
     @GetMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Get a user by id")
     public ResponseEntity<UserDTO> findUserById(@PathVariable String id) {
         return ResponseEntity.ok(userService.findUserById(id));
     }
@@ -62,6 +65,7 @@ public class UserController {
      */
     @PostMapping(value = "/")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Create a new admin user")
     public ResponseEntity<?> addAdminUser(@Valid @RequestBody RegisterRequestDTO registerRequestDTO) {
         UserDTO user = userService.addAdminUser(registerRequestDTO);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/users/" + user.getId()).toUriString());
@@ -84,6 +88,7 @@ public class UserController {
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Update the profile information of a given user")
     public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody UpdateProfileRequestDTO updateProfileRequestDTO)
             throws EntityNotFoundException {
         UserDTO user = userService.updateUser(id, updateProfileRequestDTO);
@@ -105,6 +110,7 @@ public class UserController {
      */
     @DeleteMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Delete a user by id")
     public ResponseEntity<?> deleteUser(@PathVariable String id) throws EntityNotFoundException{
         userService.deleteUser(id);
         return ResponseEntity.ok(ResponseDTO.builder()
@@ -125,6 +131,7 @@ public class UserController {
      */
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Get all users with pagination and filters")
     public ResponseEntity<Page<UserDTO>> getAllUsers(
             @RequestParam(required = false) String email,
             @RequestParam(required = false) String mobile,
@@ -142,6 +149,7 @@ public class UserController {
      */
     @GetMapping("/vendors")
     @PreAuthorize("hasRole('ROLE_USER')")
+    @Operation(summary = "Get vendors list that the current user have promotions for")
     public ResponseEntity<?> getVendors() throws EntityNotFoundException {
         List<VendorDTO> vendors = userService.getVendors();
         return ResponseEntity.ok(ResponseDTO.builder()
@@ -160,6 +168,7 @@ public class UserController {
      * @throws EntityNotFoundException if no user with given email or mobile is found
      */
     @GetMapping("/check")
+    @Operation(summary = "Check if the given email or mobile is already registered")
     public ResponseEntity<?> userExists(@RequestParam(required = false) String email, @RequestParam(required = false) String mobile)
             throws EntityNotFoundException {
         if (email == null && mobile == null) {
