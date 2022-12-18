@@ -7,12 +7,14 @@ import io.satra.iconnect.dto.request.PromotionRequestDTO;
 import io.satra.iconnect.dto.request.ScanDTO;
 import io.satra.iconnect.entity.Promotion;
 import io.satra.iconnect.entity.User;
+import io.satra.iconnect.entity.Validator;
 import io.satra.iconnect.entity.Vendor;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.repository.PromotionRepository;
 import io.satra.iconnect.security.UserPrincipal;
 import io.satra.iconnect.service.user.UserService;
+import io.satra.iconnect.service.validator.ValidatorService;
 import io.satra.iconnect.service.vendor.VendorService;
 import io.satra.iconnect.utils.MaCryptoUtils;
 import io.satra.iconnect.utils.TimeUtils;
@@ -37,6 +39,7 @@ public class PromotionServiceImpl implements PromotionService {
 
     private final PromotionRepository promotionRepository;
     private final VendorService vendorService;
+    private final ValidatorService validatorService;
     private final UserService userService;
 
     @Value("${iconnect.app.default.aes.password}")
@@ -50,7 +53,7 @@ public class PromotionServiceImpl implements PromotionService {
      * @throws BadRequestException if the promotion already exists
      */
     @Override
-    public PromotionDTO createPromotion(PromotionRequestDTO promotionRequestDTO) throws BadRequestException {
+    public PromotionDTO createPromotion(PromotionRequestDTO promotionRequestDTO) throws BadRequestException, EntityNotFoundException {
         // check if promotion request is valid
         // check if the vendor exists
         Vendor vendor = vendorService.findVendorEntityById(promotionRequestDTO.getVendorId());
@@ -68,6 +71,9 @@ public class PromotionServiceImpl implements PromotionService {
 
         // get the user data from the request
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userPrincipal.getUser() == null) {
+            throw new EntityNotFoundException("User not found");
+        }
 
         // create the promotion entity
         Promotion promotion = Promotion.builder()
@@ -115,6 +121,9 @@ public class PromotionServiceImpl implements PromotionService {
 
         // get the user data from the request
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userPrincipal.getUser() == null) {
+            throw new EntityNotFoundException("User not found");
+        }
 
         // update the promotion entity
         promotion.setName(promotionRequestDTO.getName());
@@ -209,8 +218,14 @@ public class PromotionServiceImpl implements PromotionService {
      */
     @Override
     public List<PromotionDTO> promotionScannerValidator(ScanDTO scanDTO) throws EntityNotFoundException {
-        // check if the vendor exists
-        Vendor vendor = vendorService.findVendorEntityById(scanDTO.getScannerKey());
+        // get the authenticated validator
+        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userPrincipal.getValidator() == null) {
+            throw new EntityNotFoundException("Validator not found");
+        }
+
+        // get the validator entity
+        Validator validator = validatorService.getValidatorEntityById(userPrincipal.getValidator().getId());
 
         // decrypt the message
         MaCryptoUtils maCryptoUtils = new MaCryptoUtils();
@@ -226,7 +241,7 @@ public class PromotionServiceImpl implements PromotionService {
         User user = userService.findUserEntityById(scannerMessageDTO.getUserId());
 
         // find promotion by vendorId and user
-        return promotionRepository.findByVendorAndUsers(vendor, user)
+        return promotionRepository.findByVendorAndUsers(validator.getVendor(), user)
                 .stream().map(Promotion::toScannerResponseDTO).collect(Collectors.toList());
     }
 

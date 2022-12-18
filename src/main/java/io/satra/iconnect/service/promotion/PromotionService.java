@@ -22,8 +22,9 @@ public interface PromotionService {
      * @param promotionRequestDTO the promotion information to register
      * @return the registered promotion {@link PromotionDTO}
      * @throws BadRequestException if the promotion already exists
+     * @throws EntityNotFoundException if the user does not exist
      */
-    PromotionDTO createPromotion(PromotionRequestDTO promotionRequestDTO) throws BadRequestException;
+    PromotionDTO createPromotion(PromotionRequestDTO promotionRequestDTO) throws BadRequestException, EntityNotFoundException;
 
     /**
      * This method is used to update a promotion

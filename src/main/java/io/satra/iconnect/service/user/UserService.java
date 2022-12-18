@@ -45,7 +45,7 @@ public interface UserService {
      * @return the current authenticated user
      * @throws EntityNotFoundException if no user is authenticated
      */
-    UserDTO getCurrentUser() throws EntityNotFoundException;
+    Object getCurrentUser() throws EntityNotFoundException;
 
     /**
      * Get a user by given id
