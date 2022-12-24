@@ -36,6 +36,7 @@ public class User extends BaseEntityAudit {
     @NotNull
     @Email
     private String email;
+    private String profilePicture;
     @NotBlank
     @Size(max = 120)
     private String password;
@@ -76,6 +77,7 @@ public class User extends BaseEntityAudit {
                 .firstName(firstName)
                 .lastName(lastName)
                 .email(email)
+                .profilePicture(profilePicture)
                 .mobile(mobile)
                 .isActive(isActive)
                 .role(role)

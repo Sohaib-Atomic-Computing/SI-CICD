@@ -1,23 +1,19 @@
 package io.satra.iconnect.utils;
 
-import org.springframework.beans.factory.annotation.Value;
-
 import java.io.File;
 
 public class FolderUtil {
-    @Value("${i-connect.app.systemFolderPath}")
-    private String systemFolderPath;
 
     public void createFolder(String folderName) {
         synchronized (FolderUtil.class) {
             try {
                 // creating parent folder
-                if (isNotFolderExist(systemFolderPath)) {
-                    create(systemFolderPath);
+                if (isNotFolderExist(PropertyLoader.getPathStorage())) {
+                    create(PropertyLoader.getPathStorage());
                 }
 
-                if (isNotFolderExist(systemFolderPath + File.separator + folderName)) {
-                    create(systemFolderPath + File.separator + folderName);
+                if (isNotFolderExist(PropertyLoader.getPathStorage() + File.separator + folderName)) {
+                    create(PropertyLoader.getPathStorage() + File.separator + folderName);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -33,7 +29,7 @@ public class FolderUtil {
      */
     public String getPath(String folderName) {
         createFolder(folderName);
-        return (systemFolderPath + folderName + "/");
+        return (PropertyLoader.getPathStorage() + folderName + "/");
     }
 
     /**

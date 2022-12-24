@@ -1,5 +1,6 @@
 package io.satra.iconnect.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.satra.iconnect.entity.User;
 import io.satra.iconnect.entity.enums.UserRole;
 import lombok.Builder;
@@ -9,12 +10,14 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDTO {
 
     private String id;
     private String firstName;
     private String lastName;
     private String email;
+    private String profilePicture;
     private String mobile;
     private Boolean isActive;
     private UserRole role;
@@ -28,6 +31,7 @@ public class UserDTO {
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setEmail(email);
+        user.setProfilePicture(profilePicture);
         user.setMobile(mobile);
         user.setIsActive(isActive);
         user.setRole(role);

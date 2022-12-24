@@ -22,6 +22,7 @@ public class Vendor extends BaseEntityAudit {
 
     @NotNull
     private String name;
+    private String logo;
     @JsonIgnore
     @JoinColumn(name = "createdBy", referencedColumnName = "id")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -48,6 +49,7 @@ public class Vendor extends BaseEntityAudit {
         return VendorDTO.builder()
                 .id(id)
                 .name(name)
+                .logo(logo)
                 .createdAt(createdAt)
                 .createdBy(createdBy != null ? createdBy.getFirstName() + ' ' + createdBy.getLastName() : null)
                 .lastModifiedAt(lastModifiedAt)

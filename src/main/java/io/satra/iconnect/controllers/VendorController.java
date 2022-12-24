@@ -1,8 +1,8 @@
 package io.satra.iconnect.controllers;
 
 import io.satra.iconnect.dto.VendorDTO;
-import io.satra.iconnect.dto.request.VendorRequestDTO;
 import io.satra.iconnect.dto.response.ResponseDTO;
+import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.service.vendor.VendorService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,9 +13,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.validation.Valid;
+import java.io.IOException;
 import java.net.URI;
 
 @RestController
@@ -29,14 +30,17 @@ public class VendorController {
     /**
      * This endpoint creates a new vendor.
      *
-     * @param vendorRequestDTO the vendor information to register
+     * @param name the vendor name
+     * @param logo the vendor logo
      * @return {@link ResponseDTO} with the created vendor {@link VendorDTO}
      */
     @PostMapping(value = "/")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Create a new vendor")
-    public ResponseEntity<?> createVendor(@Valid @RequestBody VendorRequestDTO vendorRequestDTO) {
-        VendorDTO vendorDTO = vendorService.createVendor(vendorRequestDTO);
+    public ResponseEntity<?> createVendor(@RequestParam(name = "name") String name,
+                                          @RequestParam(name = "logo", required = false) MultipartFile logo)
+            throws BadRequestException, IOException {
+        VendorDTO vendorDTO = vendorService.createVendor(name, logo);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/vendors/" + vendorDTO.getId()).toUriString());
         return ResponseEntity.created(uri).body(
                 ResponseDTO.builder()
@@ -51,16 +55,19 @@ public class VendorController {
      * This endpoint updates the vendor with the given id.
      *
      * @param id the id of the vendor to be updated
-     * @param vendorRequestDTO the vendor information to update
+     * @param name the vendor name
+     * @param logo the vendor logo
      * @return {@link ResponseDTO} with the updated vendor {@link VendorDTO}
      * @throws EntityNotFoundException if no vendor is found with the given id
      */
     @PutMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Update a vendor")
-    public ResponseEntity<?> updateVendor(@PathVariable String id, @Valid @RequestBody VendorRequestDTO vendorRequestDTO)
-            throws EntityNotFoundException {
-        VendorDTO vendorDTO = vendorService.updateVendor(id, vendorRequestDTO);
+    public ResponseEntity<?> updateVendor(@PathVariable String id,
+                                          @RequestParam(name = "name") String name,
+                                          @RequestParam(name = "logo", required = false) MultipartFile logo)
+            throws EntityNotFoundException, IOException {
+        VendorDTO vendorDTO = vendorService.updateVendor(id, name, logo);
         return ResponseEntity.ok(
                 ResponseDTO.builder()
                         .message("Vendor updated successfully")

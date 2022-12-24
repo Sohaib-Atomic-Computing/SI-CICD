@@ -17,26 +17,6 @@ public class FileUtils {
      *
      * @param moduleName - module name
      * @param fileName - file name
-     * @param entityId - entity id
-     * @return file path
-     */
-    public String rename(String moduleName, String fileName, String entityId) {
-        synchronized (FileUtils.class) {
-            if (fileName == null || fileName.equals("")) {
-                return null;
-            }
-            String fileExtension = fileName.substring(fileName.lastIndexOf("."), fileName.length());
-            fileName = (moduleName + "_" + entityId + "_" + fileName.substring(0, fileName.lastIndexOf(".")) + "_" + String.valueOf(new Date().getTime()).concat(fileExtension));
-        }
-
-        return fileName;
-    }
-
-    /**
-     * This method is used to take the module name and file name and build the file path then returns it
-     *
-     * @param moduleName - module name
-     * @param fileName - file name
      * @return file path
      */
     public String rename(String moduleName, String fileName) {
@@ -68,13 +48,25 @@ public class FileUtils {
             if (file.isEmpty()) {
                 continue; //next pls
             }
-            filename = fileUtils.rename("IConnect", file.getOriginalFilename(), entityId);
+            filename = fileUtils.rename("IConnect", file.getOriginalFilename());
             byte[] bytes = file.getBytes();
             Path path = Paths.get(folderUtil.getPath(entityId) + filename);
             Files.write(path, bytes);
-            filesName.add(filename);
+            filesName.add(entityId + "/" + filename);
         }
 
         return filesName.isEmpty() ? null : String.join(",", filesName);
+    }
+
+    /**
+     * This method is used to take the file path and delete the file from the system
+     *
+     * @param filePath - file path
+     * @param entityId - entity id
+     * @throws IOException if the file does not exist
+     */
+    public void deleteFile(String filePath) throws IOException {
+        Path path = Paths.get(PropertyLoader.getPathStorage() + filePath);
+        Files.delete(path);
     }
 }

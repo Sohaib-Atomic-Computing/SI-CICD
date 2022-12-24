@@ -17,10 +17,10 @@ import io.satra.iconnect.service.user.UserService;
 import io.satra.iconnect.service.validator.ValidatorService;
 import io.satra.iconnect.service.vendor.VendorService;
 import io.satra.iconnect.utils.MaCryptoUtils;
+import io.satra.iconnect.utils.PropertyLoader;
 import io.satra.iconnect.utils.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -41,9 +41,6 @@ public class PromotionServiceImpl implements PromotionService {
     private final VendorService vendorService;
     private final ValidatorService validatorService;
     private final UserService userService;
-
-    @Value("${iconnect.app.default.aes.password}")
-    private String passwordAES;
 
     /**
      * This method is used to add a new promotion
@@ -229,7 +226,7 @@ public class PromotionServiceImpl implements PromotionService {
 
         // decrypt the message
         MaCryptoUtils maCryptoUtils = new MaCryptoUtils();
-        String decryptedMessage = maCryptoUtils.decryptAES(scanDTO.getMessage(), passwordAES);
+        String decryptedMessage = maCryptoUtils.decryptAES(scanDTO.getMessage(), PropertyLoader.getAesSecret());
         log.info("decryptedMessage: {}", decryptedMessage);
 
         // convert the decrypted message to ScannerMessageDTO Object using gson
@@ -280,7 +277,7 @@ public class PromotionServiceImpl implements PromotionService {
         log.info("Scanner message json: {}", json);
         // encrypt the json
         MaCryptoUtils maCryptoUtils = new MaCryptoUtils();
-        String encrypted = maCryptoUtils.encryptAES(json, passwordAES);
+        String encrypted = maCryptoUtils.encryptAES(json, PropertyLoader.getAesSecret());
         // add the encrypted message to the response
         HashMap<String, Object> response = new HashMap<>();
         response.put("encrypted", encrypted);
