@@ -36,6 +36,7 @@ public class WebSecurityConfig {
             "/swagger-ui.html/**",
             "/swagger-ui/**",
             "/v3/api-docs/**",
+            "/static/**",
             "/sw.js/**",
             "/api/auth/**"
     };

@@ -1,12 +1,12 @@
 package io.satra.iconnect.service.vendor;
 
 import io.satra.iconnect.dto.VendorDTO;
-import io.satra.iconnect.dto.request.VendorRequestDTO;
 import io.satra.iconnect.entity.Vendor;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.repository.VendorRepository;
 import io.satra.iconnect.security.UserPrincipal;
+import io.satra.iconnect.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -14,6 +14,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -25,19 +29,21 @@ public class VendorServiceImpl implements VendorService {
     /**
      * This method is used to add a new vendor
      *
-     * @param vendorRequestDTO the vendor information to register
+     * @param name the vendor name to register
+     * @param logo the vendor logo
      * @return the registered vendor {@link VendorDTO}
      * @throws BadRequestException if the vendor already exists
+     * @throws IOException        if the vendor logo cannot be saved
      */
     @Override
-    public VendorDTO createVendor(VendorRequestDTO vendorRequestDTO) throws BadRequestException {
+    public VendorDTO createVendor(String name, MultipartFile logo) throws BadRequestException, IOException {
         // check if the vendor request data is valid
-        if (vendorRequestDTO.getName() == null || vendorRequestDTO.getName().isEmpty()) {
+        if (name == null || name.isEmpty()) {
             throw new BadRequestException("Vendor name is required");
         }
 
         // check if the vendor already exists
-        if (vendorRepository.findByName(vendorRequestDTO.getName()).isPresent()) {
+        if (vendorRepository.findByName(name).isPresent()) {
             throw new BadRequestException("Vendor already exists");
         }
 
@@ -49,13 +55,22 @@ public class VendorServiceImpl implements VendorService {
 
         // create the vendor entity
         Vendor vendor = Vendor.builder()
-                .name(vendorRequestDTO.getName())
+                .name(name)
                 .createdBy(userPrincipal.getUser())
                 .lastModifiedBy(userPrincipal.getUser())
                 .build();
 
         // save the vendor
         vendor = vendorRepository.save(vendor);
+
+        // check if the logo is not null
+        if (logo != null) {
+            // save the logo
+            String logoPath = new FileUtils().saveFile(Collections.singletonList(logo), vendor.getId());
+            vendor.setLogo(logoPath);
+            // save the vendor
+            vendor = vendorRepository.save(vendor);
+        }
 
         return vendor.toDTO();
     }
@@ -64,12 +79,13 @@ public class VendorServiceImpl implements VendorService {
      * This method is used to update a vendor
      *
      * @param id the id of the vendor to be updated
-     * @param vendorRequestDTO the vendor information to update
+     * @param name the vendor name to update
+     * @param logo the vendor logo to update
      * @return the updated vendor {@link VendorDTO}
      * @throws EntityNotFoundException if the vendor already exists
      */
     @Override
-    public VendorDTO updateVendor(String id, VendorRequestDTO vendorRequestDTO) throws EntityNotFoundException {
+    public VendorDTO updateVendor(String id, String name, MultipartFile logo) throws EntityNotFoundException, IOException {
         // check if the vendor not exists
         Vendor vendor = vendorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No vendor with given id %s found!".formatted(id)));
 
@@ -79,9 +95,25 @@ public class VendorServiceImpl implements VendorService {
             throw new EntityNotFoundException("User not found");
         }
 
-        // update the vendor entity
-        if (vendorRequestDTO.getName() != null && !vendorRequestDTO.getName().isEmpty()) {
-            vendor.setName(vendorRequestDTO.getName());
+        // update the vendor name
+        if (name != null && !name.isEmpty()) {
+            vendor.setName(name);
+        }
+
+        // update the vendor logo
+        if (logo != null) {
+            // get the current logo path
+            String currentLogoPath = vendor.getLogo();
+            // save the logo
+            String logoPath = new FileUtils().saveFile(Collections.singletonList(logo), vendor.getId());
+            // if the logo is saved successfully, add the new logo path to the vendor
+            if (logoPath != null) {
+                vendor.setLogo(logoPath);
+            }
+            // if the vendor has an old logo, delete it
+            if (currentLogoPath != null) {
+                new FileUtils().deleteFile(currentLogoPath);
+            }
         }
 
         // update the vendor last modified by

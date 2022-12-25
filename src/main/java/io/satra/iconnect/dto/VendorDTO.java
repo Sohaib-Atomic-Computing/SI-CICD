@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class VendorDTO {
     private String id;
     private String name;
+    private String logo;
     private LocalDateTime createdAt;
     private String createdBy;
     private LocalDateTime lastModifiedAt;

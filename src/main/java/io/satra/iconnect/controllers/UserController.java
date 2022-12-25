@@ -3,8 +3,8 @@ package io.satra.iconnect.controllers;
 import io.satra.iconnect.dto.UserDTO;
 import io.satra.iconnect.dto.VendorDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
-import io.satra.iconnect.dto.request.UpdateProfileRequestDTO;
 import io.satra.iconnect.dto.response.ResponseDTO;
+import io.satra.iconnect.entity.enums.UserRole;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.service.user.UserService;
@@ -16,9 +16,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
@@ -42,6 +44,34 @@ public class UserController {
     public ResponseEntity<?> getUserInfo() throws EntityNotFoundException {
         log.info("Getting user info");
         return ResponseEntity.ok(userService.getCurrentUser());
+    }
+
+    /**
+     * This endpoint updates the profile information of a given user
+     *
+     * @param firstName         the new first name of the user
+     * @param lastName          the new last name of the user
+     * @param email             the new email of the user
+     * @param profilePicture    the new profile picture of the user
+     * @return the updated {@link UserDTO}
+     * @throws EntityNotFoundException if no user with given id is found
+     */
+    @PutMapping("/profile")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @Operation(summary = "Update the profile information of a given user")
+    public ResponseEntity<?> updateMyProfile(@RequestParam(required = false) String firstName,
+                                        @RequestParam(required = false) String lastName,
+                                        @RequestParam(required = false) String email,
+                                        @RequestParam(required = false) MultipartFile profilePicture)
+            throws EntityNotFoundException, IOException {
+        UserDTO user = userService.updateMyProfile(firstName, lastName, email, profilePicture);
+        return ResponseEntity.ok(
+                ResponseDTO.builder()
+                        .message("User updated successfully")
+                        .success(true)
+                        .data(user)
+                        .build()
+        );
     }
 
     /**
@@ -81,17 +111,30 @@ public class UserController {
     /**
      * This endpoint updates the profile information of a given user
      *
-     * @param id                      the id of the user to be updated
-     * @param updateProfileRequestDTO the information for updating the user profile
+     * @param id                the id of the user to be updated
+     * @param firstName         the new first name of the user
+     * @param lastName          the new last name of the user
+     * @param email             the new email of the user
+     * @param mobile            the new mobile of the user
+     * @param isActive          the new active status of the user
+     * @param role              the new role of the user
+     * @param profilePicture    the new profile picture of the user
      * @return the updated {@link UserDTO}
      * @throws EntityNotFoundException if no user with given id is found
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Update the profile information of a given user")
-    public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody UpdateProfileRequestDTO updateProfileRequestDTO)
-            throws EntityNotFoundException {
-        UserDTO user = userService.updateUser(id, updateProfileRequestDTO);
+    public ResponseEntity<?> updateUser(@PathVariable String id,
+                                        @RequestParam(required = false) String firstName,
+                                        @RequestParam(required = false) String lastName,
+                                        @RequestParam(required = false) String email,
+                                        @RequestParam(required = false) String mobile,
+                                        @RequestParam(required = false) Boolean isActive,
+                                        @RequestParam(required = false) UserRole role,
+                                        @RequestParam(required = false) MultipartFile profilePicture)
+            throws EntityNotFoundException, IOException {
+        UserDTO user = userService.updateUser(id, firstName, lastName, email, mobile, isActive, role, profilePicture);
         return ResponseEntity.ok(
                 ResponseDTO.builder()
                         .message("User updated successfully")

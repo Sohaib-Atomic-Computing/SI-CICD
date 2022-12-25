@@ -7,7 +7,6 @@ import io.satra.iconnect.dto.VendorDTO;
 import io.satra.iconnect.dto.request.GenerateOTPDTO;
 import io.satra.iconnect.dto.request.LoginRequestDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
-import io.satra.iconnect.dto.request.UpdateProfileRequestDTO;
 import io.satra.iconnect.dto.response.JwtResponseDTO;
 import io.satra.iconnect.dto.response.ResponseDTO;
 import io.satra.iconnect.entity.Promotion;
@@ -21,10 +20,11 @@ import io.satra.iconnect.security.JWTUtils;
 import io.satra.iconnect.security.UserPrincipal;
 import io.satra.iconnect.service.validator.ValidatorService;
 import io.satra.iconnect.utils.EncodingUtils;
+import io.satra.iconnect.utils.FileUtils;
+import io.satra.iconnect.utils.PropertyLoader;
 import io.satra.iconnect.utils.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,7 +34,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -49,8 +51,6 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JWTUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
-    @Value("${iconnect.app.env}")
-    private String env;
 
     /**
      * Login a user
@@ -153,8 +153,61 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new EntityNotFoundException("User not found");
         }
+    }
 
+    /**
+     * This method is used to update the user information.
+     * The user can only update his/her first name and last name.
+     * The admin can update the first name, last name, email, mobile, isActive and role of the user.
+     *
+     * @param firstName         the new first name of the user
+     * @param lastName          the new last name of the user
+     * @param email             the new email of the user
+     * @param profilePicture    the new profile picture of the user
+     * @return the updated user {@link UserDTO}
+     * @throws EntityNotFoundException if the user does not exist
+     */
+    @Override
+    public UserDTO updateMyProfile(String firstName, String lastName, String email, MultipartFile profilePicture) throws EntityNotFoundException, IOException {
+        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userPrincipal.getUser() == null) {
+            throw new EntityNotFoundException("User not found");
+        }
 
+        User updatedUser = userRepository.findFirstByEmailOrMobile(userPrincipal.getUsername(), userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found!"));
+
+        if (firstName != null && !firstName.isBlank()) {
+            updatedUser.setFirstName(firstName);
+        }
+        if (lastName != null && !lastName.isBlank()) {
+            updatedUser.setLastName(lastName);
+        }
+
+        if (email != null && !email.isBlank()) {
+            updatedUser.setEmail(email);
+        }
+
+        // update the profile picture
+        if (profilePicture != null) {
+            // get the current profile picture
+            String currentProfilePicture = updatedUser.getProfilePicture();
+            // save the new profile picture
+            String profilePictureUrl = new FileUtils().saveFile(Collections.singletonList(profilePicture), updatedUser.getId());
+            // if the profile picture is updated successfully, add the new profile picture to the user
+            if (profilePictureUrl != null) {
+                updatedUser.setProfilePicture(profilePictureUrl);
+            }
+            // if the user has an old profile picture, delete it
+            if (currentProfilePicture != null) {
+                new FileUtils().deleteFile(currentProfilePicture);
+            }
+        }
+
+        // update the user
+        updatedUser = userRepository.save(updatedUser);
+
+        return updatedUser.toDTO();
     }
 
     /**
@@ -204,13 +257,20 @@ public class UserServiceImpl implements UserService {
      * The user can only update his/her first name and last name.
      * The admin can update the first name, last name, email, mobile, isActive and role of the user.
      *
-     * @param id                       the id of the user to be updated
-     * @param updateProfileRequestDTO the user information to update
+     * @param id                the id of the user to be updated
+     * @param firstName         the new first name of the user
+     * @param lastName          the new last name of the user
+     * @param email             the new email of the user
+     * @param mobile            the new mobile of the user
+     * @param isActive          the new isActive of the user
+     * @param role              the new role of the user
+     * @param profilePicture    the new profile picture of the user
      * @return the updated user {@link UserDTO}
      * @throws EntityNotFoundException if the user does not exist
      */
     @Override
-    public UserDTO updateUser(String id, UpdateProfileRequestDTO updateProfileRequestDTO) throws EntityNotFoundException {
+    public UserDTO updateUser(String id, String firstName, String lastName, String email, String mobile,
+                              Boolean isActive, UserRole role, MultipartFile profilePicture) throws EntityNotFoundException, IOException {
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (userPrincipal.getUser() == null) {
             throw new EntityNotFoundException("User not found");
@@ -219,29 +279,45 @@ public class UserServiceImpl implements UserService {
         User updatedUser = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("No user with given id %s found!".formatted(id)));
 
-        if (updateProfileRequestDTO.getFirstName() != null) {
-            updatedUser.setFirstName(updateProfileRequestDTO.getFirstName());
+        if (firstName != null && !firstName.isBlank()) {
+            updatedUser.setFirstName(firstName);
         }
-        if (updateProfileRequestDTO.getLastName() != null) {
-            updatedUser.setLastName(updateProfileRequestDTO.getLastName());
+        if (lastName != null && !lastName.isBlank()) {
+            updatedUser.setLastName(lastName);
+        }
+
+        if (email != null && !email.isBlank()) {
+            updatedUser.setEmail(email);
         }
 
         // only admin can update the role, email, isActive and mobile
         if (userPrincipal.getUser().getRole() == UserRole.ROLE_ADMIN) {
-            if (updateProfileRequestDTO.getRole() != null) {
-                updatedUser.setRole(updateProfileRequestDTO.getRole());
+            if (role != null) {
+                updatedUser.setRole(role);
             }
 
-            if (updateProfileRequestDTO.getEmail() != null) {
-                updatedUser.setEmail(updateProfileRequestDTO.getEmail());
+            if (mobile != null && !mobile.isBlank()) {
+                updatedUser.setMobile(mobile);
             }
 
-            if (updateProfileRequestDTO.getMobile() != null) {
-                updatedUser.setMobile(updateProfileRequestDTO.getMobile());
+            if (isActive != null) {
+                updatedUser.setIsActive(isActive);
             }
+        }
 
-            if (updateProfileRequestDTO.getIsActive() != null) {
-                updatedUser.setIsActive(updateProfileRequestDTO.getIsActive());
+        // update the profile picture
+        if (profilePicture != null) {
+            // get the current profile picture
+            String currentProfilePicture = updatedUser.getProfilePicture();
+            // save the new profile picture
+            String profilePictureUrl = new FileUtils().saveFile(Collections.singletonList(profilePicture), updatedUser.getId());
+            // if the profile picture is updated successfully, add the new profile picture to the user
+            if (profilePictureUrl != null) {
+                updatedUser.setProfilePicture(profilePictureUrl);
+            }
+            // if the user has an old profile picture, delete it
+            if (currentProfilePicture != null) {
+                new FileUtils().deleteFile(currentProfilePicture);
             }
         }
 
@@ -367,7 +443,7 @@ public class UserServiceImpl implements UserService {
 
         String otp = String.format("%05d", rand.nextInt(100000));
 
-        if (env.equals("dev")) {
+        if (PropertyLoader.getEnv().equals("DEVELOPMENT")) {
             user.setOtpCode(passwordEncoder.encode("00000"));
         } else {
             user.setOtpCode(passwordEncoder.encode(otp));

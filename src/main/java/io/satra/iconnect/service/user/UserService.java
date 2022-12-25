@@ -5,16 +5,18 @@ import io.satra.iconnect.dto.VendorDTO;
 import io.satra.iconnect.dto.request.GenerateOTPDTO;
 import io.satra.iconnect.dto.request.LoginRequestDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
-import io.satra.iconnect.dto.request.UpdateProfileRequestDTO;
 import io.satra.iconnect.dto.response.JwtResponseDTO;
 import io.satra.iconnect.dto.response.ResponseDTO;
 import io.satra.iconnect.entity.User;
+import io.satra.iconnect.entity.enums.UserRole;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -48,6 +50,18 @@ public interface UserService {
     Object getCurrentUser() throws EntityNotFoundException;
 
     /**
+     * This method is used to update a user
+     *
+     * @param firstName         the user first name to update
+     * @param lastName          the user last name to update
+     * @param email             the user email to update
+     * @param profilePicture    the user profile picture to update
+     * @return the updated user {@link UserDTO}
+     * @throws EntityNotFoundException if no user with given id is found
+     */
+    UserDTO updateMyProfile(String firstName, String lastName, String email, MultipartFile profilePicture) throws EntityNotFoundException, IOException;
+
+    /**
      * Get a user by given id
      *
      * @param id the id of the user to be obtained
@@ -68,12 +82,18 @@ public interface UserService {
     /**
      * This method is used to update a user
      *
-     * @param id                       the id of the user to be updated
-     * @param updateProfileRequestDTO the user information to update
+     * @param id                the id of the user to be updated
+     * @param firstName         the user first name to update
+     * @param lastName          the user last name to update
+     * @param email             the user email to update
+     * @param mobile            the user mobile to update
+     * @param isActive          the user active status to update
+     * @param role              the user roles to update
+     * @param profilePicture    the user profile picture to update
      * @return the updated user {@link UserDTO}
      * @throws EntityNotFoundException if no user with given id is found
      */
-    UserDTO updateUser(String id, UpdateProfileRequestDTO updateProfileRequestDTO) throws EntityNotFoundException;
+    UserDTO updateUser(String id, String firstName, String lastName, String email, String mobile, Boolean isActive, UserRole role, MultipartFile profilePicture) throws EntityNotFoundException, IOException;
 
     /**
      * Delete an user
