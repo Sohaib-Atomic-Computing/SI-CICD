@@ -62,7 +62,6 @@ public class FileUtils {
      * This method is used to take the file path and delete the file from the system
      *
      * @param filePath - file path
-     * @param entityId - entity id
      * @throws IOException if the file does not exist
      */
     public void deleteFile(String filePath) throws IOException {

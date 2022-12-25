@@ -50,6 +50,18 @@ public interface UserService {
     Object getCurrentUser() throws EntityNotFoundException;
 
     /**
+     * This method is used to update a user
+     *
+     * @param firstName         the user first name to update
+     * @param lastName          the user last name to update
+     * @param email             the user email to update
+     * @param profilePicture    the user profile picture to update
+     * @return the updated user {@link UserDTO}
+     * @throws EntityNotFoundException if no user with given id is found
+     */
+    UserDTO updateMyProfile(String firstName, String lastName, String email, MultipartFile profilePicture) throws EntityNotFoundException, IOException;
+
+    /**
      * Get a user by given id
      *
      * @param id the id of the user to be obtained

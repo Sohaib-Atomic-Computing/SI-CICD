@@ -47,6 +47,34 @@ public class UserController {
     }
 
     /**
+     * This endpoint updates the profile information of a given user
+     *
+     * @param firstName         the new first name of the user
+     * @param lastName          the new last name of the user
+     * @param email             the new email of the user
+     * @param profilePicture    the new profile picture of the user
+     * @return the updated {@link UserDTO}
+     * @throws EntityNotFoundException if no user with given id is found
+     */
+    @PutMapping("/profile")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @Operation(summary = "Update the profile information of a given user")
+    public ResponseEntity<?> updateMyProfile(@RequestParam(required = false) String firstName,
+                                        @RequestParam(required = false) String lastName,
+                                        @RequestParam(required = false) String email,
+                                        @RequestParam(required = false) MultipartFile profilePicture)
+            throws EntityNotFoundException, IOException {
+        UserDTO user = userService.updateMyProfile(firstName, lastName, email, profilePicture);
+        return ResponseEntity.ok(
+                ResponseDTO.builder()
+                        .message("User updated successfully")
+                        .success(true)
+                        .data(user)
+                        .build()
+        );
+    }
+
+    /**
      * This endpoint obtains a user with the given id
      *
      * @param id the id of the user to be obtained
@@ -95,7 +123,7 @@ public class UserController {
      * @throws EntityNotFoundException if no user with given id is found
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Update the profile information of a given user")
     public ResponseEntity<?> updateUser(@PathVariable String id,
                                         @RequestParam(required = false) String firstName,

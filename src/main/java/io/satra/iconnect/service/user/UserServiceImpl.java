@@ -153,8 +153,61 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new EntityNotFoundException("User not found");
         }
+    }
 
+    /**
+     * This method is used to update the user information.
+     * The user can only update his/her first name and last name.
+     * The admin can update the first name, last name, email, mobile, isActive and role of the user.
+     *
+     * @param firstName         the new first name of the user
+     * @param lastName          the new last name of the user
+     * @param email             the new email of the user
+     * @param profilePicture    the new profile picture of the user
+     * @return the updated user {@link UserDTO}
+     * @throws EntityNotFoundException if the user does not exist
+     */
+    @Override
+    public UserDTO updateMyProfile(String firstName, String lastName, String email, MultipartFile profilePicture) throws EntityNotFoundException, IOException {
+        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userPrincipal.getUser() == null) {
+            throw new EntityNotFoundException("User not found");
+        }
 
+        User updatedUser = userRepository.findFirstByEmailOrMobile(userPrincipal.getUsername(), userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found!"));
+
+        if (firstName != null && !firstName.isBlank()) {
+            updatedUser.setFirstName(firstName);
+        }
+        if (lastName != null && !lastName.isBlank()) {
+            updatedUser.setLastName(lastName);
+        }
+
+        if (email != null && !email.isBlank()) {
+            updatedUser.setEmail(email);
+        }
+
+        // update the profile picture
+        if (profilePicture != null) {
+            // get the current profile picture
+            String currentProfilePicture = updatedUser.getProfilePicture();
+            // save the new profile picture
+            String profilePictureUrl = new FileUtils().saveFile(Collections.singletonList(profilePicture), updatedUser.getId());
+            // if the profile picture is updated successfully, add the new profile picture to the user
+            if (profilePictureUrl != null) {
+                updatedUser.setProfilePicture(profilePictureUrl);
+            }
+            // if the user has an old profile picture, delete it
+            if (currentProfilePicture != null) {
+                new FileUtils().deleteFile(currentProfilePicture);
+            }
+        }
+
+        // update the user
+        updatedUser = userRepository.save(updatedUser);
+
+        return updatedUser.toDTO();
     }
 
     /**
