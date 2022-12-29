@@ -185,6 +185,9 @@ public class UserServiceImpl implements UserService {
         }
 
         if (email != null && !email.isBlank()) {
+            if (!updatedUser.getEmail().equals(email) && userRepository.findByEmail(email).isPresent()) {
+                throw new BadRequestException("User with email %s already exists!".formatted(email));
+            }
             updatedUser.setEmail(email);
         }
 
