@@ -60,7 +60,7 @@ public class UserPrincipal implements UserDetails {
     @Override
     public String getUsername() {
         if (user != null) {
-            return user.getEmail();
+            return user.getMobile() != null ? user.getMobile() : user.getEmail();
         } else {
             return validator.getName();
         }
