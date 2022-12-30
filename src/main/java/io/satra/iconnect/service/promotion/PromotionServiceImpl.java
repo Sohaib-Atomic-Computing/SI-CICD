@@ -242,7 +242,7 @@ public class PromotionServiceImpl implements PromotionService {
         LocalDateTime currentDateTime = LocalDateTime.now();
 
         // find promotion by vendor and user and start date less than current date time and end date greater than current date time
-        return promotionRepository.findByVendorAndUsersAndStartDateLessThanEqualAndEndDateGreaterThanEqual(validator.getVendor(), user, currentDateTime, currentDateTime)
+        return promotionRepository.findByVendorAndUsersAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndIsActiveTrue(validator.getVendor(), user, currentDateTime, currentDateTime)
                 .stream().map(Promotion::toScannerResponseDTO).collect(Collectors.toList());
     }
 
