@@ -44,6 +44,9 @@ public class ValidatorServiceImpl implements ValidatorService {
         // Generate JWT token
         String jwt = generateJWTToken(validatorLoginRequestDTO.getUserId(), validatorLoginRequestDTO.getValidatorKey());
 
+        validator.setToken(jwt);
+        validatorRepository.save(validator);
+
         return JwtResponseDTO.builder()
                 .validator(validator.toDTO())
                 .token(jwt)

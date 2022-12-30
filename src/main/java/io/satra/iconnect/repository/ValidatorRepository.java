@@ -16,4 +16,5 @@ public interface ValidatorRepository extends JpaRepository<Validator, String> {
     Optional<Validator> findByValidatorKey(String validatorKey);
     Optional<Validator> findByVendorAndName(Vendor vendor, String name);
     List<Validator> findAllByVendor(Vendor vendor);
+    Optional<Validator> findByNameAndToken(String name, String token);
 }

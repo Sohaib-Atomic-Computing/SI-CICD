@@ -79,8 +79,10 @@ public class UserServiceImpl implements UserService {
 
             // reset the OTP
             user.setOtpCode(null);
-            userRepository.save(user);
         }
+
+        user.setToken(jwt);
+        userRepository.save(user);
 
         return JwtResponseDTO.builder()
                 .user(user.toDTO())
@@ -119,11 +121,12 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException(e);
         }
 
-        // save the new user to the database
-        registeredUser = userRepository.save(registeredUser);
-
         // Generate JWT token
         String jwt = generateJWTToken(registerRequestDTO.getEmail(), registerRequestDTO.getPassword());
+        registeredUser.setToken(jwt);
+
+        // save the new user to the database
+        registeredUser = userRepository.save(registeredUser);
 
         return JwtResponseDTO.builder()
                 .user(registeredUser.toDTO())
