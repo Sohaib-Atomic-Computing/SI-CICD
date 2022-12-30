@@ -27,6 +27,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -237,8 +238,11 @@ public class PromotionServiceImpl implements PromotionService {
         // find the user by user id
         User user = userService.findUserEntityById(scannerMessageDTO.getUserId());
 
-        // find promotion by vendorId and user
-        return promotionRepository.findByVendorAndUsers(validator.getVendor(), user)
+        // get the current date time as local date time
+        LocalDateTime currentDateTime = LocalDateTime.now();
+
+        // find promotion by vendor and user and start date less than current date time and end date greater than current date time
+        return promotionRepository.findByVendorAndUsersAndStartDateLessThanEqualAndEndDateGreaterThanEqual(validator.getVendor(), user, currentDateTime, currentDateTime)
                 .stream().map(Promotion::toScannerResponseDTO).collect(Collectors.toList());
     }
 
