@@ -66,6 +66,9 @@ public class FileUtils {
      */
     public void deleteFile(String filePath) throws IOException {
         Path path = Paths.get(PropertyLoader.getPathStorage() + filePath);
-        Files.delete(path);
+        // if the file exist then delete it
+        if (Files.exists(path)) {
+            Files.delete(path);
+        }
     }
 }
