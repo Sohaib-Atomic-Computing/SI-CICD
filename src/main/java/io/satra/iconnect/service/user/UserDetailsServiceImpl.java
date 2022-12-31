@@ -6,6 +6,7 @@ import io.satra.iconnect.repository.UserRepository;
 import io.satra.iconnect.repository.ValidatorRepository;
 import io.satra.iconnect.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -33,5 +34,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         } else {
             throw new UsernameNotFoundException("User not found with username: " + username);
         }
+    }
+
+    public Boolean checkToken(String username, String token) throws UsernameNotFoundException {
+        if (userRepository.findByToken(token).isPresent()) {
+            return true;
+        } else return validatorRepository.findByNameAndToken(username, token).isPresent();
     }
 }

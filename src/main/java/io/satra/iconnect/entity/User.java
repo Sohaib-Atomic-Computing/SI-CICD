@@ -51,6 +51,7 @@ public class User extends BaseEntityAudit {
     private String otpCode;
     private LocalDateTime otpExpireAt;
     private LocalDateTime otpCreatedAt;
+    private String token;
     @ManyToMany
     @JoinTable(
             name = "promotion_user",

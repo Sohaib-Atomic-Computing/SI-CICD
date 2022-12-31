@@ -20,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
     Optional<User> findByMobile(String mobile);
     // find user by role
     List<User> findByRole(UserRole role);
+    // find user by token
+    Optional<User> findByToken(String token);
 }

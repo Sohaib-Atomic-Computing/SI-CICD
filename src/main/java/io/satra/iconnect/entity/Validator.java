@@ -39,6 +39,7 @@ public class Validator extends BaseEntityAudit {
     @JoinColumn(name = "vendorId", referencedColumnName = "id")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Vendor vendor;
+    private String token;
 
     @Override
     public boolean equals(Object o) {

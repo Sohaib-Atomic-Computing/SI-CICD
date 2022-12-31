@@ -33,6 +33,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                // check if the user token is valid
+                if (!userDetailsService.checkToken(username, jwt)) {
+                    throw new Exception("Invalid token");
+                }
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
