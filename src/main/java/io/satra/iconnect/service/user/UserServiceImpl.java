@@ -103,7 +103,7 @@ public class UserServiceImpl implements UserService {
         log.info("Registering user with email: {} and mobile: {}", registerRequestDTO.getEmail(), registerRequestDTO.getMobile());
         // check if the user already exists
         if (userRepository.findFirstByEmailOrMobile(registerRequestDTO.getEmail(), registerRequestDTO.getMobile()).isPresent()) {
-            throw new BadRequestException("User with email %s or mobile %s already exists!".formatted(registerRequestDTO.getEmail(), registerRequestDTO.getMobile()));
+            throw new BadRequestException(String.format("User with email: %s or mobile: %s already exists", registerRequestDTO.getEmail(), registerRequestDTO.getMobile()));
         }
         User registeredUser = User.builder()
                 .firstName(registerRequestDTO.getFirstName())
@@ -180,16 +180,16 @@ public class UserServiceImpl implements UserService {
         User updatedUser = userRepository.findFirstByEmailOrMobile(userPrincipal.getUsername(), userPrincipal.getUsername())
                 .orElseThrow(() -> new EntityNotFoundException("User not found!"));
 
-        if (firstName != null && !firstName.isBlank()) {
+        if (firstName != null && !firstName.isEmpty()) {
             updatedUser.setFirstName(firstName);
         }
-        if (lastName != null && !lastName.isBlank()) {
+        if (lastName != null && !lastName.isEmpty()) {
             updatedUser.setLastName(lastName);
         }
 
-        if (email != null && !email.isBlank()) {
+        if (email != null && !email.isEmpty()) {
             if (!updatedUser.getEmail().equals(email) && userRepository.findByEmail(email).isPresent()) {
-                throw new BadRequestException("User with email %s already exists!".formatted(email));
+                throw new BadRequestException(String.format("User with email: %s already exists", email));
             }
             updatedUser.setEmail(email);
         }
@@ -225,7 +225,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserDTO findUserById(String id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No user with id %s found".formatted(id)));
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(String.format("No user with id %s found", id)));
         return user.toDTO();
     }
 
@@ -241,7 +241,7 @@ public class UserServiceImpl implements UserService {
         log.info("Registering admin with email: {} and mobile: {}", registerRequestDTO.getEmail(), registerRequestDTO.getMobile());
         // check if the user already exists
         if (userRepository.findFirstByEmailOrMobile(registerRequestDTO.getEmail(), registerRequestDTO.getMobile()).isPresent()) {
-            throw new BadRequestException("User with email %s or mobile %s already exists!".formatted(registerRequestDTO.getEmail(), registerRequestDTO.getMobile()));
+            throw new BadRequestException(String.format("User with email %s or mobile %s already exists!", registerRequestDTO.getEmail(), registerRequestDTO.getMobile()));
         }
         User registeredUser = User.builder()
                 .firstName(registerRequestDTO.getFirstName())
@@ -283,16 +283,16 @@ public class UserServiceImpl implements UserService {
         }
 
         User updatedUser = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("No user with given id %s found!".formatted(id)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("No user with given id %s found!", id)));
 
-        if (firstName != null && !firstName.isBlank()) {
+        if (firstName != null && !firstName.isEmpty()) {
             updatedUser.setFirstName(firstName);
         }
-        if (lastName != null && !lastName.isBlank()) {
+        if (lastName != null && !lastName.isEmpty()) {
             updatedUser.setLastName(lastName);
         }
 
-        if (email != null && !email.isBlank()) {
+        if (email != null && !email.isEmpty()) {
             updatedUser.setEmail(email);
         }
 
@@ -302,7 +302,7 @@ public class UserServiceImpl implements UserService {
                 updatedUser.setRole(role);
             }
 
-            if (mobile != null && !mobile.isBlank()) {
+            if (mobile != null && !mobile.isEmpty()) {
                 updatedUser.setMobile(mobile);
             }
 
@@ -344,7 +344,7 @@ public class UserServiceImpl implements UserService {
         try {
             userRepository.deleteById(id);
         } catch (IllegalArgumentException e) {
-            throw new EntityNotFoundException("No user with id %s found".formatted(id));
+            throw new EntityNotFoundException(String.format("No user with id %s found", id));
         }
     }
 
@@ -425,7 +425,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findUserEntityById(String id) throws EntityNotFoundException {
         return userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("No user with given id %s found!".formatted(id)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("No user with given id %s found!", id)));
     }
 
     /**
@@ -439,7 +439,7 @@ public class UserServiceImpl implements UserService {
     public ResponseDTO sendOTP(GenerateOTPDTO generateOTPDTO) throws EntityNotFoundException{
         // get the user by mobile number
         User user = userRepository.findByMobile(generateOTPDTO.getMobile())
-                .orElseThrow(() -> new EntityNotFoundException("No user with given mobile number %s found!".formatted(generateOTPDTO.getMobile())));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("No user with given mobile number %s found!", generateOTPDTO.getMobile())));
 
         // generate a random 5 digit number
         Random rand = new Random();
@@ -525,7 +525,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = userRepository.findById(userPrincipal.getUser().getId())
-                .orElseThrow(() -> new EntityNotFoundException("No user with given id %s found!".formatted(userPrincipal.getUser().getId())));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("No user with given id %s found!", userPrincipal.getUser().getId())));
 
         return user.getPromotions().stream()
                 .map(Promotion::getVendor)

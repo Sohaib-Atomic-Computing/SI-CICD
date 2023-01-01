@@ -14,9 +14,7 @@
 	<name>iconnect</name>
 	<description>I-Connect Spring Boot Application</description>
 	<properties>
-		<java.version>17</java.version>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+		<java.version>1.8</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.boot.dependecies.version>2.7.4</spring.boot.dependecies.version>
 	</properties>

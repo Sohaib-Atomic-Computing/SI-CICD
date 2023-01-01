@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -65,7 +66,7 @@ public class PromotionServiceImpl implements PromotionService {
         List<User> users = userService.findUsersByIds(promotionRequestDTO.getUserIds());
 
         // convert list of users to set of users
-        Set<User> usersSet = Set.copyOf(users);
+        Set<User> usersSet = new HashSet<>(users);
 
         // get the user data from the request
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -115,7 +116,7 @@ public class PromotionServiceImpl implements PromotionService {
         List<User> users = userService.findUsersByIds(promotionRequestDTO.getUserIds());
 
         // convert list of users to set of users
-        Set<User> usersSet = Set.copyOf(users);
+        Set<User> usersSet = new HashSet<>(users);
 
         // get the user data from the request
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
