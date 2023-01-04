@@ -120,6 +120,7 @@ public class UserServiceImpl implements UserService {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+        userRepository.save(registeredUser);
 
         // Generate JWT token
         String jwt = generateJWTToken(registerRequestDTO.getEmail(), registerRequestDTO.getPassword());
