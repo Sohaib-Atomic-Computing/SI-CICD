@@ -28,6 +28,12 @@ public class PropertyLoader {
     // DEFAULT USER VALUES
     private static String DEFAULT_ADMIN_EMAIL;
     private static String DEFAULT_ADMIN_PASSWORD;
+    // SMS VALUES
+    private static String cequensURL;
+    private static String cequensAuthKey;
+    private static String cequensSenderId;
+    private static String cequensMessageType;
+    private static String cequensClientMessageId;
 
     @Bean
     public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
@@ -97,5 +103,50 @@ public class PropertyLoader {
         DEFAULT_ADMIN_PASSWORD = defaultAdminPassword;
     }
 
+    public static String getCequensURL() {
+        return cequensURL;
+    }
+
+    @Value("${constants.cequens.url}")
+    public void setCequensURL(String cequensURL) {
+        PropertyLoader.cequensURL = cequensURL;
+    }
+
+    public static String getCequensAuthKey() {
+        return cequensAuthKey;
+    }
+
+    @Value("${constants.cequens.authKey}")
+    public void setCequensAuthKey(String cequensAuthKey) {
+        PropertyLoader.cequensAuthKey = cequensAuthKey;
+    }
+
+    public static String getCequensSenderId() {
+        return cequensSenderId;
+    }
+
+    //setter
+    @Value("${constants.cequens.senderId}")
+    public void setCequensSenderId(String cequensSenderId) {
+        PropertyLoader.cequensSenderId = cequensSenderId;
+    }
+
+    public static String getCequensMessageType() {
+        return cequensMessageType;
+    }
+
+    @Value("${constants.cequens.messageType}")
+    public void setCequensMessageType(String cequensMessageType) {
+        PropertyLoader.cequensMessageType = cequensMessageType;
+    }
+
+    public static String getCequensClientMessageId() {
+        return cequensClientMessageId;
+    }
+
+    @Value("${constants.cequens.clientMessageId}")
+    public void setCequensClientMessageId(String cequensClientMessageId) {
+        PropertyLoader.cequensClientMessageId = cequensClientMessageId;
+    }
 
 }
