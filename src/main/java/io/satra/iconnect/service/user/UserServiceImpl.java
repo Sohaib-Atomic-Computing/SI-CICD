@@ -23,6 +23,8 @@ import io.satra.iconnect.utils.EncodingUtils;
 import io.satra.iconnect.utils.FileUtils;
 import io.satra.iconnect.utils.PropertyLoader;
 import io.satra.iconnect.utils.TimeUtils;
+import io.satra.iconnect.utils.sms.SMSSender;
+import io.satra.iconnect.utils.sms.SMSSenderCequens;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -454,9 +456,9 @@ public class UserServiceImpl implements UserService {
             user.setOtpCode(passwordEncoder.encode("00000"));
         } else {
             user.setOtpCode(passwordEncoder.encode(otp));
+            SMSSender smsSender = new SMSSenderCequens();
+            smsSender.sendSMS(generateOTPDTO.getMobile(), "Your OTP is " + otp);
         }
-
-        // TODO: send the OTP to the user
 
         // set the expiry time
         user.setOtpExpireAt(TimeUtils.convertDateToLocalDateTime(c.getTime()));
