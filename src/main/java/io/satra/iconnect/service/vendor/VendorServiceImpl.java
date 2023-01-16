@@ -87,7 +87,8 @@ public class VendorServiceImpl implements VendorService {
     @Override
     public VendorDTO updateVendor(String id, String name, MultipartFile logo) throws EntityNotFoundException, IOException {
         // check if the vendor not exists
-        Vendor vendor = vendorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No vendor with given id %s found!".formatted(id)));
+        Vendor vendor = vendorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("No vendor with given id %s found!", id)));
 
         // get the user data from the request
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -136,7 +137,7 @@ public class VendorServiceImpl implements VendorService {
         try {
             vendorRepository.deleteById(id);
         } catch (Exception e) {
-            throw new EntityNotFoundException("No vendor with given id %s found!".formatted(id));
+            throw new EntityNotFoundException(String.format("No vendor with given id %s found!", id));
         }
     }
 
@@ -149,7 +150,8 @@ public class VendorServiceImpl implements VendorService {
      */
     @Override
     public VendorDTO findVendorById(String id) throws EntityNotFoundException {
-        Vendor vendor = vendorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No vendor with given id %s found!".formatted(id)));
+        Vendor vendor = vendorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("No vendor with given id %s found!", id)));
         return vendor.toDTO();
     }
 
@@ -158,11 +160,12 @@ public class VendorServiceImpl implements VendorService {
      *
      * @param id the id of the vendor to be obtained
      * @return the vendor entity {@link Vendor}
-     * @throws EntityNotFoundException
+     * @throws EntityNotFoundException if the vendor does not exist
      */
     @Override
     public Vendor findVendorEntityById(String id) throws EntityNotFoundException {
-        return vendorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("No vendor with given id %s found!".formatted(id)));
+        return vendorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("No vendor with given id %s found!", id)));
     }
 
     /**

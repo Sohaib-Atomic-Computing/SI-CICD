@@ -23,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -149,7 +150,7 @@ public class ValidatorServiceImpl implements ValidatorService {
     public List<ValidatorDTO> getValidatorsByVendorId(String vendorId) throws EntityNotFoundException {
         // check if vendor exists
         Vendor vendor = vendorService.findVendorEntityById(vendorId);
-        return validatorRepository.findAllByVendor(vendor).stream().map(Validator::toDTO).toList();
+        return validatorRepository.findAllByVendor(vendor).stream().map(Validator::toDTO).collect(Collectors.toList());
     }
 
     @Override

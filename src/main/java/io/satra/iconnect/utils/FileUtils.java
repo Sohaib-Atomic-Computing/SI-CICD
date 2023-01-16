@@ -51,7 +51,11 @@ public class FileUtils {
             filename = fileUtils.rename("IConnect", file.getOriginalFilename());
             byte[] bytes = file.getBytes();
             Path path = Paths.get(folderUtil.getPath(entityId) + filename);
-            Files.write(path, bytes);
+            if (isFileCreated(path)) {
+                Files.write(path, bytes);
+            } else {
+                return null;
+            }
             filesName.add(entityId + "/" + filename);
         }
 
@@ -70,5 +74,22 @@ public class FileUtils {
         if (Files.exists(path)) {
             Files.delete(path);
         }
+    }
+
+    private Boolean isFileCreated(Path path) throws IOException {
+        int count = 0;
+        while (count < 3) {
+            if (Files.exists(path)) {
+                return true;
+            }
+            // wait for 1 second
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            count++;
+        }
+        return false;
     }
 }
