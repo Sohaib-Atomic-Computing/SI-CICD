@@ -36,7 +36,9 @@ public class ValidatorController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Create a new validator")
     public ResponseEntity<?> createValidator(@Valid @RequestBody ValidatorRequestDTO validatorRequestDTO) throws BadRequestException {
-        log.info("Creating validator");
+        log.debug("API ---> (/api/v1/validators) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".createValidator()");
+        log.debug("Request body: {}", validatorRequestDTO);
         ValidatorDTO validatorDTO = validatorService.createValidator(validatorRequestDTO);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/validators/" + validatorDTO.getId()).toUriString());
         return ResponseEntity.created(uri).body(
@@ -61,7 +63,10 @@ public class ValidatorController {
     @Operation(summary = "Update a validator by id")
     public ResponseEntity<?> updateValidator(@PathVariable String id, @Valid @RequestBody ValidatorRequestDTO validatorRequestDTO)
             throws EntityNotFoundException {
-        log.info("Updating validator with id: {}", id);
+        log.debug("API ---> (/api/v1/validators/{id}) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".updateValidator()");
+        log.debug("Request parameters: id={}", id);
+        log.debug("Request body: {}", validatorRequestDTO);
         ValidatorDTO validatorDTO = validatorService.updateValidator(id, validatorRequestDTO);
         return ResponseEntity.ok(
                 ResponseDTO.builder()
@@ -83,7 +88,9 @@ public class ValidatorController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Delete a validator by id")
     public ResponseEntity<?> deleteValidator(@PathVariable String id) throws EntityNotFoundException {
-        log.info("Deleting validator with id: {}", id);
+        log.debug("API ---> (/api/v1/validators/{id}) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".deleteValidator()");
+        log.debug("Request parameters: id={}", id);
         validatorService.deleteValidator(id);
         return ResponseEntity.ok(
                 ResponseDTO.builder()
@@ -104,7 +111,9 @@ public class ValidatorController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Get a validator by id")
     public ResponseEntity<?> getValidator(@PathVariable String id) throws EntityNotFoundException {
-        log.info("Getting validator with id: {}", id);
+        log.debug("API ---> (/api/v1/validators/{id}) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".getValidator()");
+        log.debug("Request parameters: id={}", id);
         ValidatorDTO validatorDTO = validatorService.getValidator(id);
         return ResponseEntity.ok(
                 ResponseDTO.builder()
@@ -126,7 +135,9 @@ public class ValidatorController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Get all vendor validators by vendor id")
     public ResponseEntity<?> getValidatorsByVendor(@PathVariable String vendorId) throws EntityNotFoundException {
-        log.info("Getting validators by vendor id: {}", vendorId);
+        log.debug("API ---> (/api/v1/validators/vendor/{vendorId}) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".getValidatorsByVendor()");
+        log.debug("Request parameters: vendorId={}", vendorId);
         return ResponseEntity.ok(validatorService.getValidatorsByVendorId(vendorId));
     }
 }

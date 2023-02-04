@@ -42,7 +42,8 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN') or hasRole('ROLE_VALIDATOR')")
     @Operation(summary = "Get the current authenticated user information")
     public ResponseEntity<?> getUserInfo() throws EntityNotFoundException {
-        log.info("Getting user info");
+        log.debug("API ---> (/api/v1/users/userinfo) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".getUserInfo()");
         return ResponseEntity.ok(userService.getCurrentUser());
     }
 
@@ -64,6 +65,13 @@ public class UserController {
                                         @RequestParam(required = false) String email,
                                         @RequestParam(required = false) MultipartFile profilePicture)
             throws EntityNotFoundException, IOException {
+        log.debug("API ---> (/api/v1/users/profile) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".updateMyProfile()");
+        log.debug("Request parameters: firstName={}, lastName={}, email={}", firstName, lastName, email);
+        if (profilePicture != null) {
+            log.debug("Profile picture size: {} {}", profilePicture.getSize() / 1024 > 1024 ? profilePicture.getSize() / 1024 / 1024 : profilePicture.getSize() / 1024, profilePicture.getSize() / 1024 > 1024 ? "MB" : "KB");
+            log.debug("Profile picture type: {}", profilePicture.getContentType());
+        }
         UserDTO user = userService.updateMyProfile(firstName, lastName, email, profilePicture);
         return ResponseEntity.ok(
                 ResponseDTO.builder()
@@ -84,6 +92,9 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Get a user by id")
     public ResponseEntity<UserDTO> findUserById(@PathVariable String id) {
+        log.debug("API ---> (/api/v1/users/{id}) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".findUserById()");
+        log.debug("Request parameters: id={}", id);
         return ResponseEntity.ok(userService.findUserById(id));
     }
 
@@ -97,6 +108,9 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Create a new admin user")
     public ResponseEntity<?> addAdminUser(@Valid @RequestBody RegisterRequestDTO registerRequestDTO) {
+        log.debug("API ---> (/api/v1/users/) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".addAdminUser()");
+        log.debug("Request body: {}", registerRequestDTO);
         UserDTO user = userService.addAdminUser(registerRequestDTO);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/users/" + user.getId()).toUriString());
         return ResponseEntity.created(uri).body(
@@ -134,6 +148,14 @@ public class UserController {
                                         @RequestParam(required = false) UserRole role,
                                         @RequestParam(required = false) MultipartFile profilePicture)
             throws EntityNotFoundException, IOException {
+        log.debug("API ---> (/api/v1/users/{id}) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".updateUser()");
+        log.debug("Request parameters: id={}, firstName={}, lastName={}, email={}, mobile={}, isActive={}, role={}",
+                id, firstName, lastName, email, mobile, isActive, role);
+        if (profilePicture != null) {
+            log.debug("Profile picture size: {} {}", profilePicture.getSize() / 1024 > 1024 ? profilePicture.getSize() / 1024 / 1024 : profilePicture.getSize() / 1024, profilePicture.getSize() / 1024 > 1024 ? "MB" : "KB");
+            log.debug("Profile picture type: {}", profilePicture.getContentType());
+        }
         UserDTO user = userService.updateUser(id, firstName, lastName, email, mobile, isActive, role, profilePicture);
         return ResponseEntity.ok(
                 ResponseDTO.builder()
@@ -154,7 +176,10 @@ public class UserController {
     @DeleteMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Delete a user by id")
-    public ResponseEntity<?> deleteUser(@PathVariable String id) throws EntityNotFoundException{
+    public ResponseEntity<?> deleteUser(@PathVariable String id) throws EntityNotFoundException {
+        log.debug("API ---> (/api/v1/users/{id}) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".deleteUser()");
+        log.debug("Request parameters: id={}", id);
         userService.deleteUser(id);
         return ResponseEntity.ok(ResponseDTO.builder()
                 .message("User deleted successfully")
@@ -181,6 +206,9 @@ public class UserController {
             @RequestParam(required = false) String firstName,
             @RequestParam(required = false) String lastName,
             Pageable page) {
+        log.debug("API ---> (/api/v1/users) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".getAllUsers()");
+        log.debug("Request parameters: email={}, mobile={}, firstName={}, lastName={}, page={}", email, mobile, firstName, lastName, page);
         return ResponseEntity.ok(userService.findAllUsers(email, mobile, firstName, lastName,  page));
     }
 
@@ -194,6 +222,8 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_USER')")
     @Operation(summary = "Get vendors list that the current user have promotions for")
     public ResponseEntity<?> getVendors() throws EntityNotFoundException {
+        log.debug("API ---> (/api/v1/users/vendors) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".getVendors()");
         List<VendorDTO> vendors = userService.getVendors();
         return ResponseEntity.ok(ResponseDTO.builder()
                 .message("User has promotions in the following vendors")
@@ -214,6 +244,9 @@ public class UserController {
     @Operation(summary = "Check if the given email or mobile is already registered")
     public ResponseEntity<?> userExists(@RequestParam(required = false) String email, @RequestParam(required = false) String mobile)
             throws EntityNotFoundException {
+        log.debug("API ---> (/api/v1/users/check) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".userExists()");
+        log.debug("Request parameters: email={}, mobile={}", email, mobile);
         if (email == null && mobile == null) {
             throw new BadRequestException("Email or mobile is required");
         }

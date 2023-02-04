@@ -63,19 +63,22 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public JwtResponseDTO loginUser(LoginRequestDTO loginRequestDTO) throws BadRequestException {
-       log.info("Logging in user with email: {}, and password: {}", loginRequestDTO.getEmailOrMobile(), loginRequestDTO.getPassword());
-         User user = userRepository.findFirstByEmailOrMobile(loginRequestDTO.getEmailOrMobile(), loginRequestDTO.getEmailOrMobile())
+        User user = userRepository.findFirstByEmailOrMobile(loginRequestDTO.getEmailOrMobile(), loginRequestDTO.getEmailOrMobile())
                 .orElseThrow(() -> new BadRequestException("User does not exist"));
+
+        log.debug("User Mobile: {}", user.getMobile());
 
         // Generate JWT token
         String jwt = generateJWTToken(loginRequestDTO.getEmailOrMobile(), loginRequestDTO.getPassword());
+        log.debug("User JWT: {}", jwt);
 
         // check if the user has OTP
         if (user.getOtpCode() != null && !user.getOtpCode().isEmpty()) {
-            log.info("User has OTP: {}", user.getOtpCode());
+            log.debug("User has OTP: {}", user.getOtpCode());
 
             // check if the otp is expired
             if (user.getOtpExpireAt().isBefore(LocalDateTime.now())) {
+                log.error("OTP is expired!");
                 throw new BadRequestException("OTP is expired!");
             }
 
@@ -128,6 +131,8 @@ public class UserServiceImpl implements UserService {
         String jwt = generateJWTToken(registerRequestDTO.getEmail(), registerRequestDTO.getPassword());
         registeredUser.setToken(jwt);
 
+        log.debug("User JWT: {}", jwt);
+
         // save the new user to the database
         registeredUser = userRepository.save(registeredUser);
 
@@ -153,10 +158,12 @@ public class UserServiceImpl implements UserService {
         if (userPrincipal.getUser() != null) {
             currentUser = userRepository.findFirstByEmailOrMobile(userPrincipal.getUsername(), userPrincipal.getUsername())
                     .orElseThrow(() -> new EntityNotFoundException("User not found!"));
+            log.debug("Current user: {}", currentUser.toDTO());
             return currentUser.toDTO();
         } else if (userPrincipal.getValidator() != null) {
             return validatorService.getValidatorEntityByName(userPrincipal.getUsername());
         } else {
+            log.error("User not found!");
             throw new EntityNotFoundException("User not found");
         }
     }
@@ -177,11 +184,14 @@ public class UserServiceImpl implements UserService {
     public UserDTO updateMyProfile(String firstName, String lastName, String email, MultipartFile profilePicture) throws EntityNotFoundException, IOException {
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (userPrincipal.getUser() == null) {
+            log.error("User not found!");
             throw new EntityNotFoundException("User not found");
         }
 
         User updatedUser = userRepository.findFirstByEmailOrMobile(userPrincipal.getUsername(), userPrincipal.getUsername())
                 .orElseThrow(() -> new EntityNotFoundException("User not found!"));
+
+        log.debug("User Mobile Number: {}", updatedUser.getMobile());
 
         if (firstName != null && !firstName.isEmpty()) {
             updatedUser.setFirstName(firstName);
@@ -192,6 +202,7 @@ public class UserServiceImpl implements UserService {
 
         if (email != null && !email.isEmpty()) {
             if (!updatedUser.getEmail().equals(email) && userRepository.findByEmail(email).isPresent()) {
+                log.error("User with email: {} already exists", email);
                 throw new BadRequestException(String.format("User with email: %s already exists", email));
             }
             updatedUser.setEmail(email);
@@ -199,22 +210,29 @@ public class UserServiceImpl implements UserService {
 
         // update the profile picture
         if (profilePicture != null) {
+            log.debug("Profile picture is not null");
             // get the current profile picture
             String currentProfilePicture = updatedUser.getProfilePicture();
+            log.debug("Current profile picture: {}", currentProfilePicture);
             // save the new profile picture
             String profilePictureUrl = new FileUtils().saveFile(Collections.singletonList(profilePicture), updatedUser.getId());
             // if the profile picture is updated successfully, add the new profile picture to the user
             if (profilePictureUrl != null) {
                 updatedUser.setProfilePicture(profilePictureUrl);
+                log.debug("Profile picture is updated successfully: {}", profilePictureUrl);
             }
             // if the user has an old profile picture, delete it
             if (currentProfilePicture != null) {
+                log.debug("Delete the old profile picture: {}", currentProfilePicture);
                 new FileUtils().deleteFile(currentProfilePicture);
             }
+        } else {
+            log.debug("Profile picture is null");
         }
 
         // update the user
         updatedUser = userRepository.save(updatedUser);
+        log.debug("User updated successfully: {}", updatedUser.toDTO());
 
         return updatedUser.toDTO();
     }
@@ -229,6 +247,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO findUserById(String id) {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(String.format("No user with id %s found", id)));
+        log.debug("User is found: {}", user.toDTO());
         return user.toDTO();
     }
 

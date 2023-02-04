@@ -142,7 +142,6 @@ public class PromotionServiceImpl implements PromotionService {
         promotionUsers.addAll(usersSet);
         promotionUsers.retainAll(usersSet);
 
-
         // set the users to promotion
         promotion.setUsers(promotionUsers);
 

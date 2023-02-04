@@ -51,11 +51,7 @@ public class FileUtils {
             filename = fileUtils.rename("IConnect", file.getOriginalFilename());
             byte[] bytes = file.getBytes();
             Path path = Paths.get(folderUtil.getPath(entityId) + filename);
-            if (isFileCreated(path)) {
-                Files.write(path, bytes);
-            } else {
-                return null;
-            }
+            Files.write(path, bytes);
             filesName.add(entityId + "/" + filename);
         }
 
