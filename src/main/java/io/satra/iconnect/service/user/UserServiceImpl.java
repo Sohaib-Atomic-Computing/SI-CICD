@@ -451,6 +451,18 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * This method is used to get the user active entity by given id
+     * @param id the id of the user to be obtained
+     * @return a {@link User}
+     * @throws EntityNotFoundException if no user with given id is found or the user is not active
+     */
+    @Override
+    public User findActiveUserEntityById(String id) throws EntityNotFoundException {
+        return userRepository.findByIdAndIsActive(id, true)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("No active user with given id %s found!", id)));
+    }
+
+    /**
      * This method is used to send OTP to the user
      *
      * @param generateOTPDTO the user mobile number to send the OTP
