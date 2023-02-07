@@ -40,6 +40,13 @@ public class VendorController {
     public ResponseEntity<?> createVendor(@RequestParam(name = "name") String name,
                                           @RequestParam(name = "logo", required = false) MultipartFile logo)
             throws BadRequestException, IOException {
+        log.debug("API ---> (/api/v1/vendors) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".createVendor()");
+        log.debug("Request parameters: name={}", name);
+        if (logo != null) {
+            log.debug("Logo size: {}", logo.getSize());
+            log.debug("Logo picture type: {}", logo.getContentType());
+        }
         VendorDTO vendorDTO = vendorService.createVendor(name, logo);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/vendors/" + vendorDTO.getId()).toUriString());
         return ResponseEntity.created(uri).body(
@@ -67,6 +74,13 @@ public class VendorController {
                                           @RequestParam(name = "name") String name,
                                           @RequestParam(name = "logo", required = false) MultipartFile logo)
             throws EntityNotFoundException, IOException {
+        log.debug("API ---> (/api/v1/vendors/{id}) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".updateVendor()");
+        log.debug("Request parameters: id={}, name={}", id, name);
+        if (logo != null) {
+            log.debug("Logo picture size: {} {}", logo.getSize() / 1024 > 1024 ? logo.getSize() / 1024 / 1024 : logo.getSize() / 1024, logo.getSize() / 1024 > 1024 ? "MB" : "KB");
+            log.debug("Logo picture type: {}", logo.getContentType());
+        }
         VendorDTO vendorDTO = vendorService.updateVendor(id, name, logo);
         return ResponseEntity.ok(
                 ResponseDTO.builder()
@@ -89,6 +103,9 @@ public class VendorController {
     @Operation(summary = "Delete a vendor")
     public ResponseEntity<?> deleteVendor(@PathVariable String id)
             throws EntityNotFoundException {
+        log.debug("API ---> (/api/v1/vendors/{id}) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".deleteVendor()");
+        log.debug("Request parameters: id={}", id);
         vendorService.deleteVendor(id);
         return ResponseEntity.ok(
                 ResponseDTO.builder()
@@ -109,6 +126,9 @@ public class VendorController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Get a vendor by id")
     public ResponseEntity<?> getVendor(@PathVariable String id) throws EntityNotFoundException {
+        log.debug("API ---> (/api/v1/vendors/{id}) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".getVendor()");
+        log.debug("Request parameters: id={}", id);
         return ResponseEntity.ok(vendorService.findVendorById(id));
     }
 
@@ -125,6 +145,9 @@ public class VendorController {
     public ResponseEntity<Page<VendorDTO>> getAllVendors(
             @RequestParam(required = false) String name,
             Pageable page) {
+        log.debug("API ---> (/api/v1/vendors) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".getAllVendors()");
+        log.debug("Request parameters: name={}, page={}", name, page);
         return ResponseEntity.ok(vendorService.findAllVendors(name, page));
     }
 }

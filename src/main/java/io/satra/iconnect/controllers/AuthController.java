@@ -41,6 +41,9 @@ public class AuthController {
     @PostMapping("/login")
     @Operation(summary = "Login a user to the application. Can login with email and password or mobile number and OTP code")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO loginRequestDTO) {
+        log.debug("API ---> (/api/auth/login) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".login()");
+        log.debug("Request body: {}", loginRequestDTO);
         return ResponseEntity.ok(userService.loginUser(loginRequestDTO));
     }
 
@@ -53,7 +56,9 @@ public class AuthController {
     @PostMapping("/register")
     @Operation(summary = "Register a new user to the application")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequestDTO registerRequestDTO) throws BadRequestException {
-        log.info("Registering user with email: {} and mobile: {}", registerRequestDTO.getEmail(), registerRequestDTO.getMobile());
+        log.debug("API ---> (/api/auth/register) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".register()");
+        log.debug("Request body: {}", registerRequestDTO);
         JwtResponseDTO registeredUser = userService.register(registerRequestDTO);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/users/" + registeredUser.getUser().getId()).toUriString());
         return ResponseEntity.created(uri).body(registeredUser);
@@ -68,7 +73,10 @@ public class AuthController {
      */
     @PostMapping("/otp/generate")
     @Operation(summary = "Generate and send an OTP to the user's mobile number")
-    public ResponseEntity<?> sendOTP(@RequestBody GenerateOTPDTO generateOTPDTO) throws EntityNotFoundException{
+    public ResponseEntity<?> sendOTP(@RequestBody GenerateOTPDTO generateOTPDTO) throws EntityNotFoundException {
+        log.debug("API ---> (/api/auth/otp/generate) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".sendOTP()");
+        log.debug("Request body: {}", generateOTPDTO);
         return ResponseEntity.ok(userService.sendOTP(generateOTPDTO));
     }
 
@@ -82,6 +90,9 @@ public class AuthController {
     @PostMapping("/login/validator")
     @Operation(summary = "Authenticate a vendor with the validator key")
     public ResponseEntity<?> loginValidator(@Valid @RequestBody ValidatorLoginRequestDTO validatorLoginRequestDTO) throws EntityNotFoundException {
+        log.debug("API ---> (/api/auth/login/validator) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".loginValidator()");
+        log.debug("Request body: {}", validatorLoginRequestDTO);
         return ResponseEntity.ok(validatorService.loginValidator(validatorLoginRequestDTO));
     }
 }

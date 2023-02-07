@@ -67,6 +67,7 @@ public class VendorServiceImpl implements VendorService {
         if (logo != null) {
             // save the logo
             String logoPath = new FileUtils().saveFile(Collections.singletonList(logo), vendor.getId());
+            log.info("Logo saved successfully at {}", logoPath);
             vendor.setLogo(logoPath);
             // save the vendor
             vendor = vendorRepository.save(vendor);
@@ -107,6 +108,7 @@ public class VendorServiceImpl implements VendorService {
             String currentLogoPath = vendor.getLogo();
             // save the logo
             String logoPath = new FileUtils().saveFile(Collections.singletonList(logo), vendor.getId());
+            log.info("Logo saved successfully at {}", logoPath);
             // if the logo is saved successfully, add the new logo path to the vendor
             if (logoPath != null) {
                 vendor.setLogo(logoPath);

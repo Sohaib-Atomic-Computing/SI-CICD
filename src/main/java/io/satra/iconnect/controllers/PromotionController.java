@@ -40,6 +40,9 @@ public class PromotionController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Create a new promotion")
     public ResponseEntity<?> createPromotion(@Valid @RequestBody PromotionRequestDTO promotionRequestDTO) throws BadRequestException {
+        log.debug("API ---> (/api/v1/promotions) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".createPromotion()");
+        log.debug("Request body: {}", promotionRequestDTO);
         PromotionDTO promotionDTO = promotionService.createPromotion(promotionRequestDTO);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/promotions/" + promotionDTO.getId()).toUriString());
         return ResponseEntity.created(uri).body(
@@ -64,6 +67,10 @@ public class PromotionController {
     @Operation(summary = "Update a promotion")
     public ResponseEntity<?> updatePromotion(@PathVariable String id, @Valid @RequestBody PromotionRequestDTO promotionRequestDTO)
             throws EntityNotFoundException {
+        log.debug("API ---> (/api/v1/promotions/{id}) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".updatePromotion()");
+        log.debug("Request parameters: id={}", id);
+        log.debug("Request body: {}", promotionRequestDTO);
         PromotionDTO promotionDTO = promotionService.updatePromotion(id, promotionRequestDTO);
         return ResponseEntity.ok(
                 ResponseDTO.builder()
@@ -85,6 +92,9 @@ public class PromotionController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Delete a promotion")
     public ResponseEntity<?> deletePromotion(@PathVariable String id) throws EntityNotFoundException {
+        log.debug("API ---> (/api/v1/promotions/{id}) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".deletePromotion()");
+        log.debug("Request parameters: id={}", id);
         promotionService.deletePromotion(id);
         return ResponseEntity.ok(
                 ResponseDTO.builder()
@@ -105,6 +115,9 @@ public class PromotionController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Get a promotion by id")
     public ResponseEntity<?> getPromotion(@PathVariable String id) throws EntityNotFoundException {
+        log.debug("API ---> (/api/v1/promotions/{id}) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".getPromotion()");
+        log.debug("Request parameters: id={}", id);
         return ResponseEntity.ok(promotionService.getPromotion(id));
     }
 
@@ -131,6 +144,10 @@ public class PromotionController {
             @RequestParam(required = false) String endDateFrom,
             @RequestParam(required = false) String endDateTo,
             Pageable page) {
+        log.debug("API ---> (/api/v1/promotions) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".getAllPromotions()");
+        log.debug("Request parameters: name={}, isActive={}, startDateFrom={}, startDateTo={}, endDateFrom={}, endDateTo={}, page={}",
+                name, isActive, startDateFrom, startDateTo, endDateFrom, endDateTo, page);
         return ResponseEntity.ok(promotionService.getAllPromotions(name, isActive, startDateFrom, startDateTo, endDateFrom,
                 endDateTo, page));
     }
@@ -146,6 +163,9 @@ public class PromotionController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Get all promotions for a vendor")
     public ResponseEntity<?> getPromotionsByVendor(@PathVariable String vendorId) throws EntityNotFoundException {
+        log.debug("API ---> (/api/v1/promotions/vendor/{vendorId}) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".getPromotionsByVendor()");
+        log.debug("Request parameters: vendorId={}", vendorId);
         return ResponseEntity.ok(promotionService.getVendorPromotions(vendorId));
     }
 
@@ -160,6 +180,9 @@ public class PromotionController {
     @PreAuthorize("hasRole('ROLE_VALIDATOR')")
     @Operation(summary = "Validate a QR code and get the promotion associated with it")
     public ResponseEntity<?> getPromotionByQRCode(@Valid @RequestBody ScanDTO scanDTO) throws EntityNotFoundException {
+        log.debug("API ---> (/api/v1/promotions/scanner/validate) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".getPromotionByQRCode()");
+        log.debug("Request Body: {}", scanDTO);
         return ResponseEntity.ok(ResponseDTO.builder()
                 .message("User has the following promotions")
                 .success(true)
@@ -178,7 +201,9 @@ public class PromotionController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Encrypt the user id and return the encrypted string")
     public ResponseEntity<?> encryptQRCode(@Valid @RequestBody ScannerMessageDTO scannerMessageDTO) throws BadRequestException {
+        log.debug("API ---> (/api/v1/promotions/scanner/encrypt) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".encryptQRCode()");
+        log.debug("Request Body: {}", scannerMessageDTO);
         return ResponseEntity.ok(promotionService.encrypt(scannerMessageDTO));
     }
-
 }
