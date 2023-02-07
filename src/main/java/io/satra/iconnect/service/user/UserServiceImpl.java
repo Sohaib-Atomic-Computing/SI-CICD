@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import io.satra.iconnect.dto.QRCodeDTO;
 import io.satra.iconnect.dto.UserDTO;
 import io.satra.iconnect.dto.VendorDTO;
+import io.satra.iconnect.dto.request.ChangePasswordDTO;
 import io.satra.iconnect.dto.request.GenerateOTPDTO;
 import io.satra.iconnect.dto.request.LoginRequestDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
@@ -235,6 +236,35 @@ public class UserServiceImpl implements UserService {
         log.debug("User updated successfully: {}", updatedUser.toDTO());
 
         return updatedUser.toDTO();
+    }
+
+    @Override
+    public UserDTO changePassword(ChangePasswordDTO changePasswordDTO) throws EntityNotFoundException, BadRequestException {
+        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userPrincipal.getUser() == null) {
+            log.error("User not found!");
+            throw new EntityNotFoundException("User not found");
+        }
+
+        User user = userRepository.findFirstByEmailOrMobile(userPrincipal.getUsername(), userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found!"));
+
+        if (!passwordEncoder.matches(changePasswordDTO.getOldPassword(), user.getPassword())) {
+            log.error("Old password is incorrect");
+            throw new BadRequestException("Old password is incorrect");
+        }
+
+        // check if the new password is the same as the old password
+        if (passwordEncoder.matches(changePasswordDTO.getNewPassword(), user.getPassword())) {
+            log.error("New password is the same as the old password");
+            throw new BadRequestException("New password is the same as the old password");
+        }
+
+        user.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
+        user = userRepository.save(user);
+        log.debug("Password changed successfully: {}", user.toDTO());
+
+        return user.toDTO();
     }
 
     /**
