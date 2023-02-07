@@ -33,6 +33,14 @@ public interface UserService {
     JwtResponseDTO loginUser(LoginRequestDTO loginRequestDTO) throws BadRequestException;
 
     /**
+     * Logout a user
+     *
+     * @return true if the user is logged out successfully
+     * @throws EntityNotFoundException if the user is not exists
+     */
+    boolean logout() throws EntityNotFoundException;
+
+    /**
      * Register a new user
      *
      * @param registerRequestDTO the user information to register

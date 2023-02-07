@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -45,6 +46,25 @@ public class AuthController {
         log.debug("Method Location: {}", this.getClass().getName() + ".login()");
         log.debug("Request body: {}", loginRequestDTO);
         return ResponseEntity.ok(userService.loginUser(loginRequestDTO));
+    }
+
+    /**
+     * This endpoint logs out a user from the application.
+     * @return the logged-out flag {@link ResponseDTO}
+     */
+    @DeleteMapping("/logout")
+    @Operation(summary = "Logout a user from the application")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<?> logout() {
+        log.debug("API ---> (/api/auth/logout) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".logout()");
+        boolean isLoggedOut = userService.logout();
+        return ResponseEntity.ok(
+                ResponseDTO.builder()
+                .message(isLoggedOut ? "User logged out successfully":"User failed to logout")
+                .success(isLoggedOut)
+                .build()
+        );
     }
 
     /**
