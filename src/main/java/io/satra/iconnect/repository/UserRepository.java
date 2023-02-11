@@ -12,6 +12,7 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, String>, JpaSpecificationExecutor<User> {
 
+    Optional<User> findByIdAndIsActive(String id, Boolean isActive);
     // find user by email or mobile number
     Optional<User> findFirstByEmailOrMobile(String email, String mobile);
     // find user by email

@@ -1,9 +1,9 @@
 package io.satra.iconnect.service.promotion;
 
 import io.satra.iconnect.dto.PromotionDTO;
-import io.satra.iconnect.dto.ScannerMessageDTO;
+import io.satra.iconnect.dto.scandto.ScannerMessageDTO;
 import io.satra.iconnect.dto.request.PromotionRequestDTO;
-import io.satra.iconnect.dto.request.ScanDTO;
+import io.satra.iconnect.dto.scandto.ScanDTO;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import org.springframework.data.domain.Page;

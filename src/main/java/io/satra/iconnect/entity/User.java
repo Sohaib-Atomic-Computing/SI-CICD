@@ -87,4 +87,15 @@ public class User extends BaseEntityAudit {
                 .lastModifiedAt(lastModifiedAt)
                 .build();
     }
+
+    public UserDTO toViewDTO() {
+        return UserDTO.builder()
+                .id(id)
+                .firstName(firstName)
+                .lastName(lastName)
+                .email(email)
+                .profilePicture(profilePicture)
+                .mobile(mobile)
+                .build();
+    }
 }

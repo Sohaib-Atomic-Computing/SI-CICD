@@ -2,9 +2,9 @@ package io.satra.iconnect.service.promotion;
 
 import com.google.gson.Gson;
 import io.satra.iconnect.dto.PromotionDTO;
-import io.satra.iconnect.dto.ScannerMessageDTO;
+import io.satra.iconnect.dto.scandto.ScannerMessageDTO;
 import io.satra.iconnect.dto.request.PromotionRequestDTO;
-import io.satra.iconnect.dto.request.ScanDTO;
+import io.satra.iconnect.dto.scandto.ScanDTO;
 import io.satra.iconnect.entity.Promotion;
 import io.satra.iconnect.entity.User;
 import io.satra.iconnect.entity.Validator;

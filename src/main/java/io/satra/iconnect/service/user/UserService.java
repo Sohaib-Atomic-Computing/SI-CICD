@@ -166,6 +166,15 @@ public interface UserService {
     User findUserEntityById(String id) throws EntityNotFoundException;
 
     /**
+     * This method is used to get the user active entity by given id
+     * @param id the id of the user to be obtained
+     * @return a {@link User}
+     * @throws EntityNotFoundException if no user with given id is found or the user is not active
+     */
+    User findActiveUserEntityById(String id) throws EntityNotFoundException;
+
+
+    /**
      * This method is used to send OTP to the user
      *
      * @param generateOTPDTO the user mobile number to send OTP

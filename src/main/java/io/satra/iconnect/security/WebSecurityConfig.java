@@ -39,7 +39,8 @@ public class WebSecurityConfig {
             "/v3/api-docs/**",
             "/static/**",
             "/sw.js/**",
-            "/api/auth/**"
+            "/api/auth/**",
+            "/api/v1/scanners/**"
     };
     private static final String[] AUTH_AUTHENTICATED_LIST = {
             "/api/v1/**"
