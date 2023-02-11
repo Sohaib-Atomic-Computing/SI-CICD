@@ -98,6 +98,29 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * This method logs out the user by removing the token from the user
+     *
+     * @return true if the user is logged out successfully
+     * @throws EntityNotFoundException if the user is not exists
+     */
+    @Override
+    public boolean logout() throws EntityNotFoundException {
+
+        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userPrincipal.getUser() == null) {
+            log.debug("User not found!");
+            throw new EntityNotFoundException("User not found!");
+        }
+
+        User currentUser = userRepository.findFirstByEmailOrMobile(userPrincipal.getUsername(), userPrincipal.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("User not found!"));
+
+        currentUser.setToken(null);
+        userRepository.save(currentUser);
+        return true;
+    }
+
+    /**
      * Register a new user
      *
      * @param registerRequestDTO the user information to register
