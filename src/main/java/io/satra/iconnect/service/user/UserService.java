@@ -2,6 +2,7 @@ package io.satra.iconnect.service.user;
 
 import io.satra.iconnect.dto.UserDTO;
 import io.satra.iconnect.dto.VendorDTO;
+import io.satra.iconnect.dto.request.ChangePasswordDTO;
 import io.satra.iconnect.dto.request.GenerateOTPDTO;
 import io.satra.iconnect.dto.request.LoginRequestDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
@@ -60,6 +61,17 @@ public interface UserService {
      * @throws EntityNotFoundException if no user with given id is found
      */
     UserDTO updateMyProfile(String firstName, String lastName, String email, MultipartFile profilePicture) throws EntityNotFoundException, IOException;
+
+    /**
+     * This method is used to change the password of a user
+     *
+     * @param changePasswordDTO the user information to change the password
+     * @@return the updated {@link UserDTO}
+     * @throws EntityNotFoundException if no user is authenticated
+     * @throws BadRequestException if the old password is incorrect
+     * @throws BadRequestException if the new password is the same as the old password
+     */
+    UserDTO changePassword(ChangePasswordDTO changePasswordDTO) throws EntityNotFoundException, BadRequestException;
 
     /**
      * Get a user by given id

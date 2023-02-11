@@ -2,6 +2,7 @@ package io.satra.iconnect.controllers;
 
 import io.satra.iconnect.dto.UserDTO;
 import io.satra.iconnect.dto.VendorDTO;
+import io.satra.iconnect.dto.request.ChangePasswordDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
 import io.satra.iconnect.dto.response.ResponseDTO;
 import io.satra.iconnect.entity.enums.UserRole;
@@ -76,6 +77,32 @@ public class UserController {
         return ResponseEntity.ok(
                 ResponseDTO.builder()
                         .message("User updated successfully")
+                        .success(true)
+                        .data(user)
+                        .build()
+        );
+    }
+
+    /**
+     * This endpoint is used to change the password of a user.
+     *
+     * @param changePasswordDTO the user old and new password
+     * @return the updated {@link UserDTO}
+     * @throws EntityNotFoundException if no user is authenticated
+     * @throws BadRequestException if the old password is incorrect
+     * @throws BadRequestException if the new password is the same as the old password
+     */
+    @PutMapping("/change-password")
+    @Operation(summary = "Change the password of a user")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordDTO changePasswordDTO) throws EntityNotFoundException, BadRequestException {
+        log.debug("API ---> (/api/auth/change-password) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".changePassword()");
+        log.debug("Request body: {}", changePasswordDTO);
+        UserDTO user = userService.changePassword(changePasswordDTO);
+        return ResponseEntity.ok(
+                ResponseDTO.builder()
+                        .message("Password changed successfully")
                         .success(true)
                         .data(user)
                         .build()
