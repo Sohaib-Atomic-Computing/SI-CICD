@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 @Builder
 @Table(name = "promotions")
 public class Promotion extends BaseEntityAudit {
-
     @NotNull
     private String name;
     @NotNull
