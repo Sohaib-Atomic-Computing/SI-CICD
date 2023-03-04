@@ -1,5 +1,7 @@
 package io.satra.iconnect.utils;
 
+import javax.crypto.SecretKey;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 public class KeyGenerator {
@@ -20,4 +22,23 @@ public class KeyGenerator {
             buf[idx] = symbols[random.nextInt(symbols.length)];
         return new String(buf);
     }
+
+    public static String generateAESKey(final int keyLength) throws NoSuchAlgorithmException {
+        javax.crypto.KeyGenerator keyGen = javax.crypto.KeyGenerator.getInstance("AES");
+        keyGen.init(keyLength);
+        SecretKey secretKey = keyGen.generateKey();
+        byte[] encoded = secretKey.getEncoded();
+        // convert to hex
+        return bytesToHex(encoded).toLowerCase();
+    }
+
+    private static String bytesToHex(byte[] encoded) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : encoded) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
+
 }

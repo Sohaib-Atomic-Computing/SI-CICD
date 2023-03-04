@@ -28,7 +28,8 @@ public interface PromotionRepository extends JpaRepository<Promotion, String>, J
     // find promotion by vendor and user
     Set<Promotion> findByVendorAndUsers(Vendor vendor, User user);
 
-    // find promotion by vendor and user and start date greater than or equal to current date and end date less than or equal to current date and isActive is true
+    // find promotion by vendor and user and start date greater than or equal to current date and end date less than or
+    // equal to current date and isActive is true
     Set<Promotion> findByVendorAndUsersAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndIsActiveTrue(Vendor vendor, User user, LocalDateTime startDate, LocalDateTime endDate);
 
     //find all by name containing and status and start date greater than or equal to and end date less than or equal to
