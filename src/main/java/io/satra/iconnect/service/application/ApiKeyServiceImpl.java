@@ -66,9 +66,9 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
         if (name != null) {
             // check if the api key name already exist for the same application except the current api key
-            apiKeyRepository.findByNameAndIdNot(name, apiKeyId).ifPresent(apiKeyEntity -> {
+            if (apiKeyRepository.existsByNameAndIdNotAndIsActiveTrue(name, apiKeyId)) {
                 throw new BadRequestException("The api key name already exists for the same application");
-            });
+            }
             apiKey.setName(name);
         }
         if (isActive != null) {
@@ -81,7 +81,8 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
     @Override
     public void deleteApiKey(String apiKeyId) throws EntityNotFoundException {
-        apiKeyRepository.delete(getApiKey(apiKeyId));
+        // apply soft delete
+        updateApiKey(apiKeyId, false, null);
     }
 
     @Override
@@ -93,7 +94,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     public List<ApiKey> getAllApiKeys(String applicationId) throws EntityNotFoundException {
         // get the application
         Application application = applicationService.getApplication(applicationId);
-        return apiKeyRepository.findByApplication(application);
+        return apiKeyRepository.findByApplicationAndIsActiveTrue(application);
     }
 
     @Override

@@ -90,10 +90,10 @@ public class ApplicationController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Get all applications with pagination and filters")
     public ResponseEntity<Page<Application>> getApplications(@RequestParam(required = false) String name,
-            @RequestParam(required = false) Boolean status, Pageable page) {
+            @RequestParam(required = false) Boolean isActive, Pageable page) {
         log.debug("API ---> (/api/v1/applications) has been called.");
         log.debug("Method Location: {}", this.getClass().getName() + ".getApplications()");
-        log.debug("Request parameters: name={}, status={}", name, status);
-        return ResponseEntity.ok(applicationService.getAllApplications(name, status, page));
+        log.debug("Request parameters: name={}, isActive={}", name, isActive);
+        return ResponseEntity.ok(applicationService.getAllApplications(name, isActive, page));
     }
 }

@@ -56,7 +56,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         if (name != null) {
             // check if the name is already taken by another application except the current one
-            if(applicationRepository.findByNameAndIdNot(name, id).isPresent()){
+            if(applicationRepository.existsByNameAndIdNotAndIsActiveTrue(name, id)){
                 throw new BadRequestException("Application already exists with the name: " + name);
             }
             application.setName(name);
@@ -71,7 +71,8 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public void deleteApplication(String id) throws EntityNotFoundException {
-        applicationRepository.delete(getApplication(id));
+        // apply soft delete
+        updateApplication(id, false, null);
     }
 
     @Override
@@ -80,8 +81,9 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public Page<Application> getAllApplications(String name, Boolean status, Pageable page) {
-        Specification<Application> specification = ApplicationSpecifications.filterApplications(name, status);
+    public Page<Application> getAllApplications(String name, Boolean isActive, Pageable page) {
+        if (isActive == null) isActive = true;
+        Specification<Application> specification = ApplicationSpecifications.filterApplications(name, isActive);
         return applicationRepository.findAll(specification, page);
     }
 }
