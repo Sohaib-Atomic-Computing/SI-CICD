@@ -12,5 +12,5 @@ public interface ApplicationRepository extends JpaRepository<Application, String
 
     Optional<Application> findByName(String name);
 
-    Optional<Application> findByNameAndIdNot(String name, String id);
+     boolean existsByNameAndIdNotAndIsActiveTrue(String name, String id);
 }

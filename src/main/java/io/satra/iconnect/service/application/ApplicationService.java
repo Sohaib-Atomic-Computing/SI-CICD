@@ -52,10 +52,10 @@ public interface ApplicationService {
      * This method is used to get all applications
      *
      * @param name the application name to be obtained (Optional)
-     * @param status the application status to be obtained (Optional)
+     * @param isActive the application status to be obtained (Optional)
      * @param page the pagination information
      * @return the list of applications {@link Application}
      * */
-    Page<Application> getAllApplications(String name, Boolean status, Pageable page);
+    Page<Application> getAllApplications(String name, Boolean isActive, Pageable page);
 
 }

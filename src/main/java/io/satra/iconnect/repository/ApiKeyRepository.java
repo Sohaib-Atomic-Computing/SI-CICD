@@ -12,9 +12,10 @@ import java.util.Optional;
 public interface ApiKeyRepository extends JpaRepository<ApiKey, String> {
 
     Optional<ApiKey> findByKeyAndIsActiveIsTrue(String apiKey);
+
     Optional<ApiKey> findByNameAndApplication(String name, Application application);
 
-    Optional<Object> findByNameAndIdNot(String name, String apiKeyId);
+    boolean existsByNameAndIdNotAndIsActiveTrue(String name, String apiKeyId);
 
-    List<ApiKey> findByApplication(Application application);
+    List<ApiKey> findByApplicationAndIsActiveTrue(Application application);
 }
