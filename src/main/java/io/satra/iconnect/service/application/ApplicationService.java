@@ -25,11 +25,11 @@ public interface ApplicationService {
      *
      * @param id the id of the application to be updated
      * @param name the application name to update
-     * @param status the application status to update
+     * @param isActive the application isActive status to update
      * @return the updated application {@link Application}
      * @throws EntityNotFoundException if the application not exists
      * */
-    Application updateApplication(String id, Boolean status, String name) throws EntityNotFoundException;
+    Application updateApplication(String id, Boolean isActive, String name) throws EntityNotFoundException;
 
     /**
      * This method is used to delete an application

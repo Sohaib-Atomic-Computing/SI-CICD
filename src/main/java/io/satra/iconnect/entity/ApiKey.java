@@ -26,7 +26,7 @@ public class ApiKey extends BaseEntityAudit {
     private String key;
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     @Builder.Default
-    private Boolean status = Boolean.TRUE;
+    private Boolean isActive = Boolean.TRUE;
     @JsonIgnore
     @JoinColumn(name = "applicationId", referencedColumnName = "id")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)

@@ -8,7 +8,7 @@ import java.util.List;
 import javax.persistence.criteria.Predicate;
 
 public class ApplicationSpecifications {
-    public static Specification<Application> filterApplications(String name, Boolean status) {
+    public static Specification<Application> filterApplications(String name, Boolean isActive) {
         return (root, criteriaQuery,criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -16,8 +16,8 @@ public class ApplicationSpecifications {
                 predicates.add(criteriaBuilder.like(root.get("name"), "%"+name+"%"));
             }
 
-            if (status != null) {
-                predicates.add(criteriaBuilder.equal(root.get("status"), status));
+            if (isActive != null) {
+                predicates.add(criteriaBuilder.equal(root.get("isActive"), isActive));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

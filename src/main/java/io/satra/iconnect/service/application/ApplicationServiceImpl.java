@@ -44,7 +44,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public Application updateApplication(String id, Boolean status, String name) throws EntityNotFoundException {
+    public Application updateApplication(String id, Boolean isActive, String name) throws EntityNotFoundException {
         // check if application exists
         Application application = getApplication(id);
 
@@ -61,8 +61,8 @@ public class ApplicationServiceImpl implements ApplicationService {
             }
             application.setName(name);
         }
-        if (status != null) {
-            application.setStatus(status);
+        if (isActive != null) {
+            application.setIsActive(isActive);
         }
         application.setLastModifiedBy(userPrincipal.getUser());
 

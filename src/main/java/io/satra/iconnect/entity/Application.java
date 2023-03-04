@@ -24,7 +24,7 @@ public class Application extends BaseEntityAudit {
     private String name;
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     @Builder.Default
-    private Boolean status = Boolean.TRUE;
+    private Boolean isActive = Boolean.TRUE;
     @OneToMany(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ApiKey> apiKeys;
     @JsonIgnore

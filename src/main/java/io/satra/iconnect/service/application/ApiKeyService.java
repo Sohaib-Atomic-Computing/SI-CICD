@@ -27,12 +27,12 @@ public interface ApiKeyService {
      *
      * @param apiKeyId the api key id
      * @param name the api key name
-     * @param status the api key status
+     * @param isActive the api key active status
      * @return the updated api key {@link ApiKey}
      * @throws EntityNotFoundException if the api key does not exist
      * @throws BadRequestException if the api key name already exists for the same application
      * */
-    ApiKey updateApiKey(String apiKeyId, Boolean status, String name) throws EntityNotFoundException, BadRequestException;
+    ApiKey updateApiKey(String apiKeyId, Boolean isActive, String name) throws EntityNotFoundException, BadRequestException;
 
     /**
      * This used to delete an api key

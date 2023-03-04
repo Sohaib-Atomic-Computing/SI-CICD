@@ -54,7 +54,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     }
 
     @Override
-    public ApiKey updateApiKey(String apiKeyId, Boolean status, String name) throws EntityNotFoundException, BadRequestException {
+    public ApiKey updateApiKey(String apiKeyId, Boolean isActive, String name) throws EntityNotFoundException, BadRequestException {
         // get the api key
         ApiKey apiKey = getApiKey(apiKeyId);
 
@@ -71,8 +71,8 @@ public class ApiKeyServiceImpl implements ApiKeyService {
             });
             apiKey.setName(name);
         }
-        if (status != null) {
-            apiKey.setStatus(status);
+        if (isActive != null) {
+            apiKey.setIsActive(isActive);
         }
         apiKey.setLastModifiedBy(userPrincipal.getUser());
 
@@ -98,7 +98,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
     @Override
     public ApiKey getApiKeyByKey(String key) throws BadRequestException {
-        return apiKeyRepository.findByKeyAndStatusIsTrue(key).orElseThrow(() -> new BadRequestException("Invalid api key"));
+        return apiKeyRepository.findByKeyAndIsActiveIsTrue(key).orElseThrow(() -> new BadRequestException("Invalid api key"));
     }
 
     @Override
@@ -109,11 +109,11 @@ public class ApiKeyServiceImpl implements ApiKeyService {
             throw new EntityNotFoundException("Api key not found");
         }
 
-        if (!apiKey.getStatus()) {
-            throw new BadRequestException("Your API Key is expired! Please contact support.");
+        if (!apiKey.getIsActive()) {
+            throw new BadRequestException("Your API Key is inactive! Please contact support.");
         }
 
-        if (!apiKey.getApplication().getStatus()) {
+        if (!apiKey.getApplication().getIsActive()) {
             throw new BadRequestException("Your Application is inactive! Please contact support.");
         }
     }

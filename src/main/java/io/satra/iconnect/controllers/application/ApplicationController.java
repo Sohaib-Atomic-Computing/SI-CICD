@@ -45,12 +45,12 @@ public class ApplicationController {
     @PutMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Update an application")
-    public ResponseEntity<?> updateApplication(@PathVariable String id, @RequestParam(required = false) Boolean status,
+    public ResponseEntity<?> updateApplication(@PathVariable String id, @RequestParam(required = false) Boolean isActive,
                                                @RequestParam(required = false) String name) throws Exception {
         log.debug("API ---> (/api/v1/applications/{id}) has been called.");
         log.debug("Method Location: {}", this.getClass().getName() + ".updateApplication()");
-        log.debug("Request parameters: id={}, name={}, status={}", id, name, status);
-        Application application  = applicationService.updateApplication(id, status, name);
+        log.debug("Request parameters: id={}, name={}, isActive={}", id, name, isActive);
+        Application application  = applicationService.updateApplication(id, isActive, name);
         return ResponseEntity.ok(
                 ResponseDTO.builder()
                         .message("Application updated successfully")

@@ -44,12 +44,12 @@ public class ApiKeyController {
     @PutMapping(value = "/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Update an application API Key")
-    public ResponseEntity<?> updateApiKey(@PathVariable String id, @RequestParam(required = false) Boolean status,
+    public ResponseEntity<?> updateApiKey(@PathVariable String id, @RequestParam(required = false) Boolean isActive,
                                           @RequestParam(required = false) String name) throws Exception {
         log.debug("API ---> (/api/v1/api-keys/{id}) has been called.");
         log.debug("Method Location: {}", this.getClass().getName() + ".updateApiKey()");
-        log.debug("Request parameters: id={}, name={}, status={}", id, name, status);
-        ApiKey apiKey = apiKeyService.updateApiKey(id, status, name);
+        log.debug("Request parameters: id={}, name={}, isActive={}", id, name, isActive);
+        ApiKey apiKey = apiKeyService.updateApiKey(id, isActive, name);
         return ResponseEntity.ok(
                 ResponseDTO.builder()
                         .message("API Key updated successfully")
