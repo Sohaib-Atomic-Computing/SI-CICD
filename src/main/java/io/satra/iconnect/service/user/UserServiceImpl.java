@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -615,11 +616,17 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new EntityNotFoundException(String.format("No user with given id %s found!", userPrincipal.getUser().getId())));
 
         return user.getPromotions().stream()
+                .filter(promotion -> {
+                    Date date = new Date();
+                    return date.after(TimeUtils.convertLocalDateTimeToDate(promotion.getStartDate()))
+                            && date.before(TimeUtils.convertLocalDateTimeToDate(promotion.getEndDate()));
+                })
                 .map(Promotion::getVendor)
                 .distinct()
                 .map(vendor -> VendorDTO.builder()
                         .id(vendor.getId())
                         .name(vendor.getName())
+                        .logo(vendor.getLogo())
                         .build())
                 .collect(Collectors.toList());
     }
