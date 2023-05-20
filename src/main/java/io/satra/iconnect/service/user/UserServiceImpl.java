@@ -4,10 +4,7 @@ import com.google.gson.Gson;
 import io.satra.iconnect.dto.QRCodeDTO;
 import io.satra.iconnect.dto.UserDTO;
 import io.satra.iconnect.dto.VendorDTO;
-import io.satra.iconnect.dto.request.ChangePasswordDTO;
-import io.satra.iconnect.dto.request.GenerateOTPDTO;
-import io.satra.iconnect.dto.request.LoginRequestDTO;
-import io.satra.iconnect.dto.request.RegisterRequestDTO;
+import io.satra.iconnect.dto.request.*;
 import io.satra.iconnect.dto.response.JwtResponseDTO;
 import io.satra.iconnect.dto.response.ResponseDTO;
 import io.satra.iconnect.entity.Promotion;
@@ -43,7 +40,6 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -369,6 +365,10 @@ public class UserServiceImpl implements UserService {
         }
 
         if (email != null && !email.isEmpty()) {
+            if (!updatedUser.getEmail().equals(email) && userRepository.findByEmail(email).isPresent()) {
+                log.error("User with email: {} already exists", email);
+                throw new BadRequestException(String.format("User with email: %s already exists", email));
+            }
             updatedUser.setEmail(email);
         }
 
@@ -629,5 +629,33 @@ public class UserServiceImpl implements UserService {
                         .logo(vendor.getLogo())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void addUser(AddUserRequest addUserRequest) throws BadRequestException {
+        if (userRepository.findByMobile(addUserRequest.getMobile()).isPresent()) {
+            return;
+        }
+
+        if ((addUserRequest.getEmail() == null || addUserRequest.getEmail().isEmpty()) &&
+                (addUserRequest.getMobile() == null || addUserRequest.getMobile().isEmpty())) {
+            throw new BadRequestException("Email or mobile number is required");
+        }
+
+        if(addUserRequest.getEmail() != null && !addUserRequest.getEmail().isEmpty()
+                && userRepository.findByEmail(addUserRequest.getEmail()).isPresent()) {
+            return;
+        }
+
+        User user = User.builder()
+            .email(addUserRequest.getEmail())
+            .mobile(addUserRequest.getMobile())
+            .firstName(addUserRequest.getFirstName())
+            .lastName(addUserRequest.getLastName())
+            .role(UserRole.USER)
+            .isActive(true)
+            .build();
+
+        userRepository.save(user);
     }
 }

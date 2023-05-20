@@ -2,10 +2,7 @@ package io.satra.iconnect.service.user;
 
 import io.satra.iconnect.dto.UserDTO;
 import io.satra.iconnect.dto.VendorDTO;
-import io.satra.iconnect.dto.request.ChangePasswordDTO;
-import io.satra.iconnect.dto.request.GenerateOTPDTO;
-import io.satra.iconnect.dto.request.LoginRequestDTO;
-import io.satra.iconnect.dto.request.RegisterRequestDTO;
+import io.satra.iconnect.dto.request.*;
 import io.satra.iconnect.dto.response.JwtResponseDTO;
 import io.satra.iconnect.dto.response.ResponseDTO;
 import io.satra.iconnect.entity.User;
@@ -199,4 +196,11 @@ public interface UserService {
      */
     List<VendorDTO> getVendors() throws EntityNotFoundException;
 
+    /**
+     * This method is used to add user to the system
+     *
+     * @param addUserRequest the user information to be added to the system
+     * @throws BadRequestException if there is a missing field
+     */
+    void addUser(AddUserRequest addUserRequest) throws BadRequestException;
 }
