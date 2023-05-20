@@ -1,7 +1,6 @@
 package io.satra.iconnect.controllers.application;
 
 import io.satra.iconnect.dto.response.ResponseDTO;
-import org.aspectj.apache.bcel.classfile.Module;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;

@@ -12,7 +12,7 @@ import io.satra.iconnect.repository.ValidatorRepository;
 import io.satra.iconnect.security.JWTUtils;
 import io.satra.iconnect.security.UserPrincipal;
 import io.satra.iconnect.service.vendor.VendorService;
-import io.satra.iconnect.utils.KeyGenerator;
+import io.satra.iconnect.utils.KeyGeneratorUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -76,7 +76,7 @@ public class ValidatorServiceImpl implements ValidatorService {
         }
 
         // generate license key
-        String key = KeyGenerator.nextKey();
+        String key = KeyGeneratorUtil.nextKey();
 
         // create validator entity
         Validator validator = Validator.builder()

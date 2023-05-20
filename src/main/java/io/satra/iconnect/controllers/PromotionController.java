@@ -9,8 +9,14 @@ import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.service.promotion.PromotionService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.RouterOperation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -38,15 +44,71 @@ public class PromotionController {
      */
     @PostMapping(value = "/")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @Operation(summary = "Create a new promotion")
-    public ResponseEntity<?> createPromotion(@Valid @RequestBody PromotionRequestDTO promotionRequestDTO) throws BadRequestException {
+    @Operation(
+            summary = "Create a promotion",
+            description = "This endpoint creates a new promotion.\nYou have to have the role 'ROLE_ADMIN' to access this endpoint. " +
+                    "To create a promotion, you have to provide the following information:\n" +
+                    "- name: the name of the promotion\n" +
+                    "- description: the description of the promotion\n" +
+                    "- isActive: the status of the promotion *default value is true*\n" +
+                    "- startDate: the start date of the promotion\n" +
+                    "- endDate: the end date of the promotion\n" +
+                    "- vendorId: the id of the vendor that created the promotion\n" +
+                    "- userIds: the ids of the users that are eligible for the promotion\n"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Promotion created successfully",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(
+                                            example = "{\"message\": \"Promotion created successfully\",\"success\": true,\"data\": {\"id\": \"5f9f1b9b0b2b4b0001b5b1b1\",\"name\": \"Promotion 1\",\"description\": \"Promotion 1\",\"isActive\": true,\"startDate\": \"2020-10-30T00:00:00.000+00:00\",\"endDate\": \"2020-11-30T00:00:00.000+00:00\",\"vendorId\": \"5f9f1b9b0b2b4b0001b5b1b0\",\"userIds\": [\"5f9f1b9b0b2b4b0001b5b1b0\"]}}}"
+                                    )
+                            )
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Vendor info or user info didn't found!",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    examples = {
+                                            @ExampleObject(
+                                                    name = "Vendor not found!",
+                                                    value = "{\"message\": \"No vendor with given id found!\",\"success\": false,\"data\": null}"
+                                            ),
+                                            @ExampleObject(
+                                                    name = "User not found!",
+                                                    value = "{\"message\": \"User not found!\",\"success\": false,\"data\": null}"
+                                            )
+                                    }
+                            )
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Promotion already exists!",
+                    content = {
+                            @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(
+                                            example = "{\"message\": \"Promotion already exists!\",\"success\": false,\"data\": null}"
+                                    )
+                            )
+                    }
+            )})
+    public ResponseEntity<ResponseDTO> createPromotion(@Valid @RequestBody PromotionRequestDTO promotionRequestDTO) throws BadRequestException {
         log.debug("API ---> (/api/v1/promotions) has been called.");
         log.debug("Method Location: {}", this.getClass().getName() + ".createPromotion()");
         log.debug("Request body: {}", promotionRequestDTO);
         PromotionDTO promotionDTO = promotionService.createPromotion(promotionRequestDTO);
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/v1/promotions/" + promotionDTO.getId()).toUriString());
+        ResponseDTO.ResponseDTOBuilder<PromotionDTO> responseDTOBuilder = ResponseDTO.builder();
         return ResponseEntity.created(uri).body(
-                ResponseDTO.builder()
+                        responseDTOBuilder
                         .message("Promotion created successfully")
                         .success(true)
                         .data(promotionDTO)
