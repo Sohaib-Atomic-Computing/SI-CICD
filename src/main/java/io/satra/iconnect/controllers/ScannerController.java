@@ -27,9 +27,9 @@ public class ScannerController {
     @Operation(summary = "Scan a QR code")
     public ResponseEntity<?> scan(@RequestHeader(name = "x-api-key", required = true) String apiKey,
                                   @Valid @RequestBody ScanDTO scanDTO) throws Exception {
-        log.debug("API ---> (/api/v1/scanners/scan) has been called.");
-        log.debug("Method Location: {}", this.getClass().getName() + ".scan()");
-        log.debug("Request body: {}", scanDTO);
+        log.info("API ---> (/api/v1/scanners/scan) has been called.");
+        log.info("Method Location: {}", this.getClass().getName() + ".scan()");
+        log.info("Request body: {}", scanDTO);
 
         apiKeyService.validateApiKey(apiKey);
 

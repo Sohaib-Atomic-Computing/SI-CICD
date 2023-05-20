@@ -6,7 +6,7 @@ import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.repository.ApiKeyRepository;
 import io.satra.iconnect.security.UserPrincipal;
-import io.satra.iconnect.utils.KeyGenerator;
+import io.satra.iconnect.utils.KeyGeneratorUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,7 +39,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
         }
 
         // generate random 64 unique character api key
-        String apiKey = KeyGenerator.generateAESKey(256);
+        String apiKey = KeyGeneratorUtil.generateKeyWithAES(256);
         log.info("Generated api key: {}", apiKey);
 
         // create the api key
