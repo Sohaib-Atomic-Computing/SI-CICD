@@ -1,9 +1,9 @@
 package io.satra.iconnect.security;
 
+import io.satra.iconnect.entity.Merchant;
 import io.satra.iconnect.entity.User;
 import io.satra.iconnect.entity.Validator;
 import io.satra.iconnect.entity.enums.UserRole;
-import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,6 +19,7 @@ public class UserPrincipal implements UserDetails {
 
     private transient User user;
     private transient Validator validator;
+    private transient Merchant merchant;
     private Collection<? extends GrantedAuthority> authorities;
 
     public UserPrincipal(User user, Collection<? extends GrantedAuthority> authorities) {
@@ -28,6 +29,11 @@ public class UserPrincipal implements UserDetails {
 
     public UserPrincipal(Validator validator, Collection<? extends GrantedAuthority> authorities) {
         this.validator = validator;
+        this.authorities = authorities;
+    }
+
+    public UserPrincipal(Merchant merchant, Collection<? extends GrantedAuthority> authorities) {
+        this.merchant = merchant;
         this.authorities = authorities;
     }
 
@@ -57,12 +63,29 @@ public class UserPrincipal implements UserDetails {
                 authorities);
     }
 
+    public static UserPrincipal build(Merchant merchant) {
+        List<UserRole> roles = new ArrayList<>();
+        roles.add(UserRole.ROLE_MERCHANT);
+
+        List<GrantedAuthority> authorities = roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.toString()))
+                .collect(Collectors.toList());
+
+        return new UserPrincipal(
+                merchant,
+                authorities);
+    }
+
     @Override
     public String getUsername() {
         if (user != null) {
             return user.getMobile() != null ? user.getMobile() : user.getEmail();
-        } else {
+        } else if (validator != null) {
             return validator.getName();
+        } else if (merchant != null) {
+            return merchant.getAdminEmail();
+        } else {
+            return null;
         }
     }
 
@@ -70,14 +93,15 @@ public class UserPrincipal implements UserDetails {
     public String getPassword() {
         if (user != null) {
             if (user.getOtpCode() == null || user.getOtpCode().isEmpty()) {
-                log.info("User password: {}", user.getPassword());
                 return user.getPassword();
             }
-
-            log.info("User OTP: {}", user.getOtpCode());
             return user.getOtpCode();
-        } else {
+        } else if (validator != null) {
             return validator.getEncodedKey();
+        } else if (merchant != null) {
+            return merchant.getPassword();
+        } else {
+            return null;
         }
     }
 
@@ -100,8 +124,12 @@ public class UserPrincipal implements UserDetails {
     public boolean isEnabled() {
         if (user != null) {
             return user.getIsActive();
-        } else {
+        } else if (validator != null) {
             return validator.getIsActive();
+        } else if (merchant != null) {
+            return merchant.getIsActive();
+        } else {
+            return false;
         }
     }
 
@@ -116,8 +144,12 @@ public class UserPrincipal implements UserDetails {
         UserPrincipal that = (UserPrincipal) o;
         if (user != null) {
             return Objects.equals(user, that.user);
-        } else {
+        } else if (validator != null) {
             return Objects.equals(validator, that.validator);
+        } else if (merchant != null) {
+            return Objects.equals(merchant, that.merchant);
+        } else {
+            return false;
         }
     }
 
@@ -125,8 +157,13 @@ public class UserPrincipal implements UserDetails {
     public int hashCode() {
         if (user != null) {
             return Objects.hash(user);
-        } else {
+        } else if (validator != null) {
             return Objects.hash(validator);
+        } else if (merchant != null) {
+            return Objects.hash(merchant);
+        } else {
+            // return 0 to indicate that this object is not hashable
+            return 0;
         }
     }
 }

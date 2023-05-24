@@ -43,7 +43,7 @@ public class PromotionController {
      * @throws BadRequestException if the promotion is invalid
      */
     @PostMapping(value = "/")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_MERCHANT')")
     @Operation(
             summary = "Create a promotion",
             description = "This endpoint creates a new promotion.\nYou have to have the role 'ROLE_ADMIN' to access this endpoint. " +
@@ -100,7 +100,7 @@ public class PromotionController {
                             )
                     }
             )})
-    public ResponseEntity<ResponseDTO> createPromotion(@Valid @RequestBody PromotionRequestDTO promotionRequestDTO) throws BadRequestException {
+    public ResponseEntity<?> createPromotion(@Valid @RequestBody PromotionRequestDTO promotionRequestDTO) throws BadRequestException {
         log.debug("API ---> (/api/v1/promotions) has been called.");
         log.debug("Method Location: {}", this.getClass().getName() + ".createPromotion()");
         log.debug("Request body: {}", promotionRequestDTO);
@@ -125,7 +125,7 @@ public class PromotionController {
      * @throws EntityNotFoundException if no promotion is found with the given id
      */
     @PutMapping(value = "/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MERCHANT')")
     @Operation(summary = "Update a promotion")
     public ResponseEntity<?> updatePromotion(@PathVariable String id, @Valid @RequestBody PromotionRequestDTO promotionRequestDTO)
             throws EntityNotFoundException {
@@ -151,7 +151,7 @@ public class PromotionController {
      * @throws EntityNotFoundException if no promotion is found with the given id
      */
     @DeleteMapping(value = "/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MERCHANT')")
     @Operation(summary = "Delete a promotion")
     public ResponseEntity<?> deletePromotion(@PathVariable String id) throws EntityNotFoundException {
         log.debug("API ---> (/api/v1/promotions/{id}) has been called.");

@@ -3,6 +3,7 @@ package io.satra.iconnect.repository;
 import io.satra.iconnect.entity.Promotion;
 import io.satra.iconnect.entity.User;
 import io.satra.iconnect.entity.Vendor;
+import io.satra.iconnect.entity.enums.PromotionStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,8 +30,10 @@ public interface PromotionRepository extends JpaRepository<Promotion, String>, J
     Set<Promotion> findByVendorAndUsers(Vendor vendor, User user);
 
     // find promotion by vendor and user and start date greater than or equal to current date and end date less than or
-    // equal to current date and isActive is true
-    Set<Promotion> findByVendorAndUsersAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndIsActiveTrue(Vendor vendor, User user, LocalDateTime startDate, LocalDateTime endDate);
+    // equal to current date and isActive is true and the promotion status equal approved
+    Set<Promotion> findByVendorAndUsersAndStartDateGreaterThanEqualAndEndDateLessThanEqualAndIsActiveTrueAndStatus(
+            Vendor vendor, User user, LocalDateTime startDate, LocalDateTime endDate, PromotionStatus status
+    );
 
     //find all by name containing and status and start date greater than or equal to and end date less than or equal to
     Page<Promotion> findAllByNameContainingAndIsActiveAndStartDateGreaterThanEqualAndEndDateLessThanEqual(
