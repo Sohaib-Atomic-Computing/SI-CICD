@@ -584,17 +584,13 @@ public class UserServiceImpl implements UserService {
 
         String otp = String.format("%05d", rand.nextInt(100000));
 
-//        if (PropertyLoader.getEnv().equals("DEVELOPMENT")) {
-//            user.setOtpCode(passwordEncoder.encode("00000"));
-//        } else {
-//            user.setOtpCode(passwordEncoder.encode(otp));
-//            SMSSender smsSender = new SMSSenderCequens();
-//            smsSender.sendSMS(generateOTPDTO.getMobile(), "Your OTP is " + otp);
-//        }
-
-        user.setOtpCode(passwordEncoder.encode(otp));
-        SMSSender smsSender = new SMSSenderCequens();
-        smsSender.sendSMS("+201122228252", "Your OTP is " + otp);
+        if (PropertyLoader.getEnv().equals("DEVELOPMENT")) {
+            user.setOtpCode(passwordEncoder.encode("00000"));
+        } else {
+            user.setOtpCode(passwordEncoder.encode(otp));
+            SMSSender smsSender = new SMSSenderCequens();
+            smsSender.sendSMS(generateOTPDTO.getMobile(), "Your OTP is " + otp);
+        }
 
         // set the expiry time
         user.setOtpExpireAt(TimeUtils.convertDateToLocalDateTime(c.getTime()));
