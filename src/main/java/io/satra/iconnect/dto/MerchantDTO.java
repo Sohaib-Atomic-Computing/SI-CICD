@@ -1,27 +1,30 @@
 package io.satra.iconnect.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.satra.iconnect.entity.enums.PromotionStatus;
 import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PromotionDTO {
+public class MerchantDTO {
     private String id;
     private String name;
-    private String description;
+    private String logo;
+    private String abbreviation;
+    private String adminFirstName;
+    private String adminLastName;
+    private String adminEmail;
+    private String mobile;
+    private String firstAddress;
+    private String secondAddress;
+    private String city;
+    private String state;
+    private String country;
     private Boolean isActive;
-    private PromotionStatus status;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
-    private Set<UserDTO> users;
-    private VendorDTO vendor;
-    private MerchantDTO merchant;
     private LocalDateTime createdAt;
     private LocalDateTime lastModifiedAt;
+
 }

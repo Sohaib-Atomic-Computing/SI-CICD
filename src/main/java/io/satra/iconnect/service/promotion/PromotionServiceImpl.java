@@ -9,6 +9,8 @@ import io.satra.iconnect.entity.Promotion;
 import io.satra.iconnect.entity.User;
 import io.satra.iconnect.entity.Validator;
 import io.satra.iconnect.entity.Vendor;
+import io.satra.iconnect.entity.enums.PromotionStatus;
+import io.satra.iconnect.entity.enums.UserRole;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.repository.PromotionRepository;
@@ -70,8 +72,8 @@ public class PromotionServiceImpl implements PromotionService {
 
         // get the user data from the request
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (userPrincipal.getUser() == null) {
-            throw new EntityNotFoundException("User not found");
+        if (userPrincipal.getMerchant() == null) {
+            throw new EntityNotFoundException("Merchant not found");
         }
 
         // create the promotion entity
@@ -82,8 +84,8 @@ public class PromotionServiceImpl implements PromotionService {
                 .endDate(TimeUtils.convertStringToLocalDateTime(promotionRequestDTO.getEndDate()))
                 .vendor(vendor)
                 .users((usersSet))
-                .createdBy(userPrincipal.getUser())
-                .lastModifiedBy(userPrincipal.getUser())
+                .status(PromotionStatus.PENDING)
+                .merchant(userPrincipal.getMerchant())
                 .build();
 
         if (promotionRequestDTO.getIsActive() != null) {
@@ -120,8 +122,24 @@ public class PromotionServiceImpl implements PromotionService {
 
         // get the user data from the request
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (userPrincipal.getUser() == null) {
-            throw new EntityNotFoundException("User not found");
+        // check if the user is a merchant or a user, if the user is a merchant then check if the promotion related to the merchant
+        // if the user is a user then check if this user is an admin
+        if (userPrincipal.getUser() != null) {
+            if (!userPrincipal.getUser().getRole().equals(UserRole.ROLE_ADMIN)) {
+                throw new EntityNotFoundException("User not found");
+            }
+        } else {
+            if (userPrincipal.getMerchant() == null) {
+                throw new EntityNotFoundException("Merchant not found");
+            }
+            if (!userPrincipal.getMerchant().getId().equals(promotion.getMerchant().getId())) {
+                throw new EntityNotFoundException("Merchant not found");
+            }
+        }
+
+        // only admin can change the status
+        if (userPrincipal.getUser() != null && promotionRequestDTO.getStatus() != null) {
+            promotion.setStatus(promotionRequestDTO.getStatus());
         }
 
         // update the promotion entity
@@ -132,13 +150,13 @@ public class PromotionServiceImpl implements PromotionService {
         if (promotionRequestDTO.getIsActive() != null) {
             promotion.setIsActive(promotionRequestDTO.getIsActive());
         }
-        promotion.setLastModifiedBy(userPrincipal.getUser());
 
         // load the users from promotion
         Set<User> promotionUsers = promotion.getUsers();
 
         // combine the users from promotion and request
-        // let the users if they are already in the promotion and add the new users and remove the users that are not in the request
+        // let the users if they are already in the promotion and add the new users and remove the users that are not in
+        // the request
         promotionUsers.addAll(usersSet);
         promotionUsers.retainAll(usersSet);
 
@@ -159,6 +177,24 @@ public class PromotionServiceImpl implements PromotionService {
      */
     @Override
     public void deletePromotion(String id) throws EntityNotFoundException {
+        // get the user data from the request
+        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        // check if the one who try to delete is a merchant then check if the promotion related to the merchant
+        // if the one who try to delete is a user then check if this user is an admin
+        if (userPrincipal.getUser() != null) {
+            if (!userPrincipal.getUser().getRole().equals(UserRole.ROLE_ADMIN)) {
+                throw new EntityNotFoundException("User not found");
+            }
+        } else {
+            if (userPrincipal.getMerchant() == null) {
+                throw new EntityNotFoundException("Merchant not found");
+            }
+            Promotion promotion = promotionRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Promotion not found"));
+            if (!userPrincipal.getMerchant().getId().equals(promotion.getMerchant().getId())) {
+                throw new EntityNotFoundException("Merchant not found");
+            }
+        }
+
         try {
             promotionRepository.deleteById(id);
         } catch (Exception e) {
@@ -209,9 +245,9 @@ public class PromotionServiceImpl implements PromotionService {
     }
 
     /**
-     * This method is used to scan a promotion
+     * This method is used to return the list of promotions for the given scan data
      *
-     * @param scanDTO the scan information
+     * @param scanDTO the scan data
      * @throws EntityNotFoundException if the promotion does not exist
      */
     @Override
@@ -242,8 +278,11 @@ public class PromotionServiceImpl implements PromotionService {
         LocalDateTime currentDateTime = LocalDateTime.now();
 
         // find promotion by vendor and user and start date less than current date time and end date greater than current date time
-        return promotionRepository.findByVendorAndUsersAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndIsActiveTrue(validator.getVendor(), user, currentDateTime, currentDateTime)
-                .stream().map(Promotion::toScannerResponseDTO).collect(Collectors.toList());
+        // and is active true and promotion status is approved
+        return promotionRepository.findByVendorAndUsersAndStartDateGreaterThanEqualAndEndDateLessThanEqualAndIsActiveTrueAndStatus
+                        (validator.getVendor(), user, currentDateTime, currentDateTime, PromotionStatus.APPROVED).stream()
+                .map(Promotion::toScannerResponseDTO)
+                .collect(Collectors.toList());
     }
 
     /**

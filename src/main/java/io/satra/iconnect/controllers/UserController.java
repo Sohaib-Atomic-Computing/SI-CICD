@@ -2,16 +2,19 @@ package io.satra.iconnect.controllers;
 
 import io.satra.iconnect.dto.UserDTO;
 import io.satra.iconnect.dto.VendorDTO;
+import io.satra.iconnect.dto.request.AddUserRequest;
 import io.satra.iconnect.dto.request.ChangePasswordDTO;
 import io.satra.iconnect.dto.request.RegisterRequestDTO;
 import io.satra.iconnect.dto.response.ResponseDTO;
 import io.satra.iconnect.entity.enums.UserRole;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
+import io.satra.iconnect.service.application.ApiKeyService;
 import io.satra.iconnect.service.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +35,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final ApiKeyService apiKeyService;
 
     /**
      * This endpoint responds with the current authenticated user
@@ -277,10 +281,41 @@ public class UserController {
         if (email == null && mobile == null) {
             throw new BadRequestException("Email or mobile is required");
         }
+
+        // if the mobile is not null, check if it starts with " " if so, remove replace it with "+"
+        if (mobile != null && mobile.startsWith(" ")) {
+            mobile = "+" + mobile.substring(1);
+        }
+
         boolean exists = userService.userExists(email, mobile);
         return ResponseEntity.ok(ResponseDTO.builder()
                 .message(exists ? "User exists" : "User does not exist")
                 .success(exists)
+                .build());
+    }
+
+    /**
+     * This endpoint is used to add users from third party applications.
+     * The user will be added if it does not exist. And the endpoint only requires the first name, last name, and email
+     * or mobile number.
+     *
+     * @param addUserRequest the request body that contains the user information to be added {@link AddUserRequest}
+     * @return success message if the user is added successfully {@link ResponseDTO} or the user is already registered
+     */
+    @PostMapping("/add")
+    @Operation(summary = "Add a user from third party applications")
+    public ResponseEntity<?> addUser(@RequestHeader(name = "x-api-key") String apiKey,
+                                     @Valid @RequestBody AddUserRequest addUserRequest) {
+        log.debug("API ---> (/api/v1/users/add) has been called.");
+        log.debug("Method Location: {}", this.getClass().getName() + ".addUser()");
+        log.debug("Request body: {}", addUserRequest);
+
+        apiKeyService.validateApiKey(apiKey);
+
+        userService.addUser(addUserRequest);
+        return ResponseEntity.ok(ResponseDTO.builder()
+                .message("User added successfully")
+                .success(true)
                 .build());
     }
 }

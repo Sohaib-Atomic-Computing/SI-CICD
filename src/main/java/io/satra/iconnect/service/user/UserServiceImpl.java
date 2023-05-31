@@ -4,12 +4,10 @@ import com.google.gson.Gson;
 import io.satra.iconnect.dto.QRCodeDTO;
 import io.satra.iconnect.dto.UserDTO;
 import io.satra.iconnect.dto.VendorDTO;
-import io.satra.iconnect.dto.request.ChangePasswordDTO;
-import io.satra.iconnect.dto.request.GenerateOTPDTO;
-import io.satra.iconnect.dto.request.LoginRequestDTO;
-import io.satra.iconnect.dto.request.RegisterRequestDTO;
+import io.satra.iconnect.dto.request.*;
 import io.satra.iconnect.dto.response.JwtResponseDTO;
 import io.satra.iconnect.dto.response.ResponseDTO;
+import io.satra.iconnect.entity.Merchant;
 import io.satra.iconnect.entity.Promotion;
 import io.satra.iconnect.entity.User;
 import io.satra.iconnect.entity.Validator;
@@ -17,13 +15,10 @@ import io.satra.iconnect.entity.enums.UserRole;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.repository.UserRepository;
-import io.satra.iconnect.security.JWTUtils;
 import io.satra.iconnect.security.UserPrincipal;
+import io.satra.iconnect.service.merchant.MerchantService;
 import io.satra.iconnect.service.validator.ValidatorService;
-import io.satra.iconnect.utils.EncodingUtils;
-import io.satra.iconnect.utils.FileUtils;
-import io.satra.iconnect.utils.PropertyLoader;
-import io.satra.iconnect.utils.TimeUtils;
+import io.satra.iconnect.utils.*;
 import io.satra.iconnect.utils.sms.SMSSender;
 import io.satra.iconnect.utils.sms.SMSSenderCequens;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -43,7 +35,6 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,9 +43,9 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ValidatorService validatorService;
+    private final MerchantService merchantService;
     private final PasswordEncoder passwordEncoder;
-    private final JWTUtils jwtUtils;
-    private final AuthenticationManager authenticationManager;
+    private final JWTToken jwtToken;
 
     /**
      * Login a user
@@ -71,7 +62,7 @@ public class UserServiceImpl implements UserService {
         log.debug("User Mobile: {}", user.getMobile());
 
         // Generate JWT token
-        String jwt = generateJWTToken(loginRequestDTO.getEmailOrMobile(), loginRequestDTO.getPassword());
+        String jwt = jwtToken.generate(loginRequestDTO.getEmailOrMobile(), loginRequestDTO.getPassword());
         log.debug("User JWT: {}", jwt);
 
         // check if the user has OTP
@@ -135,6 +126,23 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findFirstByEmailOrMobile(registerRequestDTO.getEmail(), registerRequestDTO.getMobile()).isPresent()) {
             throw new BadRequestException(String.format("User with email: %s or mobile: %s already exists", registerRequestDTO.getEmail(), registerRequestDTO.getMobile()));
         }
+
+        // validate the user email and mobile number
+        ValidateUtil vd = new ValidateUtil();
+
+        if (!vd.checkEmailValidation(registerRequestDTO.getEmail())) {
+            throw new BadRequestException("Invalid email address! Please provide proper email address");
+        }
+
+        if (!vd.checkMobileNumberValidation(registerRequestDTO.getMobile())) {
+            if(registerRequestDTO.getMobile() != null && !registerRequestDTO.getMobile().equals("")
+                && !(registerRequestDTO.getMobile().trim().startsWith("00") || registerRequestDTO.getMobile().trim().startsWith("+"))) {
+                throw new BadRequestException("Invalid mobile number! The mobile number should start with 00 or +");
+            }
+
+            throw new BadRequestException("Invalid mobile number! Please provide proper mobile number");
+        }
+
         User registeredUser = User.builder()
                 .firstName(registerRequestDTO.getFirstName())
                 .lastName(registerRequestDTO.getLastName())
@@ -153,7 +161,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(registeredUser);
 
         // Generate JWT token
-        String jwt = generateJWTToken(registerRequestDTO.getEmail(), registerRequestDTO.getPassword());
+        String jwt = jwtToken.generate(registerRequestDTO.getEmail(), registerRequestDTO.getPassword());
         registeredUser.setToken(jwt);
 
         log.debug("User JWT: {}", jwt);
@@ -178,6 +186,7 @@ public class UserServiceImpl implements UserService {
     public Object getCurrentUser() throws EntityNotFoundException {
         User currentUser = null;
         Validator currentValidator = null;
+        Merchant currentMerchant = null;
 
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (userPrincipal.getUser() != null) {
@@ -186,7 +195,9 @@ public class UserServiceImpl implements UserService {
             log.debug("Current user: {}", currentUser.toDTO());
             return currentUser.toDTO();
         } else if (userPrincipal.getValidator() != null) {
-            return validatorService.getValidatorEntityByName(userPrincipal.getUsername());
+            return validatorService.getValidatorEntityByName(userPrincipal.getUsername()).toDTO();
+        } else if (userPrincipal.getMerchant() != null) {
+            return merchantService.getMerchantEntityByEmail(userPrincipal.getUsername()).toDTO();
         } else {
             log.error("User not found!");
             throw new EntityNotFoundException("User not found");
@@ -218,6 +229,8 @@ public class UserServiceImpl implements UserService {
 
         log.debug("User Mobile Number: {}", updatedUser.getMobile());
 
+        ValidateUtil vd = new ValidateUtil();
+
         if (firstName != null && !firstName.isEmpty()) {
             updatedUser.setFirstName(firstName);
         }
@@ -229,6 +242,11 @@ public class UserServiceImpl implements UserService {
             if (!updatedUser.getEmail().equals(email) && userRepository.findByEmail(email).isPresent()) {
                 log.error("User with email: {} already exists", email);
                 throw new BadRequestException(String.format("User with email: %s already exists", email));
+            }
+
+            // validate the user email
+            if (!vd.checkEmailValidation(email)) {
+                throw new BadRequestException("Invalid email address! Please provide proper email address");
             }
             updatedUser.setEmail(email);
         }
@@ -319,6 +337,23 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findFirstByEmailOrMobile(registerRequestDTO.getEmail(), registerRequestDTO.getMobile()).isPresent()) {
             throw new BadRequestException(String.format("User with email %s or mobile %s already exists!", registerRequestDTO.getEmail(), registerRequestDTO.getMobile()));
         }
+
+        // validate the user email and mobile number
+        ValidateUtil vd = new ValidateUtil();
+
+        if (!vd.checkEmailValidation(registerRequestDTO.getEmail())) {
+            throw new BadRequestException("Invalid email address! Please provide proper email address");
+        }
+
+        if (!vd.checkMobileNumberValidation(registerRequestDTO.getMobile())) {
+            if(registerRequestDTO.getMobile() != null && !registerRequestDTO.getMobile().equals("")
+                    && !(registerRequestDTO.getMobile().trim().startsWith("00") || registerRequestDTO.getMobile().trim().startsWith("+"))) {
+                throw new BadRequestException("Invalid mobile number! The mobile number should start with 00 or +");
+            }
+
+            throw new BadRequestException("Invalid mobile number! Please provide proper mobile number");
+        }
+
         User registeredUser = User.builder()
                 .firstName(registerRequestDTO.getFirstName())
                 .lastName(registerRequestDTO.getLastName())
@@ -361,6 +396,8 @@ public class UserServiceImpl implements UserService {
         User updatedUser = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("No user with given id %s found!", id)));
 
+        ValidateUtil vd = new ValidateUtil();
+
         if (firstName != null && !firstName.isEmpty()) {
             updatedUser.setFirstName(firstName);
         }
@@ -369,6 +406,14 @@ public class UserServiceImpl implements UserService {
         }
 
         if (email != null && !email.isEmpty()) {
+            if (!updatedUser.getEmail().equals(email) && userRepository.findByEmail(email).isPresent()) {
+                log.error("User with email: {} already exists", email);
+                throw new BadRequestException(String.format("User with email: %s already exists", email));
+            }
+            // validate the user email
+            if (!vd.checkEmailValidation(email)) {
+                throw new BadRequestException("Invalid email address! Please provide proper email address");
+            }
             updatedUser.setEmail(email);
         }
 
@@ -379,6 +424,18 @@ public class UserServiceImpl implements UserService {
             }
 
             if (mobile != null && !mobile.isEmpty()) {
+                if (!updatedUser.getMobile().equals(mobile) && userRepository.findByMobile(mobile).isPresent()) {
+                    log.error("User with mobile: {} already exists", mobile);
+                    throw new BadRequestException(String.format("User with mobile: %s already exists", mobile));
+                }
+                // validate the user mobile number
+                if (!vd.checkMobileNumberValidation(mobile)) {
+                    if(!(mobile.trim().startsWith("00") || mobile.trim().startsWith("+"))) {
+                        throw new BadRequestException("Invalid mobile number! The mobile number should start with 00 or +");
+                    }
+
+                    throw new BadRequestException("Invalid mobile number! Please provide proper mobile number");
+                }
                 updatedUser.setMobile(mobile);
             }
 
@@ -450,8 +507,16 @@ public class UserServiceImpl implements UserService {
      * @throws BadRequestException if the email or mobile is not provided
      */
     @Override
-    public Boolean userExists(String email, String mobile) throws EntityNotFoundException {
-        return userRepository.findFirstByEmailOrMobile(email, mobile).isPresent();
+    public Boolean userExists(String email, String mobile) throws BadRequestException {
+        if (email != null && !email.isEmpty() && mobile != null && !mobile.isEmpty()) {
+            return userRepository.findFirstByEmailOrMobile(email, mobile).isPresent();
+        } else if (email != null && !email.isEmpty()) {
+            return userRepository.findByEmail(email).isPresent();
+        } else if (mobile != null && !mobile.isEmpty()) {
+            return userRepository.findByMobile(mobile).isPresent();
+        } else {
+            throw new BadRequestException("Please provide email or mobile");
+        }
     }
 
     /**
@@ -472,7 +537,7 @@ public class UserServiceImpl implements UserService {
                     .firstName("Admin")
                     .lastName("User")
                     .email(email)
-                    .mobile("0771234567")
+                    .mobile("+201122222222")
                     .role(UserRole.ROLE_ADMIN)
                     .password(passwordEncoder.encode(password))
                     .build();
@@ -560,21 +625,6 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Generate a JWT token for the user
-     *
-     * @param emailOrMobile the user email or mobile number
-     * @param password the user password
-     * @return the generated JWT token
-     */
-    private String generateJWTToken(String emailOrMobile, String password) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(emailOrMobile, password));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        return jwtUtils.generateJwtToken(authentication);
-    }
-
-    /**
      * Generate a QR code for the user
      *
      * @param user the user to generate the QR code for
@@ -629,5 +679,51 @@ public class UserServiceImpl implements UserService {
                         .logo(vendor.getLogo())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void addUser(AddUserRequest addUserRequest) throws BadRequestException {
+        if (userRepository.findByMobile(addUserRequest.getMobile()).isPresent()) {
+            return;
+        }
+
+        if ((addUserRequest.getEmail() == null || addUserRequest.getEmail().isEmpty()) &&
+                (addUserRequest.getMobile() == null || addUserRequest.getMobile().isEmpty())) {
+            throw new BadRequestException("Email or mobile number is required");
+        }
+
+        if(addUserRequest.getEmail() != null && !addUserRequest.getEmail().isEmpty()
+                && userRepository.findByEmail(addUserRequest.getEmail()).isPresent()) {
+            return;
+        }
+
+        // validate the email address and mobile number if they are not empty
+        ValidateUtil vd = new ValidateUtil();
+        if (addUserRequest.getEmail() != null && !addUserRequest.getEmail().isEmpty()) {
+            if (!vd.checkEmailValidation(addUserRequest.getEmail())) {
+                throw new BadRequestException("Invalid email address! Please provide proper email address");
+            }
+        }
+
+        if (addUserRequest.getMobile() != null && !addUserRequest.getMobile().isEmpty()) {
+            if (!vd.checkMobileNumberValidation(addUserRequest.getMobile())) {
+                if(addUserRequest.getMobile() != null && !addUserRequest.getMobile().equals("")
+                        && !(addUserRequest.getMobile().trim().startsWith("00") || addUserRequest.getMobile().trim().startsWith("+"))) {
+                    throw new BadRequestException("Invalid mobile number! The mobile number should start with 00 or +");
+                }
+                throw new BadRequestException("Invalid mobile number! Please provide proper mobile number");
+            }
+        }
+
+        User user = User.builder()
+            .email(addUserRequest.getEmail())
+            .mobile(addUserRequest.getMobile())
+            .firstName(addUserRequest.getFirstName())
+            .lastName(addUserRequest.getLastName())
+            .role(UserRole.ROLE_USER)
+            .isActive(true)
+            .build();
+
+        userRepository.save(user);
     }
 }

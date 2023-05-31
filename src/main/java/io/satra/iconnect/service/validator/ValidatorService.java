@@ -63,7 +63,7 @@ public interface ValidatorService {
      * This method is used to get the validator entity by given id
      *
      * @param id the id of the validator to be obtained
-     * @return validator the validator entity {@Link Validator}
+     * @return validator the validator entity {@link Validator}
      * @throws EntityNotFoundException if the validator does not exist
      */
     Validator getValidatorEntityById(String id) throws EntityNotFoundException;
@@ -72,7 +72,7 @@ public interface ValidatorService {
      * This method is used to get the validator entity by given name
      *
      * @param name the name of the validator to be obtained
-     * @return validator the validator entity {@Link Validator}
+     * @return validator the validator entity {@link Validator}
      * @throws EntityNotFoundException if the validator does not exist
      */
     Validator getValidatorEntityByName(String name) throws EntityNotFoundException;

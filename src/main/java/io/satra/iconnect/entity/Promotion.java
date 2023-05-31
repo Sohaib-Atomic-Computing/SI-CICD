@@ -3,6 +3,8 @@ package io.satra.iconnect.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.satra.iconnect.dto.PromotionDTO;
 import io.satra.iconnect.entity.base.BaseEntityAudit;
+import io.satra.iconnect.entity.enums.PromotionStatus;
+import io.satra.iconnect.entity.enums.UserRole;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -28,6 +30,8 @@ public class Promotion extends BaseEntityAudit {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     @Builder.Default
     private Boolean isActive = Boolean.TRUE;
+    @Enumerated(EnumType.STRING)
+    private PromotionStatus status;
     @NotNull
     private LocalDateTime startDate;
     @NotNull
@@ -43,13 +47,9 @@ public class Promotion extends BaseEntityAudit {
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     private Vendor vendor;
     @JsonIgnore
-    @JoinColumn(name = "createdBy", referencedColumnName = "id")
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private User createdBy;
-    @JsonIgnore
-    @JoinColumn(name = "lastModifiedBy", referencedColumnName = "id")
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private User lastModifiedBy;
+    @JoinColumn(name = "merchant", referencedColumnName = "id")
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    private Merchant merchant;
 
     @Override
     public boolean equals(Object o) {
@@ -69,15 +69,15 @@ public class Promotion extends BaseEntityAudit {
                 .id(id)
                 .name(name)
                 .description(description)
+                .status(status)
                 .isActive(isActive)
                 .startDate(startDate)
                 .endDate(endDate)
                 .users(users != null ? users.stream().map(User::toDTO).collect(Collectors.toSet()) : null)
                 .vendor(vendor != null ? vendor.toDTO() : null)
                 .createdAt(createdAt)
-                .createdBy(createdBy != null ? createdBy.getFirstName() + ' ' + createdBy.getLastName() : null)
+                .merchant(merchant != null ? merchant.toViewDTO() : null)
                 .lastModifiedAt(lastModifiedAt)
-                .lastModifiedBy(lastModifiedBy != null ? lastModifiedBy.getFirstName() + ' ' + lastModifiedBy.getLastName() : null)
                 .build();
     }
 
@@ -89,6 +89,7 @@ public class Promotion extends BaseEntityAudit {
                 .isActive(isActive)
                 .startDate(startDate)
                 .endDate(endDate)
+                .merchant(merchant != null ? merchant.toViewDTO() : null)
                 .vendor(vendor != null ? vendor.toDTO() : null)
                 .build();
     }
