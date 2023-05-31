@@ -1,9 +1,9 @@
 package io.satra.iconnect.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
+import java.time.ZonedDateTime;
 
 @Data
 @Builder
@@ -11,5 +11,8 @@ import lombok.Data;
 public class ResponseDTO<T> {
     private String message;
     private Boolean success;
+    private String error;
+    private Integer status;
+    private ZonedDateTime timestamp;
     private T data;
 }
