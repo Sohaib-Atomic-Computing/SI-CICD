@@ -281,6 +281,12 @@ public class UserController {
         if (email == null && mobile == null) {
             throw new BadRequestException("Email or mobile is required");
         }
+
+        // if the mobile is not null, check if it starts with " " if so, remove replace it with "+"
+        if (mobile != null && mobile.startsWith(" ")) {
+            mobile = "+" + mobile.substring(1);
+        }
+
         boolean exists = userService.userExists(email, mobile);
         return ResponseEntity.ok(ResponseDTO.builder()
                 .message(exists ? "User exists" : "User does not exist")

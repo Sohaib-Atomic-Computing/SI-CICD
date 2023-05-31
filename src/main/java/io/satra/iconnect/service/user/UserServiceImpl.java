@@ -15,7 +15,6 @@ import io.satra.iconnect.entity.enums.UserRole;
 import io.satra.iconnect.exception.generic.BadRequestException;
 import io.satra.iconnect.exception.generic.EntityNotFoundException;
 import io.satra.iconnect.repository.UserRepository;
-import io.satra.iconnect.security.JWTUtils;
 import io.satra.iconnect.security.UserPrincipal;
 import io.satra.iconnect.service.merchant.MerchantService;
 import io.satra.iconnect.service.validator.ValidatorService;
@@ -27,9 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -139,6 +135,11 @@ public class UserServiceImpl implements UserService {
         }
 
         if (!vd.checkMobileNumberValidation(registerRequestDTO.getMobile())) {
+            if(registerRequestDTO.getMobile() != null && !registerRequestDTO.getMobile().equals("")
+                && !(registerRequestDTO.getMobile().trim().startsWith("00") || registerRequestDTO.getMobile().trim().startsWith("+"))) {
+                throw new BadRequestException("Invalid mobile number! The mobile number should start with 00 or +");
+            }
+
             throw new BadRequestException("Invalid mobile number! Please provide proper mobile number");
         }
 
@@ -345,6 +346,11 @@ public class UserServiceImpl implements UserService {
         }
 
         if (!vd.checkMobileNumberValidation(registerRequestDTO.getMobile())) {
+            if(registerRequestDTO.getMobile() != null && !registerRequestDTO.getMobile().equals("")
+                    && !(registerRequestDTO.getMobile().trim().startsWith("00") || registerRequestDTO.getMobile().trim().startsWith("+"))) {
+                throw new BadRequestException("Invalid mobile number! The mobile number should start with 00 or +");
+            }
+
             throw new BadRequestException("Invalid mobile number! Please provide proper mobile number");
         }
 
@@ -424,6 +430,10 @@ public class UserServiceImpl implements UserService {
                 }
                 // validate the user mobile number
                 if (!vd.checkMobileNumberValidation(mobile)) {
+                    if(!(mobile.trim().startsWith("00") || mobile.trim().startsWith("+"))) {
+                        throw new BadRequestException("Invalid mobile number! The mobile number should start with 00 or +");
+                    }
+
                     throw new BadRequestException("Invalid mobile number! Please provide proper mobile number");
                 }
                 updatedUser.setMobile(mobile);
@@ -497,8 +507,16 @@ public class UserServiceImpl implements UserService {
      * @throws BadRequestException if the email or mobile is not provided
      */
     @Override
-    public Boolean userExists(String email, String mobile) throws EntityNotFoundException {
-        return userRepository.findFirstByEmailOrMobile(email, mobile).isPresent();
+    public Boolean userExists(String email, String mobile) throws BadRequestException {
+        if (email != null && !email.isEmpty() && mobile != null && !mobile.isEmpty()) {
+            return userRepository.findFirstByEmailOrMobile(email, mobile).isPresent();
+        } else if (email != null && !email.isEmpty()) {
+            return userRepository.findByEmail(email).isPresent();
+        } else if (mobile != null && !mobile.isEmpty()) {
+            return userRepository.findByMobile(mobile).isPresent();
+        } else {
+            throw new BadRequestException("Please provide email or mobile");
+        }
     }
 
     /**
@@ -689,6 +707,10 @@ public class UserServiceImpl implements UserService {
 
         if (addUserRequest.getMobile() != null && !addUserRequest.getMobile().isEmpty()) {
             if (!vd.checkMobileNumberValidation(addUserRequest.getMobile())) {
+                if(addUserRequest.getMobile() != null && !addUserRequest.getMobile().equals("")
+                        && !(addUserRequest.getMobile().trim().startsWith("00") || addUserRequest.getMobile().trim().startsWith("+"))) {
+                    throw new BadRequestException("Invalid mobile number! The mobile number should start with 00 or +");
+                }
                 throw new BadRequestException("Invalid mobile number! Please provide proper mobile number");
             }
         }

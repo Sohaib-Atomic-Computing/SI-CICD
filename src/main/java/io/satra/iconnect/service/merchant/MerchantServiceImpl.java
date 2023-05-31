@@ -47,6 +47,10 @@ public class MerchantServiceImpl implements MerchantService {
         }
         log.info("Mobile number: {}", merchant.getMobile());
         if (!vd.checkMobileNumberValidation(merchant.getMobile())) {
+            if(merchant.getMobile() != null && !merchant.getMobile().equals("")
+                    && !(merchant.getMobile().trim().startsWith("00") || merchant.getMobile().trim().startsWith("+"))) {
+                throw new BadRequestException("Invalid mobile number! The mobile number should start with 00 or +");
+            }
             throw new BadRequestException("Invalid mobile number! Please provide proper mobile number");
         }
 

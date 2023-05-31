@@ -140,7 +140,7 @@ public interface UserService {
      * @return true if the user exists, false otherwise
      * @throws BadRequestException if the email or mobile is not provided
      */
-    Boolean userExists(String email, String mobile) throws EntityNotFoundException;
+    Boolean userExists(String email, String mobile) throws BadRequestException;
 
     /**
      * This method checks if the main user admin is exists or not.
