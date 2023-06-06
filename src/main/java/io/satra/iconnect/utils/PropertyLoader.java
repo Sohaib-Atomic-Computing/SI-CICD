@@ -9,7 +9,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 @Component
 @Scope(value = "singleton")
-@PropertySource(name = "config", value = "classpath:${envTarget:LOCAL}_application.properties")
+@PropertySource(name = "config", value = "classpath:${envTarget:TEST}_application.properties")
 public class PropertyLoader {
 
     // JWT VALUES
@@ -34,6 +34,8 @@ public class PropertyLoader {
     private static String cequensSenderId;
     private static String cequensMessageType;
     private static String cequensClientMessageId;
+
+    private static String databaseUrl;
 
     @Bean
     public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
@@ -147,6 +149,15 @@ public class PropertyLoader {
     @Value("${constants.cequens.clientMessageId}")
     public void setCequensClientMessageId(String cequensClientMessageId) {
         PropertyLoader.cequensClientMessageId = cequensClientMessageId;
+    }
+
+    @Value("${spring.datasource.url}")
+    public void setDatabaseUrl(String databaseUrl) {
+        PropertyLoader.databaseUrl = databaseUrl;
+    }
+
+    public static String getDatabaseUrl() {
+        return databaseUrl;
     }
 
 }
