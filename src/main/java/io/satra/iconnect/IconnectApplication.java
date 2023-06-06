@@ -3,7 +3,6 @@ package io.satra.iconnect;
 import io.satra.iconnect.service.user.UserService;
 import io.satra.iconnect.utils.PropertyLoader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
