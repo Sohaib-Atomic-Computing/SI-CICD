@@ -11,4 +11,6 @@ services:
       - "8086:8086"
     env_file:
       - .env
+    volumes:
+      - /home/iconnect/storage/:/home/iconnect/storage/
     restart: unless-stopped
