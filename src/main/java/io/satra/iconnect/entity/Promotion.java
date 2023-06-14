@@ -47,7 +47,7 @@ public class Promotion extends BaseEntityAudit {
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     private Vendor vendor;
     @JsonIgnore
-    @JoinColumn(name = "merchant", referencedColumnName = "id")
+    @JoinColumn(name = "merchantId", referencedColumnName = "id")
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     private Merchant merchant;
 
