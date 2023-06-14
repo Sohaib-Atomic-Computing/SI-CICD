@@ -1,3 +1,38 @@
+-- V1__initTables.sql
+
+-- Create table for the User entity
+CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR(36) PRIMARY KEY,
+    firstName VARCHAR(20) NOT NULL,
+    lastName VARCHAR(20) NOT NULL,
+    email VARCHAR(255),
+    profilePicture VARCHAR(255),
+    password VARCHAR(120),
+    mobile VARCHAR(255) NOT NULL,
+    isActive BOOLEAN DEFAULT TRUE,
+    role VARCHAR(255),
+    qrCode VARCHAR(255),
+    otpCode VARCHAR(255),
+    otpExpireAt TIMESTAMP,
+    otpCreatedAt TIMESTAMP,
+    token VARCHAR(255),
+    createdAt TIMESTAMP,
+    lastModifiedAt TIMESTAMP
+);
+
+-- Create table for the Vendor entity
+CREATE TABLE IF NOT EXISTS vendors (
+    id VARCHAR(36) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    logo VARCHAR(255),
+    createdBy VARCHAR(36),
+    lastModifiedBy VARCHAR(36),
+    createdAt TIMESTAMP,
+    lastModifiedAt TIMESTAMP,
+    FOREIGN KEY (createdBy) REFERENCES users(id),
+    FOREIGN KEY (lastModifiedBy) REFERENCES users(id)
+);
+
 -- Create table for the Merchant entity
 CREATE TABLE IF NOT EXISTS merchants (
     id VARCHAR(36) PRIMARY KEY,
@@ -44,26 +79,6 @@ CREATE TABLE IF NOT EXISTS promotions (
     FOREIGN KEY (lastModifiedBy) REFERENCES users(id)
 );
 
--- Create table for the User entity
-CREATE TABLE IF NOT EXISTS users (
-    id VARCHAR(36) PRIMARY KEY,
-    firstName VARCHAR(20) NOT NULL,
-    lastName VARCHAR(20) NOT NULL,
-    email VARCHAR(255),
-    profilePicture VARCHAR(255),
-    password VARCHAR(120),
-    mobile VARCHAR(255) NOT NULL,
-    isActive BOOLEAN DEFAULT TRUE,
-    role VARCHAR(255),
-    qrCode VARCHAR(255),
-    otpCode VARCHAR(255),
-    otpExpireAt TIMESTAMP,
-    otpCreatedAt TIMESTAMP,
-    token VARCHAR(255),
-    createdAt TIMESTAMP,
-    lastModifiedAt TIMESTAMP
-);
-
 -- Create table for the Validator entity
 CREATE TABLE IF NOT EXISTS validators (
     id VARCHAR(36) PRIMARY KEY,
@@ -80,19 +95,6 @@ CREATE TABLE IF NOT EXISTS validators (
     FOREIGN KEY (createdBy) REFERENCES users(id),
     FOREIGN KEY (lastModifiedBy) REFERENCES users(id),
     FOREIGN KEY (vendorId) REFERENCES vendors(id)
-);
-
--- Create table for the Vendor entity
-CREATE TABLE IF NOT EXISTS vendors (
-    id VARCHAR(36) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    logo VARCHAR(255),
-    createdBy VARCHAR(36),
-    lastModifiedBy VARCHAR(36),
-    createdAt TIMESTAMP,
-    lastModifiedAt TIMESTAMP,
-    FOREIGN KEY (createdBy) REFERENCES users(id),
-    FOREIGN KEY (lastModifiedBy) REFERENCES users(id)
 );
 
 -- Create join table for the many-to-many relationship between promotions and users
