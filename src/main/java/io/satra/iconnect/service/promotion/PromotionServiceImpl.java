@@ -279,7 +279,7 @@ public class PromotionServiceImpl implements PromotionService {
 
         // find promotion by vendor and user and start date less than current date time and end date greater than current date time
         // and is active true and promotion status is approved
-        return promotionRepository.findByVendorAndUsersAndStartDateGreaterThanEqualAndEndDateLessThanEqualAndIsActiveTrueAndStatus
+        return promotionRepository.findByVendorAndUsersAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndIsActiveTrueAndStatus
                         (validator.getVendor(), user, currentDateTime, currentDateTime, PromotionStatus.APPROVED).stream()
                 .map(Promotion::toScannerResponseDTO)
                 .collect(Collectors.toList());
