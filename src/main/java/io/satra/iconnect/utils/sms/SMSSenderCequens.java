@@ -43,18 +43,16 @@ public class SMSSenderCequens implements SMSSender {
             wr.flush();
 
             //for logging purposes--->remove on production
-            if (PropertyLoader.getEnv().equals("DEVELOPMENT")) {
-                BufferedReader br = new BufferedReader(
-                        new InputStreamReader((connection.getInputStream()))
-                );
+            BufferedReader br = new BufferedReader(
+                    new InputStreamReader((connection.getInputStream()))
+            );
 
-                String output;
-                log.info("Output from Server .... \n");
-                while ((output = br.readLine()) != null) {
-                    log.info(output);
-                }
-                log.info("SMS sent successfully to " + mobile);
+            String output;
+            log.info("Output from Server .... \n");
+            while ((output = br.readLine()) != null) {
+                log.info(output);
             }
+            log.info("SMS sent successfully to " + mobile);
 
             connection.disconnect();
 

@@ -607,7 +607,7 @@ public class UserServiceImpl implements UserService {
         } else {
             user.setOtpCode(passwordEncoder.encode(otp));
             SMSSender smsSender = new SMSSenderCequens();
-            smsSender.sendSMS(generateOTPDTO.getMobile(), "Your OTP is " + otp);
+            smsSender.sendSMS(generateOTPDTO.getMobile(), "Verification code: " + otp);
         }
 
         // set the expiry time
