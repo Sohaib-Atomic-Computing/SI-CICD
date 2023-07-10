@@ -43,7 +43,7 @@ public class PromotionController {
      * @throws BadRequestException if the promotion is invalid
      */
     @PostMapping(value = "/")
-    @PreAuthorize("hasRole('ROLE_MERCHANT')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MERCHANT')")
     @Operation(
             summary = "Create a promotion",
             description = "This endpoint creates a new promotion.\nYou have to have the role 'ROLE_ADMIN' to access this endpoint. " +
