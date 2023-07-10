@@ -5,10 +5,7 @@ import io.satra.iconnect.dto.PromotionDTO;
 import io.satra.iconnect.dto.scandto.ScannerMessageDTO;
 import io.satra.iconnect.dto.request.PromotionRequestDTO;
 import io.satra.iconnect.dto.scandto.ScanDTO;
-import io.satra.iconnect.entity.Promotion;
-import io.satra.iconnect.entity.User;
-import io.satra.iconnect.entity.Validator;
-import io.satra.iconnect.entity.Vendor;
+import io.satra.iconnect.entity.*;
 import io.satra.iconnect.entity.enums.PromotionStatus;
 import io.satra.iconnect.entity.enums.UserRole;
 import io.satra.iconnect.exception.generic.BadRequestException;
@@ -72,9 +69,10 @@ public class PromotionServiceImpl implements PromotionService {
 
         // get the user data from the request
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (userPrincipal.getMerchant() == null) {
-            throw new EntityNotFoundException("Merchant not found");
-        }
+        Merchant merchant = userPrincipal.getMerchant();
+//        if (userPrincipal.getMerchant() == null) {
+//            throw new EntityNotFoundException("Merchant not found");
+//        }
 
         // create the promotion entity
         Promotion promotion = Promotion.builder()
@@ -85,12 +83,18 @@ public class PromotionServiceImpl implements PromotionService {
                 .vendor(vendor)
                 .users((usersSet))
                 .status(PromotionStatus.PENDING)
-                .merchant(userPrincipal.getMerchant())
+                .merchant(merchant)
                 .build();
 
-        if (promotionRequestDTO.getIsActive() != null) {
-            promotion.setIsActive(promotionRequestDTO.getIsActive());
-        }
+        // discard the isActive field for now
+        // TODO: enable the isActive field
+//        if (promotionRequestDTO.getIsActive() != null) {
+//            promotion.setIsActive(promotionRequestDTO.getIsActive());
+//        }
+
+        // make the promotion active by default for now
+        // TODO: remove the following line
+        promotion.setIsActive(true);
 
         // save the promotion
         promotion = promotionRepository.save(promotion);
