@@ -1,5 +1,5 @@
 ALTER TABLE applications
-DROP COLUMN api_key;
+DROP COLUMN IF EXISTS api_key;
 
 ALTER TABLE applications
-DROP COLUMN secret_key;
+DROP COLUMN IF EXISTS secret_key;
