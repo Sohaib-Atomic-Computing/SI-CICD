@@ -82,7 +82,8 @@ public class PromotionServiceImpl implements PromotionService {
                 .endDate(TimeUtils.convertStringToLocalDateTime(promotionRequestDTO.getEndDate()))
                 .vendor(vendor)
                 .users((usersSet))
-                .status(PromotionStatus.PENDING)
+                // TODO: change the status to back to pending
+                .status(PromotionStatus.APPROVED)
                 .merchant(merchant)
                 .build();
 
