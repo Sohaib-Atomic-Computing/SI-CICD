@@ -86,15 +86,9 @@ public class PromotionServiceImpl implements PromotionService {
                 .merchant(merchant)
                 .build();
 
-        // discard the isActive field for now
-        // TODO: enable the isActive field
-//        if (promotionRequestDTO.getIsActive() != null) {
-//            promotion.setIsActive(promotionRequestDTO.getIsActive());
-//        }
-
-        // make the promotion active by default for now
-        // TODO: remove the following line
-        promotion.setIsActive(true);
+        if (promotionRequestDTO.getIsActive() != null) {
+            promotion.setIsActive(promotionRequestDTO.getIsActive());
+        }
 
         // save the promotion
         promotion = promotionRepository.save(promotion);
