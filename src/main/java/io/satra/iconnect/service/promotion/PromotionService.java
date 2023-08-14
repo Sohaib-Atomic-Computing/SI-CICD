@@ -73,8 +73,9 @@ public interface PromotionService {
      *
      * @param scanDTO the scan information
      * @throws EntityNotFoundException if the promotion does not exist
+     * @throws BadRequestException if the ScanDTO contains invalid message
      */
-    List<PromotionDTO> promotionScannerValidator(ScanDTO scanDTO) throws EntityNotFoundException;
+    List<PromotionDTO> promotionScannerValidator(ScanDTO scanDTO) throws EntityNotFoundException, BadRequestException;
 
     /**
      * This method is used to get all vendor promotions

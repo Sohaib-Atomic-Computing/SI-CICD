@@ -248,9 +248,10 @@ public class PromotionServiceImpl implements PromotionService {
      *
      * @param scanDTO the scan data
      * @throws EntityNotFoundException if the promotion does not exist
+     * @throws BadRequestException if the ScanDTO contains invalid message
      */
     @Override
-    public List<PromotionDTO> promotionScannerValidator(ScanDTO scanDTO) throws EntityNotFoundException {
+    public List<PromotionDTO> promotionScannerValidator(ScanDTO scanDTO) throws EntityNotFoundException, BadRequestException {
         // get the authenticated validator
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (userPrincipal.getValidator() == null) {
@@ -264,6 +265,10 @@ public class PromotionServiceImpl implements PromotionService {
         MaCryptoUtils maCryptoUtils = new MaCryptoUtils();
         String decryptedMessage = maCryptoUtils.decryptAES(scanDTO.getMessage(), PropertyLoader.getAesSecret());
         log.info("decryptedMessage: {}", decryptedMessage);
+
+        if (decryptedMessage == null || decryptedMessage.isEmpty()) {
+            throw new BadRequestException("Not an iConnect QR Code! Failed to Decrypt the data.");
+        }
 
         // convert the decrypted message to ScannerMessageDTO Object using gson
         Gson gson = new Gson();
