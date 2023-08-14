@@ -1,5 +1,6 @@
 package io.satra.iconnect.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -13,6 +14,7 @@ import java.util.Arrays;
 import java.util.Base64;
 
 @Component
+@Slf4j
 public class MaCryptoUtils {
 
     public static void main(String[] args) {
@@ -70,7 +72,7 @@ public class MaCryptoUtils {
             return plaintext;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error decrypting: {}", e.getMessage());
         }
         return null;
     }
