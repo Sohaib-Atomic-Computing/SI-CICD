@@ -37,15 +37,15 @@ public class ScannerServiceImpl  implements ScannerService {
         String decryptedMessage = maCryptoUtils.decryptAES(scanDTO.getMessage(), PropertyLoader.getAesSecret());
         log.debug("Decrypted message: {}", decryptedMessage);
 
+        if (decryptedMessage == null || decryptedMessage.isEmpty()) {
+            throw new BadRequestException("Not an iConnect QR Code! Failed to Decrypt the data.");
+        }
+
         // parse the decrypted message
         // convert the decrypted message to ScannerMessageDTO Object using gson
         Gson gson = new Gson();
         ScannerMessageDTO scannerMessageDTO = gson.fromJson(decryptedMessage, ScannerMessageDTO.class);
         log.debug("ScannerMessageDTO: {}", scannerMessageDTO);
-
-        if (scannerMessageDTO == null) {
-            throw new BadRequestException("Not an IConnect QR Code! Failed to Decrypt the data.");
-        }
 
         // find the user by the user id
         UserDTO user = userService.findActiveUserEntityById(scannerMessageDTO.getUserId()).toViewDTO();
