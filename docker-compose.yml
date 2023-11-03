@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   iconnect:
@@ -8,9 +8,13 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8086:8086"
+      - "8087:8087"
     env_file:
-      - .env
+      # - .env
+      - envTarget=${envTarget}
+      - DATASOURCE_URL=${DATASOURCE_URL}
+      - DATASOURCE_USERNAME=${DATASOURCE_USERNAME}
+      - DATASOURCE_PASSWORD=${DATASOURCE_PASSWORD}
     volumes:
       - /home/iconnect/storage/:/home/iconnect/storage/
     restart: unless-stopped
