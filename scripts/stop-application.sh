@@ -1,3 +1,3 @@
 #!/bin/bash
 echo "[Stop Application] Stopping Docker containers..."
-docker-compose down
+docker-compose down --volumes
