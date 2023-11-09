@@ -5,11 +5,11 @@ files:
     destination: /home/iconnect/iconnect-main/
 file_exists_behavior: OVERWRITE
 hooks:
-  BeforeInstall:
-    - location: deploy.sh
+  ApplicationStop:
+    - location: scripts/stop-application.sh
       timeout: 300
       runas: root
-  ApplicationStop:
-    - location: stop-application.sh
+  AfterInstall:
+    - location: scripts/deploy.sh
       timeout: 300
       runas: root
