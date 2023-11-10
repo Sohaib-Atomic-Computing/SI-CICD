@@ -6,10 +6,10 @@ files:
 file_exists_behavior: OVERWRITE
 hooks:
   ApplicationStop:
-    - location: stop-application.sh
+    - location: scripts/stop-application.sh
       timeout: 300
       runas: root
   AfterInstall:
-    - location: deploy.sh
+    - location: scripts/deploy.sh
       timeout: 300
       runas: root
