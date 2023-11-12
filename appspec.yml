@@ -4,14 +4,16 @@ files:
   - source: /
     destination: /home/iconnect/iconnect-main/
 file_exists_behavior: OVERWRITE
-
 hooks:
-  ApplicationStart:
-    - location: scripts/application_start.sh
+  BeforeInstall:
+    - location: before_install.sh
       timeout: 300
       runas: root
-
-  ApplicationStop:
-    - location: scripts/application_stop.sh
+  AfterInstall:
+    - location: after_install.sh
+      timeout: 300
+      runas: root
+  ApplicationStart:
+    - location: application_start.sh
       timeout: 300
       runas: root
