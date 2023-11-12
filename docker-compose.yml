@@ -8,7 +8,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8087:8086"
+      - "8088:8086"
     environment:
       - envTarget=${envTarget}
       - DATASOURCE_URL=${DATASOURCE_URL}
