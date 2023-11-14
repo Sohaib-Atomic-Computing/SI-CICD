@@ -9,8 +9,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8087:8086"
-    env_file:
-      - /home/iconnect/iconnect-main/.env
+    environment:
+      - envTarget=${envTarget}
+      - DATASOURCE_URL=${DATASOURCE_URL}
+      - DATASOURCE_USERNAME=${DATASOURCE_USERNAME}
+      - DATASOURCE_PASSWORD=${DATASOURCE_PASSWORD}
     volumes:
       - /home/iconnect/storage/:/home/iconnect/storage/
     restart: unless-stopped
