@@ -10,7 +10,7 @@ services:
     ports:
       - "8087:8086"
     env_file:
-      - .env
+      - /home/iconnect/iconnect-main/.env
     volumes:
       - /home/iconnect/storage/:/home/iconnect/storage/
     restart: unless-stopped
