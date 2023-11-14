@@ -2,5 +2,5 @@
 echo $(pwd)
 cd /home/iconnect/iconnect-main/
 echo $(pwd)
-# echo "[AfterInstall] Running mvn package command"
-# mvn package
+echo "[AfterInstall] Running mvn package command"
+mvn package
