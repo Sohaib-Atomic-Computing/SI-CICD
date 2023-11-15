@@ -8,9 +8,10 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8087:8086"
-    env_file:
-      - .env
+      - "8086:8086"
     volumes:
       - /home/iconnect/storage/:/home/iconnect/storage/
     restart: unless-stopped
+    entrypoint: /bin/bash -c "/usr/local/bin/start_application.sh" # Updated entrypoint
+    environment:
+      - AWS_REGION=eu-west-1 # Updated AWS region
