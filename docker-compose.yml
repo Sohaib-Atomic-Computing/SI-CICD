@@ -1,5 +1,4 @@
 version: "3"
-
 services:
   iconnect:
     container_name: iconnect
@@ -9,9 +8,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8086:8086"
+    env_file:
+      - .env
     volumes:
       - /home/iconnect/storage/:/home/iconnect/storage/
     restart: unless-stopped
-    entrypoint: /bin/bash -c "/usr/local/bin/start_application.sh" # Updated entrypoint
-    environment:
-      - AWS_REGION=eu-west-1 # Updated AWS region

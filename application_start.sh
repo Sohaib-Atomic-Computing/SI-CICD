@@ -1,25 +1,6 @@
 #!/bin/bash
-
-secret_arn="arn:aws:secretsmanager:eu-west-1:037680133179:secret:SIEnvSecrets-1lPfo9"
-aws_region="eu-west-1"
-
-echo "[Fetching Secrets] Fetching secrets from AWS Secrets Manager..."
-secrets=$(aws secretsmanager get-secret-value --secret-id $secret_arn --region $aws_region --output json | jq -r ".SecretString")
-
-echo "[Fetched Secrets] Fetched secrets:"
-echo "$secrets"
-
-# Export secrets as environment variables
-while IFS= read -r line; do
-  export "$line"
-done <<< "$(echo "$secrets" | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]")"
-
-# Move to the application directory
+echo $(pwd)
 cd /home/iconnect/iconnect-main/
-
-# Start Docker Compose
+echo $(pwd)
 echo "[Docker Compose] Building Docker images and starting containers..."
 docker-compose up --build -d
-
-# Continue with your existing startup logic (if not included in this script)
-exec /home/iconnect/iconnect-main/start_application.sh
